@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+Electric Dog Flash Animation Power Tools
+Copyright (C) 2011  Vladin M. Mitov
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/.
+-->
+<dialog buttons="accept, cancel" title="Rename Library Items">
+	<vbox>
+		<label value="Use &lt;name&gt; and &lt;enum&gt; tags or combine them with free" />
+		<label value="text to create enumeration format. Example:" />
+		<label value="Assume that the original symbol name is 'walk' and the symbol is" />
+		<label value="in the folder named 'Character'." />
+		<spacer></spacer>
+		<label value="a)     &lt;name&gt; &lt;enum&gt; will produce 'walk 001'" />
+		<label value="b)     &lt;enum&gt; will produce '001'" />
+		<label value="c)     FX_&lt;enum&gt; will produce 'FX_001'" />
+		<label value="d)     &quot;UseFolderNames&quot; will produce 'Character 001'" />
+		<separator></separator>
+		<spacer></spacer>
+		<spacer></spacer>
+		<spacer></spacer>
+		<textbox id="Pattern" size="55" value="&lt;name&gt; &lt;enum&gt;"/>
+		
+		<grid>
+			<columns>
+				<column/>
+				<column/>
+				<column/>
+				<column/>
+			</columns>
+			<rows>
+				<row>
+					<spacer></spacer>
+					<checkbox id="UseFolderNames" label="Use Folder Names?" checked = "true" />
+				</row>
+				<row>
+					<spacer></spacer>
+					<checkbox id="ResetOnEachFolder" label="Reset Counter on Each Folder ?" checked = "true" />
+				</row>					
+				<row>
+					<label value="Start Value   " />
+					<textbox id="StartValue" size="5" value="1" />
+					<label value="             " />
+				</row>
+				
+				<row>
+					<label value="Step             " />
+					<textbox id="Step" size="5" value="1" />
+				</row>
+				
+				<row>
+					<label value="Zero Padding   " />
+					<textbox id="ZeroPadding" size="5" value="2"/>
+					<label value="             " />
+				</row>
+				
+			</rows>
+		</grid>
+		<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "false" />
+		<spacer></spacer>
+		<separator></separator>
+		<spacer></spacer>
+	</vbox>
+</dialog>
