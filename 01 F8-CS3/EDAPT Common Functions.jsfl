@@ -234,9 +234,9 @@ serialize = function( o, filePath ){
 	/*Before we try to serialize the settings object,
 	  we clone it and remove the unnecessary data */
 	var obj = cloneObject( o );
-	//delete obj.currentParentElement;
-	//delete obj.colorIndexLight;
-	//delete obj.colorIndexDark;
+	delete obj.currentParentElement;
+	delete obj.colorIndexLight;
+	delete obj.colorIndexDark;
 	
 	var str = JSON.stringify( obj );
 	if( FLfile.exists( filePath ) ){
