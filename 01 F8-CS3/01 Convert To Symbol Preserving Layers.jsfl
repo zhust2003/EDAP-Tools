@@ -48,7 +48,7 @@ function runScript( commandname ){
 					break;
 			}
 			var layerMap = createObjectStateMap( 
-												fl.getDocumentDOM().getTimeline().layers, 
+												getLayers(), 
 												[ "name", "layerType", "color", "outline", "locked" ],
 												function( a ){ return Boolean( a.layerType != undefined && a.layerType != "folder" && a.locked == false ); } ); 
 			fl.getDocumentDOM().group();
