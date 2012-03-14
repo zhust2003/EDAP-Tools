@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 -->
-<dialog buttons="accept" title="EDAPT Help - v.0.9.8.1">
+<dialog buttons="accept" title="EDAPT Help - v.0.9.8.2">
 	<vbox>
 		<flash width="360" height="480" src="EDAPT Help.swf" />
 	<spacer></spacer>
