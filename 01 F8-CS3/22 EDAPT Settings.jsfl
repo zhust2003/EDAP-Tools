@@ -92,16 +92,61 @@ function validateHEX( colorcode ){
 } 
 
 function createXML( forceOutline, level1, level2, level3 ){
-return '<?xml version="1.0"?>' +
-'<dialog title="Electric Dog Animation Power Tools - Settings" buttons="accept, cancel">' +
-	'<vbox>' +
-		// LAYER COLORS---------------------------
-		'<label value="Layer Outline Colors" />' +
-		'<grid>' +
+	return '<?xml version="1.0"?>' +
+	'<dialog title="Electric Dog Animation Power Tools - Settings" buttons="accept, cancel">' +
+		'<vbox>' +
+			// LAYER COLORS---------------------------
+			'<label value="Layer Outline Colors" />' +
+			'<grid>' +
+				'<columns>' +
+					'<column/>' +
+					'<column/>' +
+					'<column/>' +
+					'<column/>' +
+				'</columns>' +
+					'<rows>' +
+						'<row>' +
+							'<label value="             " />' +
+							'<label value="Light:" />' +
+							'<colorchip id="light1" />' +
+							'<colorchip id="light2" />' +
+						'</row>' +
+						'<row>' +
+							'<label value="             " />' +
+							'<colorchip id="light3" />' +
+							'<colorchip id="light4" />' +
+							'<colorchip id="light5" />' +
+						'</row>' +
+						'<spacer></spacer>' +
+						'<spacer></spacer>' +
+						'<spacer></spacer>' +
+						'<row>' +
+							'<label value="             " />' +
+							'<label value="Dark:" />' +
+							'<colorchip id="dark1" />' +
+							'<colorchip id="dark2" />' +
+						'</row>' +
+						'<row>' +
+							'<label value="             " />' +
+							'<colorchip id="dark3" />' +
+							'<colorchip id="dark4" />' +
+							'<colorchip id="dark5" />' +
+						'</row>' +
+				'</rows>' +
+			'</grid>' +
+			'<hbox>' +
+				'<label value="                    " />' +
+				'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + forceOutline + '" />' +
+			'</hbox>' +
+			// ------------------------------------------
+			'<spacer>' +
+			'</spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			// SMART SNAP DISTANCE----------------------
+			'<grid>' +
 			'<columns>' +
-				'<column/>' +
-				'<column/>' +
-				'<column/>' +
 				'<column/>' +
 				'<column/>' +
 				'<column/>' +
@@ -109,83 +154,59 @@ return '<?xml version="1.0"?>' +
 			'</columns>' +
 			'<rows>' +
 				'<row>' +
-					'<label value="             " />' +
-					'<label value="Light:" />' +
-					'<textbox id="light1" size="7" value="'+EDAPSettings.colorListLight[0]+'"/>' +
-					'<textbox id="light2" size="7" value="'+EDAPSettings.colorListLight[1]+'"/>' +
-					'<textbox id="light3" size="7" value="'+EDAPSettings.colorListLight[2]+'"/>' +
-					'<textbox id="light4" size="7" value="'+EDAPSettings.colorListLight[3]+'"/>' +
-					'<textbox id="light5" size="7" value="'+EDAPSettings.colorListLight[4]+'"/>' +
-				'</row>' +
-				'<row>' +
-					'<label value="             " />' +
-					'<label value="Dark:" />' +
-					'<textbox id="dark1" size="7" value="'+EDAPSettings.colorListDark[0]+'"/>' +
-					'<textbox id="dark2" size="7" value="'+EDAPSettings.colorListDark[1]+'"/>' +
-					'<textbox id="dark3" size="7" value="'+EDAPSettings.colorListDark[2]+'"/>' +
-					'<textbox id="dark4" size="7" value="'+EDAPSettings.colorListDark[3]+'"/>' +
-					'<textbox id="dark5" size="7" value="'+EDAPSettings.colorListDark[4]+'"/>' +
+					'<label value="Smart Snap Distance:     " />' +
+					'<textbox id="SmartSnapDistance" size="5" value="' + EDAPSettings.smartSnap.distanceThreshold + '"/>' +
 				'</row>' +
 			'</rows>' +
-		'</grid>' + 
-		'<hbox>' +
-			'<label value="                    " />' +
-			'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + forceOutline + '" />' +
-		'</hbox>' +
-		// ------------------------------------------
-		'<spacer>' +
-		'</spacer>' +
-		'<separator></separator>' +
-		'<spacer></spacer>' +
-		'<spacer></spacer>' +
-		// SMART SNAP DISTANCE----------------------
-		'<grid>' +
-		'<columns>' +
-			'<column/>' +
-			'<column/>' +
-			'<column/>' +
-			'<column/>' +
-		'</columns>' +
-		'<rows>' +
-			'<row>' +
-				'<label value="Smart Snap Distance:     " />' +
-				'<textbox id="SmartSnapDistance" size="5" value="' + EDAPSettings.distanceThreshold + '"/>' +
-			'</row>' +
-		'</rows>' +
-		'</grid>' +
-		// ------------------------------------------
-		'<spacer></spacer>' +
-		'<separator></separator>' +
-		'<spacer></spacer>' +
-		'<spacer></spacer>' +
-		// OUTPUT SETTINGS---------------------------
-		'<label value="Trace Level ( Display in Output Panel )" />' +
-		'<grid>' +
-			'<columns>' +
-				'<column/>' +
-				'<column/>' +
-			'</columns>' +
-			'<rows>' +
-				'<row>' +
-					'<label value="                      " />' +
-					'<menulist id="traceLevel">' +
-						'<menupop>' +
-							'<menuitem label="None" value="0" selected="' + level1 + '" />' +
-							'<menuitem label="Errors Only" value="1"  selected="' + level2 + '" />' +
-							'<menuitem label="All" value="2"  selected="' + level3 + '" />' +
-						'</menupop>' +
-					'</menulist>' +
-				'</row>' +
-			'</rows>' +
-		'</grid>' +
-		// ------------------------------------------
-		'<spacer></spacer>' +
-		'<separator></separator>' +
-		'<spacer></spacer>' +
-		'<spacer></spacer>' +
-		// RESET DIALOGUES---------------------------
-		'<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false"/>' +
-		// ------------------------------------------
-	'</vbox>' +
-'</dialog>';
+			'</grid>' +
+			// ------------------------------------------
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			// OUTPUT SETTINGS---------------------------
+			'<label value="Trace Level ( Display in Output Panel )" />' +
+			'<grid>' +
+				'<columns>' +
+					'<column/>' +
+					'<column/>' +
+				'</columns>' +
+				'<rows>' +
+					'<row>' +
+						'<label value="                      " />' +
+						'<menulist id="traceLevel" oncreate = "setLightColor1()" >' +
+							'<menupop>' +
+								'<menuitem label="None" value="0" selected="' + level1 + '" />' +
+								'<menuitem label="Errors Only" value="1"  selected="' + level2 + '" />' +
+								'<menuitem label="All" value="2"  selected="' + level3 + '" />' +
+							'</menupop>' +
+						'</menulist>' +
+					'</row>' +
+				'</rows>' +
+			'</grid>' +
+			// ------------------------------------------
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			// RESET DIALOGUES---------------------------
+			'<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
+			// ------------------------------------------
+			'<script>' +
+				'function setLightColor1(){'+ 
+					'fl.xmlui.set( "light1", "'+EDAPSettings.layerColors.light.colors[0]+'" );'+
+					'fl.xmlui.set( "light2", "'+EDAPSettings.layerColors.light.colors[1]+'" );'+
+					'fl.xmlui.set( "light3", "'+EDAPSettings.layerColors.light.colors[2]+'" );'+
+					'fl.xmlui.set( "light4", "'+EDAPSettings.layerColors.light.colors[3]+'" );'+
+					'fl.xmlui.set( "light5", "'+EDAPSettings.layerColors.light.colors[4]+'" );'+
+					
+					'fl.xmlui.set( "dark1",  "'+EDAPSettings.layerColors.dark.colors[0] +'" );'+
+					'fl.xmlui.set( "dark2",  "'+EDAPSettings.layerColors.dark.colors[1] +'" );'+
+					'fl.xmlui.set( "dark3",  "'+EDAPSettings.layerColors.dark.colors[2] +'" );'+
+					'fl.xmlui.set( "dark4",  "'+EDAPSettings.layerColors.dark.colors[3] +'" );'+
+					'fl.xmlui.set( "dark5",  "'+EDAPSettings.layerColors.dark.colors[4] +'" );'+
+				'}'
+			'</script>'+
+		'</vbox>' +
+	'</dialog>';
 }

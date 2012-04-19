@@ -77,6 +77,9 @@ createObjectStateMap = function( objectCollection, props, afilter ){
 }
 
 restoreObjectStateFromMap = function( objectCollection, stateMap ){
+	if( objectCollection.length != stateMap.length ){
+		return;
+	}
 	for( var i = 0; i < stateMap.length; i++ ){
 		state = stateMap[ i ];
 		for ( p in state ){
