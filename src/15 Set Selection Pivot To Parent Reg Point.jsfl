@@ -34,16 +34,14 @@ function runScript( commandname ){
 	  displayMessage( commandname + " : Please, select a symbol and execute 'Record Parent Reg Point' command first.", 1 )
 	} 
 	else{
-		var parent = EDAPSettings.currentParentElement;
+		var parent = EDAPSettings.recordParentRegPoint.currentElement;
 		if( parent.instanceType == "symbol" ){
-		
-
 			sl = fl.getDocumentDOM().selection.length;
 			if( sl > 1 ){
 				fl.getDocumentDOM().setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
 			}
 			else{
-				if( EDAPSettings.showSetSelectionPivotToParentRegPointAlert == true ){
+				if( EDAPSettings.setSelectionPivotToParentRegPoint.showAlert == true ){
 					var message = "&quot;" + commandname + "&quot; requires multiple objects to be selected."+"\n"+
 					"The command moves the pivot point of the selected group to a location previously recorded by"+"\n"+
 					"running &quot;Record Parent Reg Point&quot;."+"\n"+"\n"+

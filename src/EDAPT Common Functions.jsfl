@@ -16,27 +16,34 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-// F8 - CS4
 initialize = function(){
-	var global = getGlobal();
-	if( global.EDAPSettings == undefined ){
+	var context;
+	if( getVersion() < 11 ){
+		fl.trace( "F8 - CS4" ); //***
+		context = getGlobal();
+	}
+	else{
+		fl.trace( "CS5" );//***
+		context = this;
+	}
+	if( typeof context.EDAPSettings != "object" ){
 		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
 		if ( FLfile.exists( fpath ) ) {
-			EDAPSettings = deserialize( fpath );
-			if( typeof EDAPSettings == undefined ){
-				createFresh();
+			context.EDAPSettings = deserialize( fpath );
+			if( typeof context.EDAPSettings != "object" ){
+				createFresh(context);
 			}
 			else{
-				EDAPSettings.currentParentElement = 0; 
-				EDAPSettings.colorIndexLight = -1;
-				EDAPSettings.colorIndexDark = -1;
+				context.EDAPSettings.recordParentRegPoint.currentElement = 0; 
+				context.EDAPSettings.layerColors.light.index = -1;
+				context.EDAPSettings.layerColors.dark.index = -1;
 			}
 		}
 		else{
-			createFresh();
-			serialize( EDAPSettings, fpath );
+			createFresh(context);
+			serialize( context.EDAPSettings, fpath );
 		}
-	}
+	}	
 }
 
 isElementSymbol = function( element ){
@@ -155,31 +162,39 @@ createOptionalMessageBox = function( atitle, amessage ){
 	'</dialog>';
 }
 
-createFresh = function(){
-	EDAPSettings = new Object();
-	
+createFresh = function( context ){
+	//fl.trace( "CREATE FRESH... " + getVersion() ); //*****
+	context.EDAPSettings = new Object();
+	context.EDAPSettings.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
+
+	// Layer Colors
+	context.EDAPSettings.layerColors = new Object();
+	context.EDAPSettings.layerColors.light = new Object();
+	context.EDAPSettings.layerColors.light.colors = defineLightColors();
+	context.EDAPSettings.layerColors.light.index = -1;
+	context.EDAPSettings.layerColors.dark = new Object();
+	context.EDAPSettings.layerColors.dark.colors = defineDarkColors();
+	context.EDAPSettings.layerColors.dark.index = -1;
+	context.EDAPSettings.layerColors.forceOutline = true;
+
 	// Record Parent Reg Point
-	EDAPSettings.currentParentElement = 0; 
+	context.EDAPSettings.recordParentRegPoint = new Object();
+	context.EDAPSettings.recordParentRegPoint.currentElement = 0;
 
-	// Layer Color Dark, Layer Color Light
-	EDAPSettings.colorListLight = defineLightColors();
-	EDAPSettings.colorListDark = defineDarkColors();
-	EDAPSettings.colorIndexLight = -1;
-	EDAPSettings.colorIndexDark = -1;
-	EDAPSettings.forceOutline = true;
+	// SetSelectionPivotToParentRegPoint
+	context.EDAPSettings.setSelectionPivotToParentRegPoint = new Object();
+	context.EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = true;
 
-	// CreateSnapObject and SmartSnap
-	EDAPSettings.snapObjectName = "_SnapObject";
-	EDAPSettings.snapObjectsLayerName = "Snap Object(s)";
-	EDAPSettings.distanceThreshold = 50;
-	EDAPSettings.snapDepthLevel = 2;
-	
-	// Display messages in the output panel
-	EDAPSettings.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
-	
-	// Optional Message Boxes
-	EDAPSettings.showCreateSnapObjectAlert = true;
-	EDAPSettings.showSetSelectionPivotToParentRegPointAlert = true;
+	//CreateSnapObject
+	context.EDAPSettings.createSnapObject = new Object();
+	context.EDAPSettings.createSnapObject.name = "_SnapObject";
+	context.EDAPSettings.createSnapObject.layerName = "Snap Object(s)";
+	context.EDAPSettings.createSnapObject.showAlert = true;
+
+	//SmartSnap
+	context.EDAPSettings.smartSnap = new Object();
+	context.EDAPSettings.smartSnap.distanceThreshold = 50;
+	context.EDAPSettings.smartSnap.depthLevel = 2;
 }
 
 displayMessage = function( msg, level ){
@@ -202,8 +217,9 @@ displayMessage = function( msg, level ){
 }
 
 getVersion = function( astring ){
-  s1 = astring.split( " " )[ 1 ];
-  return parseInt( s1.split( "," )[0] );
+	astring = fl.version;
+	s1 = astring.split( " " )[ 1 ];
+	return parseInt( s1.split( "," )[0] );
 } 
 
 include = function( arr, obj ) {

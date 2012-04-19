@@ -32,7 +32,6 @@ function runScript( commandname ){
 	initialize();
 
 	// Construct and invoke the dialogue with the proper default values.
-	var forceOutline = EDAPSettings.forceOutline;
 	var level1 = "false", level2 = "false", level3 = "false";
 
 	switch( EDAPSettings.traceLevel ){
@@ -49,7 +48,7 @@ function runScript( commandname ){
 			level2 = "true";
 	}
 
-	var xmlContent = createXML( forceOutline, level1, level2, level3 );
+	var xmlContent = createXML( level1, level2, level3 );
 	
 	var xmlFile = fl.configURI + "Commands/EDAPTsettingsGUI.xml";
 	if ( FLfile.exists( fpath ) ) {
@@ -61,19 +60,19 @@ function runScript( commandname ){
 	if( settings.dismiss == "accept" ){
 		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
 		// Assign new values
-		for( var i=0; i<EDAPSettings.colorListLight.length; i++ ){
+		for( var i=0; i < EDAPSettings.layerColors.light.colors.length; i++ ){
 			var p1 = "light" + ( i + 1 );
 			var p2 = "dark" + ( i + 1 );
-			EDAPSettings.colorListLight[i] = validateHEX( settings[p1] )? settings[p1] : EDAPSettings.colorListLight[i];
-			EDAPSettings.colorListDark[i] = validateHEX( settings[p2] )? settings[p2] : EDAPSettings.colorListDark[i];
+			EDAPSettings.layerColors.light.colors[i] = validateHEX( settings[p1] )? settings[p1] : EDAPSettings.layerColors.light.colors;
+			EDAPSettings.layerColors.dark.colors[i] = validateHEX( settings[p2] )? settings[p2] : EDAPSettings.layerColors.dark.colors[i];
 		}
-		EDAPSettings.distanceThreshold = settings.SmartSnapDistance;
-		EDAPSettings.forceOutline = settings.forceOutline;
+		EDAPSettings.smartSnap.distanceThreshold = settings.SmartSnapDistance;
+		EDAPSettings.layerColors.forceOutline = settings.forceOutline;
 		EDAPSettings.traceLevel = parseInt( settings.traceLevel );
 		
 		if( settings.resetDialogs == "true" ){
-			EDAPSettings.showCreateSnapObjectAlert = true;
-			EDAPSettings.showSetSelectionPivotToParentRegPointAlert = true;
+			EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = true;
+			EDAPSettings.createSnapObject.showAlert = true;
 		}
 		
 		
@@ -91,7 +90,7 @@ function validateHEX( colorcode ){
   return false;
 } 
 
-function createXML( forceOutline, level1, level2, level3 ){
+function createXML( level1, level2, level3 ){
 	return '<?xml version="1.0"?>' +
 	'<dialog title="Electric Dog Animation Power Tools - Settings" buttons="accept, cancel">' +
 		'<vbox>' +
@@ -136,7 +135,7 @@ function createXML( forceOutline, level1, level2, level3 ){
 			'</grid>' +
 			'<hbox>' +
 				'<label value="                    " />' +
-				'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + forceOutline + '" />' +
+				'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + EDAPSettings.layerColors.forceOutline + '" />' +
 			'</hbox>' +
 			// ------------------------------------------
 			'<spacer>' +

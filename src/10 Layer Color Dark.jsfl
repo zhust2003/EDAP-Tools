@@ -36,7 +36,7 @@ function runScript( commandname ){
 	for( var i=0; i < affectedLayers.length; i ++ ){
 		var currentLayer = affectedLayers[i];
 		currentLayer.color = theColor;
-		if( EDAPSettings.forceOutline == true || EDAPSettings.forceOutline == "true" ){
+		if( EDAPSettings.layerColors.forceOutline == true || EDAPSettings.layerColors.forceOutline == "true" ){
 			currentLayer.outline = true;
 		}
 		counter ++ ;
@@ -48,11 +48,11 @@ function runScript( commandname ){
 }
 
 function getNextColorFromList(){
-	if( EDAPSettings.colorIndexDark < EDAPSettings.colorListDark.length-1 ){
-		EDAPSettings.colorIndexDark ++;
+	if( EDAPSettings.layerColors.dark.index < EDAPSettings.layerColors.dark.colors.length - 1 ){
+		EDAPSettings.layerColors.dark.index ++;
 	}
 	else{
-		EDAPSettings.colorIndexDark = 0;
+		EDAPSettings.layerColors.dark.index = 0;
 	}
-	return EDAPSettings.colorListDark[ EDAPSettings.colorIndexDark ];
+	return EDAPSettings.layerColors.dark.colors[ EDAPSettings.layerColors.dark.index ];
 }

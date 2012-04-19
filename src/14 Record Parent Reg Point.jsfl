@@ -35,7 +35,7 @@ function runScript( commandname ){
 		displayMessage( commandname + " : Please, select a single symbol on the stage.", 1 );
 	}
 	else{
-		EDAPSettings.currentParentElement = selection[0];
+		EDAPSettings.recordParentRegPoint.currentElement = selection[0];
 	}
 }
 
