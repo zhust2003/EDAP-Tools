@@ -19,11 +19,11 @@ along with this program.  If not, see http://www.gnu.org/licenses/.
 initialize = function(){
 	var context;
 	if( getVersion() < 11 ){
-		fl.trace( "F8 - CS4" ); //***
+		//fl.trace( "F8 - CS4" ); //***
 		context = getGlobal();
 	}
 	else{
-		fl.trace( "CS5" );//***
+		//fl.trace( "CS5" );//***
 		context = this;
 	}
 	if( typeof context.EDAPSettings != "object" ){
@@ -128,10 +128,10 @@ displayOptionalMessageBox = function( atitle, amessage, atype ){
 		if( settings.DontShowAgain == "true" ){
 			switch( atype ){
 				case "create_snap_object":
-					EDAPSettings.showCreateSnapObjectAlert = false;
+					EDAPSettings.createSnapObject.showAlert = false;
 					break;
 				case "set_selection_pivot_to_parent":
-					EDAPSettings.showSetSelectionPivotToParentRegPointAlert = false;
+					EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = false;
 					break;
 				default:
 			}

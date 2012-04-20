@@ -67,7 +67,7 @@ function runScript( commandname ){
 			EDAPSettings.layerColors.dark.colors[i] = validateHEX( settings[p2] )? settings[p2] : EDAPSettings.layerColors.dark.colors[i];
 		}
 		EDAPSettings.smartSnap.distanceThreshold = settings.SmartSnapDistance;
-		EDAPSettings.layerColors.forceOutline = settings.forceOutline;
+		EDAPSettings.layerColors.forceOutline = ( settings.forceOutline === "true");
 		EDAPSettings.traceLevel = parseInt( settings.traceLevel );
 		
 		if( settings.resetDialogs == "true" ){

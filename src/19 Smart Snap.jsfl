@@ -74,12 +74,12 @@ function checkInsideElement( aTarget, tml, alist, mt ){
 		for ( var j = 0; j < elts.length; j++) { 
 			var elt = elts[j];
 			if( elt.instanceType == "symbol" ){
-				if( elt.libraryItem.name == EDAPSettings.snapObjectName ){
+				if( elt.libraryItem.name == EDAPSettings.createSnapObject.name ){
 					var theX = elt.matrix.tx * mt.a + elt.matrix.ty * mt.c + mt.tx;
 					var theY = elt.matrix.ty * mt.d + elt.matrix.tx * mt.b + mt.ty;
 					var pos = { x:theX, y:theY };
 					var dist = fl.Math.pointDistance( {x:aTarget.matrix.tx, y:aTarget.matrix.ty}, pos );
-					if( dist <= EDAPSettings.distanceThreshold ){
+					if( dist <= EDAPSettings.smartSnap.distanceThreshold ){
 						alist.push( { distance:dist, position:pos } );
 					}
 				}

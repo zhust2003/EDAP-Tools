@@ -29,7 +29,7 @@ function runScript( commandname ){
 	}
 	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 	initialize();
-	if( isString( EDAPSettings.snapObjectName ) == false ){
+	if( isString( EDAPSettings.createSnapObject.name ) == false ){
 		displayMessage( commandname + " : There is no valid name for the symbol", 1 );
 		return;
 	}
@@ -44,7 +44,7 @@ function runScript( commandname ){
 		var theItem = itemArray[i];
 		if( theItem.itemType !== "folder" ){
 			var xname = theItem.name.substr( theItem.name.lastIndexOf("/") + 1 );
-			if( xname == EDAPSettings.snapObjectName ){
+			if( xname == EDAPSettings.createSnapObject.name ){
 				if( theItem.name != xname ){
 					currentDoc.library.moveToFolder( "", theItem.name, true );
 					objectMoved = true;
@@ -59,7 +59,7 @@ function runScript( commandname ){
 	for( var i=0; i<affectedLayers.length; i++ ){
 		var l = affectedLayers[i];
 		if( l.layerType != "folder" ){
-			if( l.name == EDAPSettings.snapObjectsLayerName ){
+			if( l.name == EDAPSettings.createSnapObject.layerName ){
 				specialLayer = i;
 				break;
 			}
@@ -83,20 +83,20 @@ function runScript( commandname ){
 		currentDoc.clipPaste();
 	}
 	else{
-		displayMessage( commandname + " : The '" + EDAPSettings.snapObjectsLayerName + "' layer is locked.", 2 );	
+		displayMessage( commandname + " : The '" + EDAPSettings.createSnapObject.layerName + "' layer is locked.", 2 );	
 	}
 	
 
 	// Display message
-	if( EDAPSettings.showCreateSnapObjectAlert == true ){
-		var messageA = "The Symbol called &quot;" + EDAPSettings.snapObjectName + "&quot; was moved to the Library's root." + "\n" +
-		"&quot;"+EDAPSettings.snapObjectName+"&quot; must be available in Library's root" + "\n" +
+	if( EDAPSettings.createSnapObject.showAlert == true ){
+		var messageA = "The Symbol called &quot;" + EDAPSettings.createSnapObject.name + "&quot; was moved to the Library's root." + "\n" +
+		"&quot;"+EDAPSettings.createSnapObject.name+"&quot; must be available in Library's root" + "\n" +
 		"for the correct functioning of &quot;Smart Snap&quot; command." + "\n" +
 		"Please, do not move, edit or rename it!";
 
-		var messageB = "A layer called &quot;"+EDAPSettings.snapObjectsLayerName+"&quot; was created for convenience." + "\n" +
+		var messageB = "A layer called &quot;"+EDAPSettings.createSnapObject.layerName+"&quot; was created for convenience." + "\n" +
 		"It is recommended to place all needed instances of" + "\n" +
-		"&quot;"+EDAPSettings.snapObjectName+"&quot; onto this layer.";
+		"&quot;"+EDAPSettings.createSnapObject.name+"&quot; onto this layer.";
 		
 		if( objectMoved == true && specialLayer > -1 ){
 			displayOptionalMessageBox( commandname, messageA, "create_snap_object" );
@@ -112,7 +112,7 @@ function runScript( commandname ){
 
 function createLayer( doc ){
 	doc.getTimeline().currentLayer = 0;
-	doc.getTimeline().addNewLayer( EDAPSettings.snapObjectsLayerName );
+	doc.getTimeline().addNewLayer( EDAPSettings.createSnapObject.layerName );
 	var xLayer = doc.getTimeline().layers[ doc.getTimeline().currentLayer ];
 	xLayer.color = "#FF0000";
 	xLayer.outline = true;	
@@ -123,7 +123,7 @@ function prepareForPasteSymbol( currentDoc ){
 	var layerMap = createObjectStateMap( timeline.layers, [ "locked" ] );
 	var n = timeline.addNewLayer();
 	timeline.setSelectedLayers( n, true );
-	currentDoc.library.addItemToDocument({x:0, y:0}, EDAPSettings.snapObjectName );
+	currentDoc.library.addItemToDocument({x:0, y:0}, EDAPSettings.createSnapObject.name );
 	timeline.setLayerProperty( "locked", true, "others" );
 	currentDoc.selectAll( true );
 	currentDoc.clipCut();
@@ -134,11 +134,11 @@ function prepareForPasteSymbol( currentDoc ){
 function createSymbol( currentDoc ){
 	var dom = fl.createDocument( "timeline" );
 	var items = dom.library.items;
-	var sourceName = EDAPSettings.snapObjectName + ".swf";
+	var sourceName = EDAPSettings.createSnapObject.name + ".swf";
 	var lnames = [ "Vertical", "Horizontal", "Circle" ];
 	dom.importFile( fl.configURI + "WindowSWF/EDAPT Helper Objects/" + sourceName, true );
 	dom.library.selectItem( sourceName, true, true );
-	dom.library.renameItem( EDAPSettings.snapObjectName );
+	dom.library.renameItem( EDAPSettings.createSnapObject.name );
 	
 	dom.library.editItem();					
 	dom.selectAll();						
@@ -158,7 +158,7 @@ function createSymbol( currentDoc ){
 		xl.locked = true;
 	}
 	dom.exitEditMode();
-	dom.library.addItemToDocument({x:0, y:0}, EDAPSettings.snapObjectName );
+	dom.library.addItemToDocument({x:0, y:0}, EDAPSettings.createSnapObject.name );
 	dom.selectAll( true );
 	dom.clipCut();
 	dom.close( false );

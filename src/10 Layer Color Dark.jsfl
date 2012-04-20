@@ -36,7 +36,7 @@ function runScript( commandname ){
 	for( var i=0; i < affectedLayers.length; i ++ ){
 		var currentLayer = affectedLayers[i];
 		currentLayer.color = theColor;
-		if( EDAPSettings.layerColors.forceOutline == true || EDAPSettings.layerColors.forceOutline == "true" ){
+		if( EDAPSettings.layerColors.forceOutline == true ){
 			currentLayer.outline = true;
 		}
 		counter ++ ;
