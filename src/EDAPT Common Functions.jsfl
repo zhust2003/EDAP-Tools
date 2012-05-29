@@ -31,7 +31,7 @@ initialize = function(){
 		if ( FLfile.exists( fpath ) ) {
 			context.EDAPSettings = deserialize( fpath );
 			if( typeof context.EDAPSettings != "object" ){
-				createFresh(context);
+				createFresh( context );
 			}
 			else{
 				context.EDAPSettings.recordParentRegPoint.currentElement = 0; 
@@ -40,7 +40,7 @@ initialize = function(){
 			}
 		}
 		else{
-			createFresh(context);
+			createFresh( context );
 			serialize( context.EDAPSettings, fpath );
 		}
 	}	
@@ -253,10 +253,8 @@ serialize = function( o, filePath ){
 	/*Before we try to serialize the settings object,
 	  we clone it and remove the unnecessary data */
 	var obj = cloneObject( o );
-	delete obj.currentParentElement;
-	delete obj.colorIndexLight;
-	delete obj.colorIndexDark;
-	
+	delete obj.recordParentRegPoint.currentElement;
+
 	var str = JSON.stringify( obj );
 	if( FLfile.exists( filePath ) ){
 		FLfile.remove( filePath );
