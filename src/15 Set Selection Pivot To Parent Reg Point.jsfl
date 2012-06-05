@@ -30,34 +30,40 @@ function runScript( commandname ){
 	}
 	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 	initialize();
-	if( ! EDAPSettings ){
+	if( typeof( EDAPSettings.recordParentRegPoint.currentElement ) == "number" ){
 	  displayMessage( commandname + " : Please, select a symbol and execute 'Record Parent Reg Point' command first.", 1 )
 	} 
 	else{
-		var parent = EDAPSettings.recordParentRegPoint.currentElement;
-		if( parent.instanceType == "symbol" ){
-			sl = fl.getDocumentDOM().selection.length;
-			if( sl > 1 ){
-				fl.getDocumentDOM().setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
+		if( fl.getDocumentDOM() == EDAPSettings.recordParentRegPoint.currentElement.document ){
+			var parent = EDAPSettings.recordParentRegPoint.currentElement.element; //June 05, 2012
+			if( parent.instanceType == "symbol" ){
+				sl = fl.getDocumentDOM().selection.length;
+				if( sl > 1 ){
+					fl.getDocumentDOM().setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
+				}
+				else{
+					if( EDAPSettings.setSelectionPivotToParentRegPoint.showAlert == true ){
+						var message = "&quot;" + commandname + "&quot; requires multiple objects to be selected."+"\n"+
+						"The command moves the pivot point of the selected group to a location previously recorded by"+"\n"+
+						"running &quot;Record Parent Reg Point&quot;."+"\n"+"\n"+
+						"Example:"+"\n"+
+						"When hinging of the whole arm (upper arm + lower arm + hand) should happen in shoulder, and multiple"+"\n"+
+						"Symbols are selected, Flash positions the pivot of the group in the middle of selection&#39;s bounding box."+"\n"+
+						"Upon activation the pivot is re-located to previously recorded coordinates, in this case shoulder&#39;s "+"\n"+
+						"Registration Point. This allows the whole arm to be rotated from the shoulder.";
+						displayOptionalMessageBox( commandname, message, "set_selection_pivot_to_parent" );
+						displayMessage( commandname + " : This command works with multiple selection only", 1 )
+						return;
+					}
+				}
 			}
 			else{
-				if( EDAPSettings.setSelectionPivotToParentRegPoint.showAlert == true ){
-					var message = "&quot;" + commandname + "&quot; requires multiple objects to be selected."+"\n"+
-					"The command moves the pivot point of the selected group to a location previously recorded by"+"\n"+
-					"running &quot;Record Parent Reg Point&quot;."+"\n"+"\n"+
-					"Example:"+"\n"+
-					"When hinging of the whole arm (upper arm + lower arm + hand) should happen in shoulder, and multiple"+"\n"+
-					"Symbols are selected, Flash positions the pivot of the group in the middle of selection&#39;s bounding box."+"\n"+
-					"Upon activation the pivot is re-located to previously recorded coordinates, in this case shoulder&#39;s "+"\n"+
-					"Registration Point. This allows the whole arm to be rotated from the shoulder.";
-					displayOptionalMessageBox( commandname, message, "set_selection_pivot_to_parent" );
-					displayMessage( commandname + " : This command works with multiple selection only", 1 )
-					return;
-				}
+				displayMessage( commandname + " : Please, select a symbol and execute 'Record Parent Reg Point' command first.", 1 )
 			}
 		}
 		else{
-			displayMessage( commandname + " : Please, select a symbol and execute 'Record Parent Reg Point' command first.", 1 )
+			alert( "Wrong document!" );
+			return;
 		}
 	}
 }
