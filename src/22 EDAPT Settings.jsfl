@@ -134,6 +134,10 @@ function createXML( level1, level2, level3 ){
 				'</rows>' +
 			'</grid>' +
 			'<hbox>' +
+			'<label value="                                      " />' +
+			'<button label="Reset to default colors" oncommand = "resetToDefaultColours()"/>' +
+			'</hbox>' +
+			'<hbox>' +
 				'<label value="                    " />' +
 				'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + EDAPSettings.layerColors.forceOutline + '" />' +
 			'</hbox>' +
@@ -173,7 +177,7 @@ function createXML( level1, level2, level3 ){
 				'<rows>' +
 					'<row>' +
 						'<label value="                      " />' +
-						'<menulist id="traceLevel" oncreate = "setLightColor1()" >' +
+						'<menulist id="traceLevel" oncreate = "setDefaultColors()" >' +
 							'<menupop>' +
 								'<menuitem label="None" value="0" selected="' + level1 + '" />' +
 								'<menuitem label="Errors Only" value="1"  selected="' + level2 + '" />' +
@@ -192,7 +196,7 @@ function createXML( level1, level2, level3 ){
 			'<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
 			// ------------------------------------------
 			'<script>' +
-				'function setLightColor1(){'+ 
+				'function setDefaultColors(){'+ 
 					'fl.xmlui.set( "light1", "'+EDAPSettings.layerColors.light.colors[0]+'" );'+
 					'fl.xmlui.set( "light2", "'+EDAPSettings.layerColors.light.colors[1]+'" );'+
 					'fl.xmlui.set( "light3", "'+EDAPSettings.layerColors.light.colors[2]+'" );'+
@@ -204,7 +208,21 @@ function createXML( level1, level2, level3 ){
 					'fl.xmlui.set( "dark3",  "'+EDAPSettings.layerColors.dark.colors[2] +'" );'+
 					'fl.xmlui.set( "dark4",  "'+EDAPSettings.layerColors.dark.colors[3] +'" );'+
 					'fl.xmlui.set( "dark5",  "'+EDAPSettings.layerColors.dark.colors[4] +'" );'+
-				'}'
+				'}' +
+				'function resetToDefaultColours(){' +
+					'var lc = defineLightColors();' +
+					'fl.xmlui.set( "light1", lc[0] );'+
+					'fl.xmlui.set( "light2", lc[1] );'+
+					'fl.xmlui.set( "light3", lc[2] );'+
+					'fl.xmlui.set( "light4", lc[3] );'+
+					'fl.xmlui.set( "light5", lc[4] );'+
+					'var dc = defineDarkColors();' +
+					'fl.xmlui.set( "dark1",  dc[0] );'+
+					'fl.xmlui.set( "dark2",  dc[1] );'+
+					'fl.xmlui.set( "dark3",  dc[2] );'+
+					'fl.xmlui.set( "dark4",  dc[3] );'+
+					'fl.xmlui.set( "dark5",  dc[4] );'+
+				'}' +
 			'</script>'+
 		'</vbox>' +
 	'</dialog>';

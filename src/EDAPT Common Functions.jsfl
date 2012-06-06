@@ -230,23 +230,11 @@ include = function( arr, obj ) {
 }
 
 defineDarkColors = function(){
-	clr = new Array();
-	clr.push( "#000099" );
-	clr.push( "#990000" );
-	clr.push( "#006600" );
-	clr.push( "#333333" );
-	clr.push( "#9900CC" );
-	return clr
+	return [ "#000099", "#990000", "#006600", "#333333", "#9900CC" ];
 }
 
 defineLightColors = function(){
-	clr = new Array();
-	clr.push( "#FF33FF" );
-	clr.push( "#4FFF4F" );
-	clr.push( "#FFFF00" );
-	clr.push( "#CCCCCC" );
-	clr.push( "#66FFFF" );
-	return clr
+	return [ "#FF33FF", "#4FFF4F", "#FFFF00", "#CCCCCC", "#66FFFF" ];
 }
 
 serialize = function( o, filePath ){

@@ -62,7 +62,7 @@ function runScript( commandname ){
 			}
 		}
 		else{
-			alert( "Wrong document!" );
+			alert( '"Set Selection Pivot To Parent Reg Point" requires "Record Parent Reg Point" to be executed in the same document first. This records the coordinates of the desired Registration Point which can then be applied to a selection of multiple Symbols.' );
 			return;
 		}
 	}
