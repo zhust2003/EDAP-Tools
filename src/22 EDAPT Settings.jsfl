@@ -74,13 +74,34 @@ function runScript( commandname ){
 			EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = true;
 			EDAPSettings.createSnapObject.showAlert = true;
 		}
-		
+
 		
 		// Save settings
 		fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl", "serialize", EDAPSettings, fpath );
+		
+		// Check for command settings
+		var checkBoxNames = ["comm1", "comm2", "comm3", "comm4", "comm5", "comm6", "comm7", "comm8", "comm9", "comm10", "comm11", "comm12", "comm13", "comm14", "comm15", "comm16", "comm17", "comm18", "comm19", "comm20", "comm21"];
+		var states = settings.allBoxes.split( "," );
+		var messageFlag = false;
+		for( var i=0; i<checkBoxNames.length; i++ ){
+			if( settings[ checkBoxNames[i] ] != states[i] ){
+				messageFlag = true;
+				break;
+			}
+		}
 	}
 	FLfile.remove( xmlFile );
+	if( messageFlag ){
+		alert( "Hiding or showing commands recquires Flash to be restarted. Do you want to restart now?" );
+	}
 }
+
+function traceObj(obj){
+	for ( var o in obj ){
+		fl.trace( o + ":" + obj[o] );
+	}
+}
+
 
 function validateHEX( colorcode ){
   var regColorcode = /^(#)([0-9a-fA-F]{3})([0-9a-fA-F]{3})?$/;
@@ -96,8 +117,15 @@ function createXML( level1, level2, level3 ){
 		'<vbox>' +
 			// LAYER COLORS---------------------------
 			'<label value="Layer Outline Colors" />' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			
 			'<grid>' +
 				'<columns>' +
+					'<column/>' +
+					'<column/>' +
 					'<column/>' +
 					'<column/>' +
 					'<column/>' +
@@ -105,42 +133,39 @@ function createXML( level1, level2, level3 ){
 				'</columns>' +
 					'<rows>' +
 						'<row>' +
-							'<label value="             " />' +
-							'<label value="Light:" />' +
+							'<label value="Light:          " />' +
 							'<colorchip id="light1" />' +
 							'<colorchip id="light2" />' +
-						'</row>' +
-						'<row>' +
-							'<label value="             " />' +
 							'<colorchip id="light3" />' +
 							'<colorchip id="light4" />' +
 							'<colorchip id="light5" />' +
 						'</row>' +
-						'<spacer></spacer>' +
-						'<spacer></spacer>' +
-						'<spacer></spacer>' +
 						'<row>' +
-							'<label value="             " />' +
-							'<label value="Dark:" />' +
+							'<label value="Dark:          " />' +
 							'<colorchip id="dark1" />' +
 							'<colorchip id="dark2" />' +
-						'</row>' +
-						'<row>' +
-							'<label value="             " />' +
 							'<colorchip id="dark3" />' +
 							'<colorchip id="dark4" />' +
 							'<colorchip id="dark5" />' +
 						'</row>' +
 				'</rows>' +
 			'</grid>' +
-			'<hbox>' +
-			'<label value="                                      " />' +
-			'<button label="Reset to default colors" oncommand = "resetToDefaultColours()"/>' +
-			'</hbox>' +
-			'<hbox>' +
-				'<label value="                    " />' +
-				'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + EDAPSettings.layerColors.forceOutline + '" />' +
-			'</hbox>' +
+			
+			'<grid>' +
+				'<columns>' +
+					'<column/>' +
+					'<column/>' +
+					'<column/>' +
+				'</columns>' +
+				'<rows>' +
+					'<row>' +
+					'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + EDAPSettings.layerColors.forceOutline + '" />' +
+					'<label value="                                                                   " />' +
+					'<button label="Reset to default colors" oncommand = "resetToDefaultColours()"/>' +						
+				'</row>'+	
+				'</rows>' +
+			'</grid>' +
+			
 			// ------------------------------------------
 			'<spacer>' +
 			'</spacer>' +
@@ -153,12 +178,12 @@ function createXML( level1, level2, level3 ){
 				'<column/>' +
 				'<column/>' +
 				'<column/>' +
-				'<column/>' +
 			'</columns>' +
 			'<rows>' +
 				'<row>' +
 					'<label value="Smart Snap Distance:     " />' +
 					'<textbox id="SmartSnapDistance" size="5" value="' + EDAPSettings.smartSnap.distanceThreshold + '"/>' +
+					'<label value="          Lorem ipsum dolor sit amet. Est cu tantas elaboraret, sed ubique postea cu, conceptam pertinacia eum ea." />' +
 				'</row>' +
 			'</rows>' +
 			'</grid>' +
@@ -168,7 +193,7 @@ function createXML( level1, level2, level3 ){
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
 			// OUTPUT SETTINGS---------------------------
-			'<label value="Trace Level ( Display in Output Panel )" />' +
+			
 			'<grid>' +
 				'<columns>' +
 					'<column/>' +
@@ -176,7 +201,7 @@ function createXML( level1, level2, level3 ){
 				'</columns>' +
 				'<rows>' +
 					'<row>' +
-						'<label value="                      " />' +
+						'<label value="Trace Level ( Display in Output Panel )          " />' +
 						'<menulist id="traceLevel" oncreate = "setDefaultColors()" >' +
 							'<menupop>' +
 								'<menuitem label="None" value="0" selected="' + level1 + '" />' +
@@ -187,6 +212,76 @@ function createXML( level1, level2, level3 ){
 					'</row>' +
 				'</rows>' +
 			'</grid>' +
+			
+			// ------------------------------------------
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			// SHOW/HIDE COMMANDS---------------------------
+			'<spacer></spacer>' +
+			'<label value="Покажи следните команди в менюто &quot;Commands&quot;. Hiding or showing commands recquires Flash to be restarted." />' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<grid>' +
+				'<columns>' +
+					'<column/>' +
+					'<column/>' +
+					'<column/>' +
+				'</columns>' +
+				'<rows>' +
+					'<row>' +
+						'<checkbox id="comm1" label="01 Convert To Symbol Preserving Layers" checked="false" onchange = "clickCheckBox()"/>' +
+						'<checkbox id="comm8" label="08 Layer Outlines Toggle" checked="false" />' +
+						'<checkbox id="comm15" label="15 Set Selection Pivot To Parent Reg Point" checked="false" />' +
+					'</row>' +
+					
+					'<row>' +
+						'<checkbox id="comm2" label="02 LB Find And Replace" checked="false" />' +
+						'<checkbox id="comm9" label="09 Layer Guide Toggle" checked="false" />' +
+						'<checkbox id="comm16" label="16 Swap Multiple Symbols" checked="false" />' +
+					'</row>' +
+					
+					'<row>' +
+						'<checkbox id="comm3" label="03 LB Prefix Suffix" checked="false" />' +
+						'<checkbox id="comm10" label="10 Layer Color Dark" checked="false" />' +
+						'<checkbox id="comm17" label="17 Sync Symbols to Timeline" checked="false" />' +
+					'</row>' +
+					
+					'<row>' +
+						'<checkbox id="comm4" label="04 LB Trim Characters" checked="false" />' +
+						'<checkbox id="comm11" label="11 Layer Color Light" checked="false" />' +
+						'<checkbox id="comm18" label="18 Create Snap Object" checked="false" />' +	
+					'</row>' +
+					
+					'<row>' +
+						'<checkbox id="comm5" label="05 LB Enumeration" checked="false" />' +
+						'<checkbox id="comm12" label="12 Set Reg Point To Transform Point" checked="false" />' +
+						'<checkbox id="comm19" label="19 Smart Snap" checked="false" />' +
+					'</row>' +
+					
+					'<row>' +
+						'<checkbox id="comm6" label="06 Next Frame In Symbol" checked="false" />' +
+						'<checkbox id="comm13" label="13 Enter Symbol At Current Frame" checked="false" />' +
+						'<checkbox id="comm20" label="20 EDAPT Help" checked="false" />' +
+					'</row>' +
+					
+					'<row>' +
+						'<checkbox id="comm7" label="07 Prev Frame In Symbol" checked="false" />' +
+						'<checkbox id="comm14" label="14 Record Parent Reg Point" checked="false" />' +
+						'<checkbox id="comm21" label="21 EDAPT Shortcuts Map" checked="false" />' +
+					'</row>' +
+					
+					'<row>' +
+						'<label value="" />' +
+						'<button id="checkall" label="Check/Uncheck All" oncreate = "getCommandBoxes()" oncommand = "setCommandBoxes()"/>' +
+						'<label value="" />' +
+						
+					'</row>' +
+				'</rows>' +
+			'</grid>' +
 			// ------------------------------------------
 			'<spacer></spacer>' +
 			'<separator></separator>' +
@@ -194,8 +289,21 @@ function createXML( level1, level2, level3 ){
 			'<spacer></spacer>' +
 			// RESET DIALOGUES---------------------------
 			'<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
+			'<property id="allBoxes" value="false" ></property>' +
 			// ------------------------------------------
 			'<script>' +
+				'var checkBoxNames = ["comm1", "comm2", "comm3", "comm4", "comm5", "comm6", "comm7", "comm8", "comm9", "comm10", "comm11", "comm12", "comm13", "comm14", "comm15", "comm16", "comm17", "comm18", "comm19", "comm20", "comm21"];' +
+				'var boxState = false;' +
+				'function setCommandBoxes(){' +
+					'boxState = ! boxState;'+
+					'setAllCommandBoxes( checkBoxNames, boxState );' +
+				'}' +
+				
+				'function getCommandBoxes(){'+
+					'var allBoxes = getAllCommandBoxes( checkBoxNames );'+
+					'fl.xmlui.set( "allBoxes", allBoxes );'+
+				'}' +
+				
 				'function setDefaultColors(){'+ 
 					'fl.xmlui.set( "light1", "'+EDAPSettings.layerColors.light.colors[0]+'" );'+
 					'fl.xmlui.set( "light2", "'+EDAPSettings.layerColors.light.colors[1]+'" );'+
@@ -223,6 +331,7 @@ function createXML( level1, level2, level3 ){
 					'fl.xmlui.set( "dark4",  dc[3] );'+
 					'fl.xmlui.set( "dark5",  dc[4] );'+
 				'}' +
+
 			'</script>'+
 		'</vbox>' +
 	'</dialog>';

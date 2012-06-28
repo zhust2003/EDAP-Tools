@@ -176,7 +176,7 @@ createFresh = function( context ){
 	context.EDAPSettings.layerColors.dark.colors = defineDarkColors();
 	context.EDAPSettings.layerColors.dark.index = -1;
 	context.EDAPSettings.layerColors.forceOutline = true;
-
+	
 	// Record Parent Reg Point
 	context.EDAPSettings.recordParentRegPoint = new Object();
 	context.EDAPSettings.recordParentRegPoint.currentElement = 0;
@@ -226,7 +226,7 @@ include = function( arr, obj ) {
   for( var i=0; i<arr.length; i++ ) {
     if (arr[i] == obj) return true;
   }
-  return false
+  return false;
 }
 
 defineDarkColors = function(){
@@ -265,6 +265,20 @@ function cloneObject(obj) {
 	return clone;
 }
 
+
+setAllCommandBoxes = function( arrayOfNames, astate ){
+	for( var i=0; i<arrayOfNames.length; i++ ){
+		fl.xmlui.set( arrayOfNames[i], astate );
+	}
+}
+
+getAllCommandBoxes = function( arrayOfNames ){
+	var output = new Array();
+	for( var i=0; i<arrayOfNames.length; i++ ){
+		output.push( fl.xmlui.get( arrayOfNames[i] ) );
+	}
+	return output;
+}
 
 /*
 Copyright (c) 2005 JSON.org
