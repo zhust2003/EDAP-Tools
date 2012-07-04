@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!--
+Electric Dog Flash Animation Power Tools
+Copyright (C) 2011  Vladin M. Mitov
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/.
+-->
+<dialog buttons="accept, cancel" title="Restart">
+
+<vbox>
+	<label value="Hiding or showing commands recquires Flash to be restarted."/>
+	<spacer></spacer>
+	<spacer></spacer>
+	<spacer></spacer>
+	<radiogroup id = "choice" >
+		<hbox>
+		<radio id="now" label="Restart Now" selected="false" accesskey="1"/>
+		<radio id="later" label="Restart Later (manually)" selected="true" accesskey="2"/>
+		</hbox>
+	</radiogroup>
+	<spacer></spacer>
+	<spacer></spacer>
+	<spacer></spacer>
+	<spacer></spacer>
+	<spacer></spacer>
+</vbox>
+</dialog>

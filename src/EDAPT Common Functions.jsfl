@@ -162,6 +162,7 @@ createOptionalMessageBox = function( atitle, amessage ){
 	'</dialog>';
 }
 
+
 createFresh = function( context ){
 	//fl.trace( "CREATE FRESH... " + getVersion() ); //*****
 	context.EDAPSettings = new Object();
@@ -195,6 +196,30 @@ createFresh = function( context ){
 	context.EDAPSettings.smartSnap = new Object();
 	context.EDAPSettings.smartSnap.distanceThreshold = 50;
 	context.EDAPSettings.smartSnap.depthLevel = 2;
+	
+	//Commands
+	context.EDAPSettings.commands = new Array();
+	context.EDAPSettings.commands.push( { id:"comm01", name:"01 Convert To Symbol Preserving Layers", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm02", name:"02 LB Find And Replace", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm03", name:"03 LB Prefix Suffix", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm04", name:"04 LB Trim Characters", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm05", name:"05 LB Enumeration", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm06", name:"06 Next Frame In Symbol", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm07", name:"07 Prev Frame In Symbol", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm08", name:"08 Layer Outlines Toggle", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm09", name:"09 Layer Guide Toggle", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm10", name:"10 Layer Color Dark", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm11", name:"11 Layer Color Light", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm12", name:"12 Set Reg Point To Transform Point", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm13", name:"13 Enter Symbol At Current Frame", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm14", name:"14 Record Parent Reg Point", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm15", name:"15 Set Selection Pivot To Parent Reg Point", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm16", name:"16 Swap Multiple Symbols", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm17", name:"17 Sync Symbols to Timeline", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm18", name:"18 Create Snap Object", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm19", name:"19 Smart Snap", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm20", name:"20 EDAPT Help", state:true } );
+	context.EDAPSettings.commands.push( { id:"comm21", name:"21 EDAPT Shortcuts Map", state:true } );	
 }
 
 displayMessage = function( msg, level ){
@@ -266,19 +291,39 @@ function cloneObject(obj) {
 }
 
 
-setAllCommandBoxes = function( arrayOfNames, astate ){
-	for( var i=0; i<arrayOfNames.length; i++ ){
-		fl.xmlui.set( arrayOfNames[i], astate );
+setAllCommandBoxes = function( astate ){
+	for( var i=0; i<EDAPSettings.commands.length; i++ ){
+		fl.xmlui.set( EDAPSettings.commands[i].id, astate );
 	}
 }
 
-getAllCommandBoxes = function( arrayOfNames ){
+getAllCommandBoxes = function(){
 	var output = new Array();
-	for( var i=0; i<arrayOfNames.length; i++ ){
-		output.push( fl.xmlui.get( arrayOfNames[i] ) );
+	for( var i=0; i<EDAPSettings.commands.length; i++ ){
+		output.push( fl.xmlui.get( EDAPSettings.commands[i].id ) );
 	}
 	return output;
 }
+
+moveCommandFiles = function(){
+	var fpath = fl.configURI + "Commands/EDAPT Hidden Commands";
+	var created = FLfile.createFolder( fpath );
+	var ext = ".jsfl";
+	for( var i=0; i<EDAPSettings.commands.length; i++ ){
+		var command = EDAPSettings.commands[i];
+		var workingdpath = fl.configURI + "Commands/" + command.name + ext;
+		var disabledpath = fl.configURI + "Commands/EDAPT Hidden Commands/" + command.name + ext;
+		if( command.state == false ){
+			FLfile.copy( workingdpath, disabledpath  );
+			FLfile.remove( workingdpath );			
+		}
+		else if( command.state == true ){
+			FLfile.copy( disabledpath,  workingdpath );
+			FLfile.remove( disabledpath );	
+		}
+	}
+}
+	
 
 /*
 Copyright (c) 2005 JSON.org

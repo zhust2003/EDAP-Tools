@@ -75,25 +75,37 @@ function runScript( commandname ){
 			EDAPSettings.createSnapObject.showAlert = true;
 		}
 
-		
+		for( var i=0; i < EDAPSettings.commands.length; i++  ){
+			var val = settings[ EDAPSettings.commands[i].id ];
+			EDAPSettings.commands[i].state = ( val === "true");
+		}
+
 		// Save settings
 		fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl", "serialize", EDAPSettings, fpath );
 		
 		// Check for command settings
-		var checkBoxNames = ["comm1", "comm2", "comm3", "comm4", "comm5", "comm6", "comm7", "comm8", "comm9", "comm10", "comm11", "comm12", "comm13", "comm14", "comm15", "comm16", "comm17", "comm18", "comm19", "comm20", "comm21"];
 		var states = settings.allBoxes.split( "," );
 		var messageFlag = false;
-		for( var i=0; i<checkBoxNames.length; i++ ){
-			if( settings[ checkBoxNames[i] ] != states[i] ){
+		for( var i=0; i<EDAPSettings.commands.length; i++ ){
+			if( settings[ EDAPSettings.commands[i].id ] != states[i] ){
 				messageFlag = true;
 				break;
 			}
 		}
+		
 	}
 	FLfile.remove( xmlFile );
+	
 	if( messageFlag ){
-		alert( "Hiding or showing commands recquires Flash to be restarted. Do you want to restart now?" );
+		moveCommandFiles();
+		var restartDialogue = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/Restart.xml" );
+		if( restartDialogue.dismiss == "accept" ){
+			if( restartDialogue.choice == "Restart Now" ){
+				fl.quit();
+			}
+		}	
 	}
+	
 }
 
 function traceObj(obj){
@@ -112,6 +124,7 @@ function validateHEX( colorcode ){
 } 
 
 function createXML( level1, level2, level3 ){
+	cmd = EDAPSettings.commands;
 	return '<?xml version="1.0"?>' +
 	'<dialog title="Electric Dog Animation Power Tools - Settings" buttons="accept, cancel">' +
 		'<vbox>' +
@@ -233,45 +246,45 @@ function createXML( level1, level2, level3 ){
 				'</columns>' +
 				'<rows>' +
 					'<row>' +
-						'<checkbox id="comm1" label="01 Convert To Symbol Preserving Layers" checked="false" onchange = "clickCheckBox()"/>' +
-						'<checkbox id="comm8" label="08 Layer Outlines Toggle" checked="false" />' +
-						'<checkbox id="comm15" label="15 Set Selection Pivot To Parent Reg Point" checked="false" />' +
+						'<checkbox id="'+ cmd[0].id +'" label="'+ cmd[0].name +'" checked="'+ cmd[0].state +'"/>' +
+						'<checkbox id="'+ cmd[7].id +'" label="'+ cmd[7].name +'" checked="'+ cmd[7].state +'" />' +
+						'<checkbox id="'+ cmd[14].id +'" label="'+ cmd[14].name +'" checked="'+ cmd[14].state +'" />' +
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="comm2" label="02 LB Find And Replace" checked="false" />' +
-						'<checkbox id="comm9" label="09 Layer Guide Toggle" checked="false" />' +
-						'<checkbox id="comm16" label="16 Swap Multiple Symbols" checked="false" />' +
+						'<checkbox id="'+cmd[1].id+'" label="'+cmd[1].name+'" checked="'+cmd[1].state+'" />' +
+						'<checkbox id="'+cmd[8].id+'" label="'+cmd[8].name+'" checked="'+cmd[8].state+'" />' +
+						'<checkbox id="'+cmd[15].id+'" label="'+cmd[15].name+'" checked="'+cmd[15].state+'" />' +
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="comm3" label="03 LB Prefix Suffix" checked="false" />' +
-						'<checkbox id="comm10" label="10 Layer Color Dark" checked="false" />' +
-						'<checkbox id="comm17" label="17 Sync Symbols to Timeline" checked="false" />' +
+						'<checkbox id="'+cmd[2].id+'" label="'+cmd[2].name+'" checked="'+cmd[2].state+'" />' +
+						'<checkbox id="'+cmd[9].id+'" label="'+cmd[9].name+'" checked="'+cmd[9].state+'" />' +
+						'<checkbox id="'+cmd[16].id+'" label="'+cmd[16].name+'" checked="'+cmd[16].state+'" />' +
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="comm4" label="04 LB Trim Characters" checked="false" />' +
-						'<checkbox id="comm11" label="11 Layer Color Light" checked="false" />' +
-						'<checkbox id="comm18" label="18 Create Snap Object" checked="false" />' +	
+						'<checkbox id="'+cmd[3].id+'" label="'+cmd[3].name+'" checked="'+cmd[3].state+'" />' +
+						'<checkbox id="'+cmd[10].id+'" label="'+cmd[10].name+'" checked="'+cmd[10].state+'" />' +
+						'<checkbox id="'+cmd[17].id+'" label="'+cmd[17].name+'" checked="'+cmd[17].state+'" />' +	
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="comm5" label="05 LB Enumeration" checked="false" />' +
-						'<checkbox id="comm12" label="12 Set Reg Point To Transform Point" checked="false" />' +
-						'<checkbox id="comm19" label="19 Smart Snap" checked="false" />' +
+						'<checkbox id="'+cmd[4].id+'" label="'+cmd[4].name+'" checked="'+cmd[4].state+'" />' +
+						'<checkbox id="'+cmd[11].id+'" label="'+cmd[11].name+'" checked="'+cmd[11].state+'" />' +
+						'<checkbox id="'+cmd[18].id+'" label="'+cmd[18].name+'" checked="'+cmd[18].state+'" />' +
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="comm6" label="06 Next Frame In Symbol" checked="false" />' +
-						'<checkbox id="comm13" label="13 Enter Symbol At Current Frame" checked="false" />' +
-						'<checkbox id="comm20" label="20 EDAPT Help" checked="false" />' +
+						'<checkbox id="'+cmd[5].id+'" label="'+cmd[5].name+'" checked="'+cmd[5].state+'" />' +
+						'<checkbox id="'+cmd[12].id+'" label="'+cmd[12].name+'" checked="'+cmd[12].state+'" />' +
+						'<checkbox id="'+cmd[19].id+'" label="'+cmd[19].name+'" checked="'+cmd[19].state+'" />' +
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="comm7" label="07 Prev Frame In Symbol" checked="false" />' +
-						'<checkbox id="comm14" label="14 Record Parent Reg Point" checked="false" />' +
-						'<checkbox id="comm21" label="21 EDAPT Shortcuts Map" checked="false" />' +
+						'<checkbox id="'+cmd[6].id+'" label="'+cmd[6].name+'" checked="'+cmd[6].state+'" />' +
+						'<checkbox id="'+cmd[13].id+'" label="'+cmd[13].name+'" checked="'+cmd[13].state+'" />' +
+						'<checkbox id="'+cmd[20].id+'" label="'+cmd[20].name+'" checked="'+cmd[20].state+'" />' +
 					'</row>' +
 					
 					'<row>' +
@@ -292,15 +305,14 @@ function createXML( level1, level2, level3 ){
 			'<property id="allBoxes" value="false" ></property>' +
 			// ------------------------------------------
 			'<script>' +
-				'var checkBoxNames = ["comm1", "comm2", "comm3", "comm4", "comm5", "comm6", "comm7", "comm8", "comm9", "comm10", "comm11", "comm12", "comm13", "comm14", "comm15", "comm16", "comm17", "comm18", "comm19", "comm20", "comm21"];' +
 				'var boxState = false;' +
 				'function setCommandBoxes(){' +
 					'boxState = ! boxState;'+
-					'setAllCommandBoxes( checkBoxNames, boxState );' +
+					'setAllCommandBoxes( boxState );' +
 				'}' +
 				
 				'function getCommandBoxes(){'+
-					'var allBoxes = getAllCommandBoxes( checkBoxNames );'+
+					'var allBoxes = getAllCommandBoxes();'+
 					'fl.xmlui.set( "allBoxes", allBoxes );'+
 				'}' +
 				
