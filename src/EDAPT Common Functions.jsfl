@@ -148,11 +148,8 @@ getElementItemByName = function( tml, aname ){
 	for( var i=0; i<tml.layers.length; i++ ){
 		var myElements = tml.layers[i].frames[cf].elements;
 		for( j=0; j<myElements.length; j++ ){
-			if( isElementSymbol( myElements[j] ) ){
-				if( myElements[j].libraryItem.name == aname ){
-					return myElements[j];
-				}
-				return null;
+			if( isElementSymbol( myElements[j] ) && ( myElements[j].libraryItem.name == aname ) ){
+				return myElements[j];
 			}
 		}
 		return null;
