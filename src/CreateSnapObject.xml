@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<dialog buttons="accept, cancel" title="Test Keys">
+	<vbox>
+		<checkbox id="one"   label="weight 1" checked = "true" class="control" accesskey="1" />
+		<checkbox id="two"   label="weight 2" checked = "true" class="control" accesskey="2" />
+		<checkbox id="three" label="weight 3" checked = "true" class="control" accesskey="3" />
+		<checkbox id="four"  label="weight 4" checked = "true" class="control" accesskey="4" />
+		<checkbox id="five"  label="weight 5" checked = "true" class="control" accesskey="5" />
+		<spacer></spacer>
+		<separator></separator>
+		<spacer></spacer>
+	</vbox>
+</dialog>

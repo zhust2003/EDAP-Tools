@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
+
+// Library initialization
 initialize = function(){
 	var context;
 	if( getVersion() < 11 ){
@@ -31,7 +33,7 @@ initialize = function(){
 		if ( FLfile.exists( fpath ) ) {
 			context.EDAPSettings = deserialize( fpath );
 			if( typeof context.EDAPSettings != "object" ){
-				createFresh( context );
+				createSettings( context );
 			}
 			else{
 				context.EDAPSettings.recordParentRegPoint.currentElement = 0; 
@@ -40,10 +42,122 @@ initialize = function(){
 			}
 		}
 		else{
-			createFresh( context );
+			createSettings( context );
 			serialize( context.EDAPSettings, fpath );
 		}
 	}	
+}
+
+createSettings = function( context ){
+	//fl.trace( "CREATE FRESH... " + getVersion() ); //*****
+	context.EDAPSettings = new Object();
+	context.EDAPSettings.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
+
+	// Layer Colors
+	context.EDAPSettings.layerColors = new Object();
+	context.EDAPSettings.layerColors.light = new Object();
+	context.EDAPSettings.layerColors.light.colors = defineLightColors();
+	context.EDAPSettings.layerColors.light.index = -1;
+	context.EDAPSettings.layerColors.dark = new Object();
+	context.EDAPSettings.layerColors.dark.colors = defineDarkColors();
+	context.EDAPSettings.layerColors.dark.index = -1;
+	context.EDAPSettings.layerColors.forceOutline = true;
+	
+	// Record Parent Reg Point
+	context.EDAPSettings.recordParentRegPoint = new Object();
+	context.EDAPSettings.recordParentRegPoint.currentElement = 0;
+
+	// SetSelectionPivotToParentRegPoint
+	context.EDAPSettings.setSelectionPivotToParentRegPoint = new Object();
+	context.EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = true;
+
+	//CreateSnapObject
+	context.EDAPSettings.createSnapObject = new Object();
+	context.EDAPSettings.createSnapObject.name = "_SnapObject";
+	context.EDAPSettings.createSnapObject.layerName = "Snap Object(s)";
+	context.EDAPSettings.createSnapObject.showAlert = true;
+
+	//SmartSnap
+	context.EDAPSettings.smartSnap = new Object();
+	context.EDAPSettings.smartSnap.distanceThreshold = 50;
+	context.EDAPSettings.smartSnap.depthLevel = 2;
+	context.EDAPSettings.smartSnap.weights = [1,2,3,4,5];
+	
+	//Commands
+	//Couples: 6,7   14,15   18,19
+	context.EDAPSettings.commands = new Object();
+	context.EDAPSettings.commands.showAlert = true;
+	
+	context.EDAPSettings.commands.settings = new Array();
+	context.EDAPSettings.commands.settings.push( { id:"comm01", name:["01 Convert To Symbol Preserving Layers"], state:true } ); 		//0
+	context.EDAPSettings.commands.settings.push( { id:"comm02", name:["02 LB Find And Replace"], state:true } );						//1
+	context.EDAPSettings.commands.settings.push( { id:"comm03", name:["03 LB Prefix Suffix"], state:true } );							//2
+	context.EDAPSettings.commands.settings.push( { id:"comm04", name:["04 LB Trim Characters"], state:true } );							//3
+	context.EDAPSettings.commands.settings.push( { id:"comm05", name:["05 LB Enumeration"], state:true } );								//4
+
+	context.EDAPSettings.commands.settings.push( { id:"comm08", name:["08 Layer Outlines Toggle"], state:true } );						//5
+	context.EDAPSettings.commands.settings.push( { id:"comm09", name:["09 Layer Guide Toggle"], state:true } );							//6
+	context.EDAPSettings.commands.settings.push( { id:"comm10", name:["10 Layer Color Dark"], state:true } );							//7
+	context.EDAPSettings.commands.settings.push( { id:"comm11", name:["11 Layer Color Light"], state:true } );							//8
+	context.EDAPSettings.commands.settings.push( { id:"comm12", name:["12 Set Reg Point To Transform Point"], state:true } );			//9
+	
+	context.EDAPSettings.commands.settings.push( { id:"comm13", name:["13 Enter Symbol At Current Frame"], state:true } );				//10
+	context.EDAPSettings.commands.settings.push( { id:"comm16", name:["16 Swap Multiple Symbols"], state:true } );						//11
+	context.EDAPSettings.commands.settings.push( { id:"comm17", name:["17 Sync Symbols to Timeline"], state:true } );					//12
+	context.EDAPSettings.commands.settings.push( { id:"comm21", name:["21 EDAPT Shortcuts Map"], state:true } );						//13
+	
+	
+	context.EDAPSettings.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );						//14
+	context.EDAPSettings.commands.settings.push( { id:"pair2",  name:["14 Record Parent Reg Point", "15 Set Selection Pivot To Parent Reg Point"], state:true } );	//15
+	context.EDAPSettings.commands.settings.push( { id:"pair3",  name:["18 Create Snap Object", "19 Smart Snap"], state:true } );									//16	
+
+}
+
+
+
+// Timelines, Layers and Elements
+getPathToTheTimeline = function(){
+	var path = [];
+	var prevName = fl.getDocumentDOM().getTimeline().name;
+	var repeat = true;
+	while( repeat ){
+		fl.getDocumentDOM().exitEditMode();
+		if( fl.getDocumentDOM().getTimeline().name != prevName ){
+			path.push( prevName );
+		}
+		else{
+			repeat = false;
+		}
+		prevName = fl.getDocumentDOM().getTimeline().name;
+	}
+	return path;
+}
+
+gotoTargetTimeline = function( apath ){
+	for( var i=apath.length-1; i>-1; i-- ){
+		el = getElementItemByName( fl.getDocumentDOM().getTimeline(), apath[ i ] );
+		if( el != null ){
+			fl.getDocumentDOM().selection = [el];
+			fl.getDocumentDOM().enterEditMode( "inPlace" );
+		}
+	}	
+}
+
+getElementItemByName = function( tml, aname ){
+	var cf = tml.currentFrame;
+	for( var i=0; i<tml.layers.length; i++ ){
+		var myElements = tml.layers[i].frames[cf].elements;
+		for( j=0; j<myElements.length; j++ ){
+			if( isElementSymbol( myElements[j] ) ){
+				if( myElements[j].libraryItem.name == aname ){
+					return myElements[j];
+				}
+				return null;
+			}
+		}
+		return null;
+	}
+	return null;
 }
 
 isElementSymbol = function( element ){
@@ -115,7 +229,11 @@ getLayers = function(){
 	return selectedLayers;
 }
 
-displayOptionalMessageBox = function( atitle, amessage, atype ){
+
+
+
+// Messages
+displayOptionalMessageBox = function( atitle, amessage, apropToChange ){
 	var xmlContent = createOptionalMessageBox( atitle, amessage );
 	var xmlFile = fl.configURI + "Commands/OptionalMessageBoxGUI.xml";
 	if ( FLfile.exists( xmlFile ) ) {
@@ -126,15 +244,7 @@ displayOptionalMessageBox = function( atitle, amessage, atype ){
 	if( settings.dismiss == "accept" ){
 		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
 		if( settings.DontShowAgain == "true" ){
-			switch( atype ){
-				case "create_snap_object":
-					EDAPSettings.createSnapObject.showAlert = false;
-					break;
-				case "set_selection_pivot_to_parent":
-					EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = false;
-					break;
-				default:
-			}
+			EDAPSettings[apropToChange].showAlert = false;
 			serialize( EDAPSettings, fpath );	
 		}	
 	}
@@ -162,66 +272,6 @@ createOptionalMessageBox = function( atitle, amessage ){
 	'</dialog>';
 }
 
-
-createFresh = function( context ){
-	//fl.trace( "CREATE FRESH... " + getVersion() ); //*****
-	context.EDAPSettings = new Object();
-	context.EDAPSettings.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
-
-	// Layer Colors
-	context.EDAPSettings.layerColors = new Object();
-	context.EDAPSettings.layerColors.light = new Object();
-	context.EDAPSettings.layerColors.light.colors = defineLightColors();
-	context.EDAPSettings.layerColors.light.index = -1;
-	context.EDAPSettings.layerColors.dark = new Object();
-	context.EDAPSettings.layerColors.dark.colors = defineDarkColors();
-	context.EDAPSettings.layerColors.dark.index = -1;
-	context.EDAPSettings.layerColors.forceOutline = true;
-	
-	// Record Parent Reg Point
-	context.EDAPSettings.recordParentRegPoint = new Object();
-	context.EDAPSettings.recordParentRegPoint.currentElement = 0;
-
-	// SetSelectionPivotToParentRegPoint
-	context.EDAPSettings.setSelectionPivotToParentRegPoint = new Object();
-	context.EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = true;
-
-	//CreateSnapObject
-	context.EDAPSettings.createSnapObject = new Object();
-	context.EDAPSettings.createSnapObject.name = "_SnapObject";
-	context.EDAPSettings.createSnapObject.layerName = "Snap Object(s)";
-	context.EDAPSettings.createSnapObject.showAlert = true;
-
-	//SmartSnap
-	context.EDAPSettings.smartSnap = new Object();
-	context.EDAPSettings.smartSnap.distanceThreshold = 50;
-	context.EDAPSettings.smartSnap.depthLevel = 2;
-	
-	//Commands
-	context.EDAPSettings.commands = new Array();
-	context.EDAPSettings.commands.push( { id:"comm01", name:"01 Convert To Symbol Preserving Layers", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm02", name:"02 LB Find And Replace", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm03", name:"03 LB Prefix Suffix", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm04", name:"04 LB Trim Characters", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm05", name:"05 LB Enumeration", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm06", name:"06 Next Frame In Symbol", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm07", name:"07 Prev Frame In Symbol", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm08", name:"08 Layer Outlines Toggle", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm09", name:"09 Layer Guide Toggle", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm10", name:"10 Layer Color Dark", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm11", name:"11 Layer Color Light", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm12", name:"12 Set Reg Point To Transform Point", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm13", name:"13 Enter Symbol At Current Frame", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm14", name:"14 Record Parent Reg Point", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm15", name:"15 Set Selection Pivot To Parent Reg Point", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm16", name:"16 Swap Multiple Symbols", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm17", name:"17 Sync Symbols to Timeline", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm18", name:"18 Create Snap Object", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm19", name:"19 Smart Snap", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm20", name:"20 EDAPT Help", state:true } );
-	context.EDAPSettings.commands.push( { id:"comm21", name:"21 EDAPT Shortcuts Map", state:true } );	
-}
-
 displayMessage = function( msg, level ){
 	initialize();
 	switch( EDAPSettings.traceLevel ){
@@ -241,11 +291,18 @@ displayMessage = function( msg, level ){
 	}
 }
 
-getVersion = function( astring ){
-	astring = fl.version;
-	s1 = astring.split( " " )[ 1 ];
-	return parseInt( s1.split( "," )[0] );
-} 
+
+
+
+// Array functions
+indexOf = function( array, element ){
+	for( var i=0; i<array.length; i++ ){
+		if( array[i] === element ){
+			return i;
+		}
+	}
+	return -1;
+}
 
 include = function( arr, obj ) {
   for( var i=0; i<arr.length; i++ ) {
@@ -254,6 +311,10 @@ include = function( arr, obj ) {
   return false;
 }
 
+
+
+
+// UI functions
 defineDarkColors = function(){
 	return [ "#000099", "#990000", "#006600", "#333333", "#9900CC" ];
 }
@@ -262,6 +323,51 @@ defineLightColors = function(){
 	return [ "#FF33FF", "#4FFF4F", "#FFFF00", "#CCCCCC", "#66FFFF" ];
 }
 
+setAllCommandBoxes = function( astate ){
+	for( var i=0; i<EDAPSettings.commands.settings.length; i++ ){
+		fl.xmlui.set( EDAPSettings.commands.settings[i].id, astate );
+	}
+}
+
+getAllCommandBoxes = function(){
+	var output = new Array();
+	for( var i=0; i<EDAPSettings.commands.settings.length; i++ ){
+		output.push( fl.xmlui.get( EDAPSettings.commands.settings[i].id ) );
+	}
+	return output;
+}
+
+moveCommandFiles = function(){
+	var fpath = fl.configURI + "Commands/EDAPT Hidden Commands";
+	var created = FLfile.createFolder( fpath );
+	var ext = ".jsfl";
+	for( var i=0; i < EDAPSettings.commands.settings.length; i++ ){
+		var command = EDAPSettings.commands.settings[i];
+		for( j=0; j< command.name.length; j++){
+			var workingPath = fl.configURI + "Commands/" + command.name[j] + ext;
+			var disabledPath = fl.configURI + "Commands/EDAPT Hidden Commands/" + command.name[j] + ext;
+			if( command.state == false ){
+				if( ! FLfile.exists( disabledPath ) ){
+					//fl.trace( "Disabling " + workingPath ); //***
+					FLfile.copy( workingPath, disabledPath  );
+					FLfile.remove( workingPath );	
+				}		
+			}
+			else if( command.state == true ){
+				if( ! FLfile.exists( workingPath ) ){
+					//fl.trace( "Enabling " + workingPath ); //***
+					FLfile.copy( disabledPath,  workingPath );
+					FLfile.remove( disabledPath );
+				}
+			}
+		}
+	}
+}
+
+
+
+
+// Serialization
 serialize = function( o, filePath ){
 	/*Before we try to serialize the settings object,
 	  we clone it and remove the unnecessary data */
@@ -282,48 +388,13 @@ deserialize = function( filePath ){
 	return JSON.parse( str );
 }
 
-function cloneObject(obj) {
+cloneObject = function(obj) {
 	var clone = {};
-	for(var i in obj) {
+	for( var i in obj ) {
 		clone[i] = obj[i];
 	}
 	return clone;
 }
-
-
-setAllCommandBoxes = function( astate ){
-	for( var i=0; i<EDAPSettings.commands.length; i++ ){
-		fl.xmlui.set( EDAPSettings.commands[i].id, astate );
-	}
-}
-
-getAllCommandBoxes = function(){
-	var output = new Array();
-	for( var i=0; i<EDAPSettings.commands.length; i++ ){
-		output.push( fl.xmlui.get( EDAPSettings.commands[i].id ) );
-	}
-	return output;
-}
-
-moveCommandFiles = function(){
-	var fpath = fl.configURI + "Commands/EDAPT Hidden Commands";
-	var created = FLfile.createFolder( fpath );
-	var ext = ".jsfl";
-	for( var i=0; i<EDAPSettings.commands.length; i++ ){
-		var command = EDAPSettings.commands[i];
-		var workingdpath = fl.configURI + "Commands/" + command.name + ext;
-		var disabledpath = fl.configURI + "Commands/EDAPT Hidden Commands/" + command.name + ext;
-		if( command.state == false ){
-			FLfile.copy( workingdpath, disabledpath  );
-			FLfile.remove( workingdpath );			
-		}
-		else if( command.state == true ){
-			FLfile.copy( disabledpath,  workingdpath );
-			FLfile.remove( disabledpath );	
-		}
-	}
-}
-	
 
 /*
 Copyright (c) 2005 JSON.org
@@ -456,8 +527,17 @@ JSON = function () {
 }();
 
 
+
+
+// Helper functions
 getGlobal = function(){
 	return (function(){
 		return this;
 	}).call(null);
 }
+
+getVersion = function( astring ){
+	astring = fl.version;
+	s1 = astring.split( " " )[ 1 ];
+	return parseInt( s1.split( "," )[0] );
+} 

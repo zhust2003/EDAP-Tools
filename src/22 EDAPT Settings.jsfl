@@ -71,13 +71,16 @@ function runScript( commandname ){
 		EDAPSettings.traceLevel = parseInt( settings.traceLevel );
 		
 		if( settings.resetDialogs == "true" ){
-			EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = true;
-			EDAPSettings.createSnapObject.showAlert = true;
+			for ( var o in EDAPSettings ){
+				if( EDAPSettings[o].hasOwnProperty( "showAlert" ) ) {
+					EDAPSettings[o].showAlert = true;
+				}
+			}	
 		}
 
-		for( var i=0; i < EDAPSettings.commands.length; i++  ){
-			var val = settings[ EDAPSettings.commands[i].id ];
-			EDAPSettings.commands[i].state = ( val === "true");
+		for( var i=0; i < EDAPSettings.commands.settings.length; i++  ){
+			var val = settings[ EDAPSettings.commands.settings[i].id ];
+			EDAPSettings.commands.settings[i].state = ( val === "true");
 		}
 
 		// Save settings
@@ -86,24 +89,20 @@ function runScript( commandname ){
 		// Check for command settings
 		var states = settings.allBoxes.split( "," );
 		var messageFlag = false;
-		for( var i=0; i<EDAPSettings.commands.length; i++ ){
-			if( settings[ EDAPSettings.commands[i].id ] != states[i] ){
+		for( var i=0; i<EDAPSettings.commands.settings.length; i++ ){
+			if( settings[ EDAPSettings.commands.settings[i].id ] != states[i] ){
 				messageFlag = true;
 				break;
 			}
 		}
-		
 	}
 	FLfile.remove( xmlFile );
 	
 	if( messageFlag ){
 		moveCommandFiles();
-		var restartDialogue = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/Restart.xml" );
-		if( restartDialogue.dismiss == "accept" ){
-			if( restartDialogue.choice == "Restart Now" ){
-				fl.quit();
-			}
-		}	
+		if( EDAPSettings.commands.showAlert == true ){
+			displayOptionalMessageBox( "Restart", "Hiding or showing commands requires Flash to be restarted." + "\n" + "All command shortcuts will be functional after the next restart.", "commands" );
+		}
 	}
 	
 }
@@ -124,7 +123,8 @@ function validateHEX( colorcode ){
 } 
 
 function createXML( level1, level2, level3 ){
-	cmd = EDAPSettings.commands;
+	var cmd = EDAPSettings.commands.settings;
+	var sep = "  /  ";
 	return '<?xml version="1.0"?>' +
 	'<dialog title="Electric Dog Animation Power Tools - Settings" buttons="accept, cancel">' +
 		'<vbox>' +
@@ -233,7 +233,7 @@ function createXML( level1, level2, level3 ){
 			'<spacer></spacer>' +
 			// SHOW/HIDE COMMANDS---------------------------
 			'<spacer></spacer>' +
-			'<label value="Покажи следните команди в менюто &quot;Commands&quot;. Hiding or showing commands recquires Flash to be restarted." />' +
+			'<label value="Show / Hide selected commands from the &quot;Commands&quot; menu. Enabling or disabling commands requires Flash to be restarted." />' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
@@ -246,74 +246,81 @@ function createXML( level1, level2, level3 ){
 				'</columns>' +
 				'<rows>' +
 					'<row>' +
-						'<checkbox id="'+ cmd[0].id +'" label="'+ cmd[0].name +'" checked="'+ cmd[0].state +'"/>' +
-						'<checkbox id="'+ cmd[7].id +'" label="'+ cmd[7].name +'" checked="'+ cmd[7].state +'" />' +
-						'<checkbox id="'+ cmd[14].id +'" label="'+ cmd[14].name +'" checked="'+ cmd[14].state +'" />' +
+						'<checkbox id="'+ cmd[0].id +'" label="'+ cmd[0].name.join( sep ) +'" checked="'+ cmd[0].state +'"/>' +  	// 01 Convert To Symbol Preserving Layers
+						'<checkbox id="'+ cmd[5].id +'" label="'+ cmd[5].name.join( sep ) +'" checked="'+ cmd[5].state +'" />' + 	// 08 Layer Outlines Toggle
+						'<checkbox id="'+ cmd[10].id +'" label="'+ cmd[10].name.join( sep ) +'" checked="'+ cmd[10].state +'" />' + // 13 Enter Symbol At Current Frame
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="'+cmd[1].id+'" label="'+cmd[1].name+'" checked="'+cmd[1].state+'" />' +
-						'<checkbox id="'+cmd[8].id+'" label="'+cmd[8].name+'" checked="'+cmd[8].state+'" />' +
-						'<checkbox id="'+cmd[15].id+'" label="'+cmd[15].name+'" checked="'+cmd[15].state+'" />' +
+						'<checkbox id="'+cmd[1].id+'" label="'+cmd[1].name.join( sep ) +'" checked="'+cmd[1].state+'" />' +			// 02 LB Find And Replace
+						'<checkbox id="'+cmd[6].id+'" label="'+cmd[6].name.join( sep ) +'" checked="'+cmd[6].state+'" />' +			// 09 Layer Guide Toggle
+						'<checkbox id="'+cmd[11].id+'" label="'+cmd[11].name.join( sep ) +'" checked="'+cmd[11].state+'" />' +		// 16 Swap Multiple Symbols
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="'+cmd[2].id+'" label="'+cmd[2].name+'" checked="'+cmd[2].state+'" />' +
-						'<checkbox id="'+cmd[9].id+'" label="'+cmd[9].name+'" checked="'+cmd[9].state+'" />' +
-						'<checkbox id="'+cmd[16].id+'" label="'+cmd[16].name+'" checked="'+cmd[16].state+'" />' +
+						'<checkbox id="'+cmd[2].id+'" label="'+cmd[2].name.join( sep ) +'" checked="'+cmd[2].state+'" />' +			// 03 LB Prefix Suffix
+						'<checkbox id="'+cmd[7].id+'" label="'+cmd[7].name.join( sep ) +'" checked="'+cmd[7].state+'" />' +			// 10 Layer Color Dark
+						'<checkbox id="'+cmd[12].id+'" label="'+cmd[12].name.join( sep ) +'" checked="'+cmd[12].state+'" />' +		// 17 Sync Symbols to Timeline
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="'+cmd[3].id+'" label="'+cmd[3].name+'" checked="'+cmd[3].state+'" />' +
-						'<checkbox id="'+cmd[10].id+'" label="'+cmd[10].name+'" checked="'+cmd[10].state+'" />' +
-						'<checkbox id="'+cmd[17].id+'" label="'+cmd[17].name+'" checked="'+cmd[17].state+'" />' +	
+						'<checkbox id="'+cmd[3].id+'" label="'+cmd[3].name.join( sep ) +'" checked="'+cmd[3].state+'" />' +			// 04 LB Trim Characters
+						'<checkbox id="'+cmd[8].id+'" label="'+cmd[8].name.join( sep ) +'" checked="'+cmd[8].state+'" />' +			// 11 Layer Color Light
+						'<checkbox id="'+cmd[13].id+'" label="'+cmd[13].name.join( sep ) +'" checked="'+cmd[13].state+'" />' +		// 21 EDAPT Shortcuts Map
 					'</row>' +
 					
 					'<row>' +
-						'<checkbox id="'+cmd[4].id+'" label="'+cmd[4].name+'" checked="'+cmd[4].state+'" />' +
-						'<checkbox id="'+cmd[11].id+'" label="'+cmd[11].name+'" checked="'+cmd[11].state+'" />' +
-						'<checkbox id="'+cmd[18].id+'" label="'+cmd[18].name+'" checked="'+cmd[18].state+'" />' +
+						'<checkbox id="'+cmd[4].id+'" label="'+cmd[4].name.join( sep ) +'" checked="'+cmd[4].state+'" />' +			// 05 LB Enumeration
+						'<checkbox id="'+cmd[9].id+'" label="'+cmd[9].name.join( sep ) +'" checked="'+cmd[9].state+'" />' +			// 12 Set Reg Point To Transform Point
 					'</row>' +
-					
+
+				'</rows>' +
+			'</grid>' +
+			
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<grid>' +
+				'<columns>' +
+					'<column/>' +
+					'<column/>' +
+				'</columns>' +
+				'<rows>' +
 					'<row>' +
-						'<checkbox id="'+cmd[5].id+'" label="'+cmd[5].name+'" checked="'+cmd[5].state+'" />' +
-						'<checkbox id="'+cmd[12].id+'" label="'+cmd[12].name+'" checked="'+cmd[12].state+'" />' +
-						'<checkbox id="'+cmd[19].id+'" label="'+cmd[19].name+'" checked="'+cmd[19].state+'" />' +
+						'<label value="" />'+
+						'<checkbox id="'+cmd[14].id+'" label="'+cmd[14].name.join( sep ) +'" checked="'+cmd[14].state+'" />' +		// 06 Next Frame In Symbol and 07 Prev Frame In Symbol
 					'</row>' +
-					
 					'<row>' +
-						'<checkbox id="'+cmd[6].id+'" label="'+cmd[6].name+'" checked="'+cmd[6].state+'" />' +
-						'<checkbox id="'+cmd[13].id+'" label="'+cmd[13].name+'" checked="'+cmd[13].state+'" />' +
-						'<checkbox id="'+cmd[20].id+'" label="'+cmd[20].name+'" checked="'+cmd[20].state+'" />' +
+						'<label value="These commands work in pairs                                      " />' +
+						'<checkbox id="'+cmd[15].id+'" label="'+cmd[15].name.join( sep ) +'" checked="'+cmd[15].state+'" />' +		// 14 Record Parent Reg Pointand 15 Set Selection Pivot To Parent Reg Point
 					'</row>' +
-					
 					'<row>' +
 						'<label value="" />' +
-						'<button id="checkall" label="Check/Uncheck All" oncreate = "getCommandBoxes()" oncommand = "setCommandBoxes()"/>' +
-						'<label value="" />' +
-						
+						'<checkbox id="'+cmd[16].id+'" label="'+cmd[16].name.join( sep ) +'" checked="'+cmd[16].state+'" />' +		// 18 Create Snap Object and 19 Smart Snap
 					'</row>' +
 				'</rows>' +
 			'</grid>' +
+			'<button label="Check / Uncheck all Commands" oncreate="getCommandBoxes()" oncommand = "invertState()" />' +
+			
 			// ------------------------------------------
 			'<spacer></spacer>' +
 			'<separator></separator>' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
 			// RESET DIALOGUES---------------------------
-			'<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
 			'<property id="allBoxes" value="false" ></property>' +
+			'<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
+				
 			// ------------------------------------------
 			'<script>' +
-				'var boxState = false;' +
-				'function setCommandBoxes(){' +
-					'boxState = ! boxState;'+
-					'setAllCommandBoxes( boxState );' +
+				'var state = false;' +
+				'function invertState(){' +
+					'state = !state;' +
+					'setAllCommandBoxes( state );' +
 				'}' +
-				
 				'function getCommandBoxes(){'+
-					'var allBoxes = getAllCommandBoxes();'+
-					'fl.xmlui.set( "allBoxes", allBoxes );'+
+					'var bstates = getAllCommandBoxes();'+
+					'fl.xmlui.set( "allBoxes", bstates );'+
 				'}' +
 				
 				'function setDefaultColors(){'+ 

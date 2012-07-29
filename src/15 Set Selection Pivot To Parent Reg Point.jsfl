@@ -51,7 +51,7 @@ function runScript( commandname ){
 						"Symbols are selected, Flash positions the pivot of the group in the middle of selection&#39;s bounding box."+"\n"+
 						"Upon activation the pivot is re-located to previously recorded coordinates, in this case shoulder&#39;s "+"\n"+
 						"Registration Point. This allows the whole arm to be rotated from the shoulder.";
-						displayOptionalMessageBox( commandname, message, "set_selection_pivot_to_parent" );
+						displayOptionalMessageBox( commandname, message, "setSelectionPivotToParentRegPoint" );
 						displayMessage( commandname + " : This command works with multiple selection only", 1 )
 						return;
 					}
