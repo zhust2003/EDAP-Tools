@@ -25,7 +25,7 @@ function runScript( command, activeKey ){
 			insertSnapObjects( command, [5] );
 			break;
 		default:
-			// Mouse or default shortcut
+			// Menu or default shortcut
 			var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/CreateSnapObject.xml" );
 			if( settings.dismiss == "accept" ){
 				objects = [];
@@ -88,54 +88,55 @@ function insertSnapObjects( commandname, requested ){
 	}
 	
 	/* 3. Create the necessary list of symbols. */
-	
+	var originalStroke = currentDoc.getCustomStroke( "toolbar" );
 	if( weights.length > 0 ){
-		// Remember the current timeline.
-		var path = getPathToTheTimeline(); 
+		var tempDoc = fl.createDocument( "timeline" );
+		var tempLib = tempDoc.library;
+		var myStroke = createStroke();
+		tempDoc.setCustomStroke( myStroke );
+
 		// Create needed symbols.
 		for( var i=0; i<weights.length; i++ ){
 			var name =  "SnapObject" + weights[i].toString();
-			var success = currentLib.addNewItem( "graphic", name );
+			var success = tempLib.addNewItem( "graphic", name );
 			if( success ){
-				var mySymbol = currentLib.getSelectedItems()[0];
+				var mySymbol = tempLib.getSelectedItems()[0];
 				mySymbol.addData( "weight", "integer", weights[i] );
 				mySymbol.addData( "signature", "string", "EDAPT" );
-				currentLib.editItem();
+				tempLib.editItem();
 				drawShape( weights[i] );
-				currentDoc.exitEditMode();
-				theSymbols.push( {weight:weights[i], item:mySymbol} );
+				tempDoc.exitEditMode();
+				theSymbols.push( { weight:weights[i], item:mySymbol } );
 			}
 		}
-		// Return to the original ( stored ) timeline.
-		gotoTargetTimeline( path ); 
+		currentDoc.setCustomStroke( originalStroke );
+		if( tempDoc ){
+			tempLib = null;
+			fl.closeDocument( tempDoc, false ); 
+		}
 	}
-	
-	/*
-	fl.trace( weights );
-	// Показваме дали листът със символи е ОК. Трябва бройката да е винаги 5.
-	for( var i=0; i<theSymbols.length; i++ ){
-		traceObj( theSymbols[i] );
+
+	/* 4. Copy the symbols, so we can paste them in the center of the visible part of the stage. */
+	if( weights.length == 0 ){
+		copySymbols( currentDoc, requested, theSymbols, true );
 	}
-	*/
-	
-	/* 4. Set the "special" layer as a current. */
+	else{
+		copySymbols( tempDoc, requested, theSymbols, false );
+	}
+
+	/* 5. Set the "special" layer as a current. */
 	currentDoc.getTimeline().currentLayer = specialLayerNumber;
-	
-	
-	
-	/* 5. Copy the symbols so we can paste them in the center of the visible part of the stage. */
-	copySymbols( currentDoc, requested, theSymbols )
-	
+
+	/* 6. Paste the symbols in the centre of the visible area. */
 	if( currentDoc.getTimeline().layers[ currentDoc.getTimeline().currentLayer ].locked == false ){
 		currentDoc.clipPaste();
 	}
 	else{
 		displayMessage( commandname + " : The '" + EDAPSettings.createSnapObject.layerName + "' layer is locked.", 2 );	
 	}
-	
-	/* 6. Display messages */
-	if( EDAPSettings.createSnapObject.showAlert == true ){
 
+	/* 7. Display messages */
+	if( EDAPSettings.createSnapObject.showAlert == true ){
 		var message = "A layer called &quot;" + EDAPSettings.createSnapObject.layerName + "&quot; was created for convenience." + "\n" +
 		"It is recommended to place all needed instances of" + "\n" +
 		"the snap objects onto this layer.";
@@ -143,9 +144,7 @@ function insertSnapObjects( commandname, requested ){
 		if( specialLayerNumber == -1 ){
 			displayOptionalMessageBox( commandname,  message, "createSnapObject" );
 		}
-
 	}
-	
 }
 
 function createSpecialLayer( doc ){
@@ -156,27 +155,31 @@ function createSpecialLayer( doc ){
 	xLayer.outline = true;	
 }
 
-function copySymbols( currentDoc, weights, theSymbols ){
-	var timeline = currentDoc.getTimeline();
-	var layerMap = createObjectStateMap( timeline.layers, [ "locked" ] );
-	var n = timeline.addNewLayer();
-	timeline.setSelectedLayers( n, true );
-	
+function copySymbols( theDocument, weights, theSymbols, isCurrent ){
+	var timeline = theDocument.getTimeline();
+	if( isCurrent ){
+		var layerMap = createObjectStateMap( timeline.layers, [ "locked" ] );
+		var n = timeline.addNewLayer();
+		timeline.setSelectedLayers( n, true );
+		theDocument.getTimeline().currentLayer = n; 
+	}
 	for( var i=0; i<weights.length; i++ ){
 		var w = weights[i];
 		for( j=0; j<theSymbols.length; j++ ){
 			var xObject = theSymbols[j];
 			if( xObject.weight == w ){
-				currentDoc.library.addItemToDocument({x:0, y:0}, xObject.item.name );
+				theDocument.library.addItemToDocument({x:0, y:0}, xObject.item.name );
 				break;
 			}
 		}
 	}
-	timeline.setLayerProperty( "locked", true, "others" );
-	currentDoc.selectAll( true );
-	currentDoc.clipCut();
-	timeline.deleteLayer( n );
-	restoreObjectStateFromMap( timeline.layers, layerMap );
+	if( isCurrent ){ timeline.setLayerProperty( "locked", true, "others" ); };
+	theDocument.selectAll( true );
+	theDocument.clipCut();
+	if( isCurrent ){
+		timeline.deleteLayer( n );
+		restoreObjectStateFromMap( timeline.layers, layerMap );
+	}
 }
 
 // Drawing functions
@@ -189,11 +192,11 @@ function drawShape( w ){
 		var path = polygonToPath( data );
 		createCircle( 1, {x:0, y:0}, 6 );
 		path.makeShape();
-		fl.getDocumentDOM().selectAll();
-		fl.getDocumentDOM().setFillColor( null ); //"#00000000"
-		fl.getDocumentDOM().setStrokeColor( "#00000001" );
-		fl.getDocumentDOM().setStrokeStyle( "hairline" );
 	}
+	fl.getDocumentDOM().selectAll();
+	fl.getDocumentDOM().setFillColor( null );
+	fl.getDocumentDOM().setStrokeColor( "#00000001" );
+	fl.getDocumentDOM().setStrokeStyle( "hairline" );
 }
 
 function createShapeData( w ){
@@ -209,20 +212,18 @@ function createCircle( anumber, acenter, radius ){
 	var t = acenter.y - radius;
 	var r = acenter.x + radius;
 	var b = acenter.y + radius;
+	var f = radius * 0.4;
 	if( anumber == 1 ){
 		fl.getDocumentDOM().addNewOval( {left:l, top:t, right:r, bottom:b} );
 	}
 	else if( anumber == 2 ){
 		fl.getDocumentDOM().addNewOval( {left:l, top:t, right:r, bottom:b} );
-		fl.getDocumentDOM().addNewOval( {left:l*0.6, top:t*0.6, right:r*0.6, bottom:b*0.6} );
+		fl.getDocumentDOM().addNewOval( {left:l+f, top:t+f, right:r-f, bottom:b-f} );
 	}
-	fl.getDocumentDOM().addNewLine({x:0, y:-radius/4}, {x:0, y:radius/4});
-	fl.getDocumentDOM().addNewLine({x:-radius/4, y:0}, {x:radius/4, y:0});	
-		
-	fl.getDocumentDOM().selectAll();
-	fl.getDocumentDOM().setFillColor( null ); //"#00000000" 
-	fl.getDocumentDOM().setStrokeColor( "#00000001" );
-	fl.getDocumentDOM().setStrokeStyle( "hairline" );
+	var lx = acenter.x;
+	var ly = acenter.y;
+	fl.getDocumentDOM().addNewLine({x:lx, y:-radius/4 + ly}, {x:lx, y:radius/4 + ly});
+	fl.getDocumentDOM().addNewLine({x:-radius/4+lx, y:ly}, {x:radius/4+lx, y:ly});	
 }
 
 function createStar( arms, center, rOuter, rInner ){
@@ -258,4 +259,17 @@ function polygonToPath( thePolygon ) {
 		index += 2;
 	}
 	return path;
+}
+
+function createStroke(){
+	return { thickness:1, 
+			color:"#000000",
+			breakAtCorners:false,
+			strokeHinting:false,
+			scaleType:"normal",
+			joinType:"round",
+			capType:"round",						
+			miterLimit:3, 
+			style:"solid", 
+			shapeFill:{ color:"#000000", style:"solid", matrix:{ a:1, b:0, c:0, d:1, tx:0, ty:0 } } };
 }

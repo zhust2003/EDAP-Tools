@@ -81,7 +81,7 @@ createSettings = function( context ){
 	context.EDAPSettings.smartSnap = new Object();
 	context.EDAPSettings.smartSnap.distanceThreshold = 50;
 	context.EDAPSettings.smartSnap.depthLevel = 2;
-	context.EDAPSettings.smartSnap.weights = [1,2,3,4,5];
+	context.EDAPSettings.smartSnap.weightsOrder = "right"; // "left"
 	
 	//Commands
 	//Couples: 6,7   14,15   18,19
