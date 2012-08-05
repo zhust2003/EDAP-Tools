@@ -46,7 +46,7 @@ function insertSnapObjects( commandname, requested ){
 	var items = currentLib.items;
 	var specialLayerNumber = -1;
 	
-	/* 1. Check whether we need to create objects. */
+	// *** 1. Check whether we need to create objects. *** //
 	
 	// Check for existing symbols.
 	var theSymbols = [];
@@ -70,7 +70,7 @@ function insertSnapObjects( commandname, requested ){
 		}
 	}
 	
-	/* 2. Check if there is a "special" layer. If it does not exist - create it. */
+	// *** 2. Check if there is a "special" layer. If it does not exist - create it. *** //
 	
 	// Check for the "special" layer existance.
 	var affectedLayers = currentDoc.getTimeline().layers;
@@ -87,7 +87,7 @@ function insertSnapObjects( commandname, requested ){
 		createSpecialLayer( currentDoc );
 	}
 	
-	/* 3. Create the necessary list of symbols. */
+	// *** 3. Create the necessary list of symbols. *** //
 	var originalStroke = currentDoc.getCustomStroke( "toolbar" );
 	if( weights.length > 0 ){
 		var tempDoc = fl.createDocument( "timeline" );
@@ -104,30 +104,31 @@ function insertSnapObjects( commandname, requested ){
 				mySymbol.addData( "weight", "integer", weights[i] );
 				mySymbol.addData( "signature", "string", "EDAPT" );
 				tempLib.editItem();
-				drawShape( weights[i] );
+				drawShape( tempDoc, weights[i] );
 				tempDoc.exitEditMode();
 				theSymbols.push( { weight:weights[i], item:mySymbol } );
 			}
 		}
 		currentDoc.setCustomStroke( originalStroke );
-		if( tempDoc ){
-			tempLib = null;
-			fl.closeDocument( tempDoc, false ); 
-		}
 	}
-
-	/* 4. Copy the symbols, so we can paste them in the center of the visible part of the stage. */
+	
+	// *** 4. Copy the symbols, so we can paste them in the center of the visible part of the stage. *** //
 	if( weights.length == 0 ){
 		copySymbols( currentDoc, requested, theSymbols, true );
 	}
 	else{
 		copySymbols( tempDoc, requested, theSymbols, false );
 	}
-
-	/* 5. Set the "special" layer as a current. */
+	
+	if( tempDoc ){
+		tempLib = null;
+		fl.closeDocument( tempDoc, false ); 
+	}
+	
+	// *** 5. Set the "special" layer as a current. *** //
 	currentDoc.getTimeline().currentLayer = specialLayerNumber;
 
-	/* 6. Paste the symbols in the centre of the visible area. */
+	// *** 6. Paste the symbols in the centre of the visible area. *** //
 	if( currentDoc.getTimeline().layers[ currentDoc.getTimeline().currentLayer ].locked == false ){
 		currentDoc.clipPaste();
 	}
@@ -135,17 +136,17 @@ function insertSnapObjects( commandname, requested ){
 		displayMessage( commandname + " : The '" + EDAPSettings.createSnapObject.layerName + "' layer is locked.", 2 );	
 	}
 
-	/* 7. Display messages */
+	// *** 7. Display messages. *** //
 	if( EDAPSettings.createSnapObject.showAlert == true ){
 		var message = "A layer called &quot;" + EDAPSettings.createSnapObject.layerName + "&quot; was created for convenience." + "\n" +
 		"It is recommended to place all needed instances of" + "\n" +
 		"the snap objects onto this layer.";
-
 		if( specialLayerNumber == -1 ){
 			displayOptionalMessageBox( commandname,  message, "createSnapObject" );
 		}
 	}
 }
+
 
 function createSpecialLayer( doc ){
 	doc.getTimeline().currentLayer = 0;
@@ -173,7 +174,9 @@ function copySymbols( theDocument, weights, theSymbols, isCurrent ){
 			}
 		}
 	}
-	if( isCurrent ){ timeline.setLayerProperty( "locked", true, "others" ); };
+	if( isCurrent ){
+		timeline.setLayerProperty( "locked", true, "others" );
+	}
 	theDocument.selectAll( true );
 	theDocument.clipCut();
 	if( isCurrent ){
@@ -183,7 +186,7 @@ function copySymbols( theDocument, weights, theSymbols, isCurrent ){
 }
 
 // Drawing functions
-function drawShape( w ){
+function drawShape( theDocument, w ){
 	if( w == 1 || w == 2 ){
 		createCircle( w, {x:0, y:0}, 6 );
 	}
@@ -193,10 +196,10 @@ function drawShape( w ){
 		createCircle( 1, {x:0, y:0}, 6 );
 		path.makeShape();
 	}
-	fl.getDocumentDOM().selectAll();
-	fl.getDocumentDOM().setFillColor( null );
-	fl.getDocumentDOM().setStrokeColor( "#00000001" );
-	fl.getDocumentDOM().setStrokeStyle( "hairline" );
+	theDocument.selectAll();
+	theDocument.setFillColor( null );
+	theDocument.setStrokeColor( "#00000001" );
+	theDocument.setStrokeStyle( "hairline" );
 }
 
 function createShapeData( w ){
