@@ -45,9 +45,9 @@ function insertSnapObjects( commandname, requested ){
 	var currentLib = currentDoc.library ;  
 	var items = currentLib.items;
 	var specialLayerNumber = -1;
-	
+
 	// *** 1. Check whether we need to create objects. *** //
-	
+
 	// Check for existing symbols.
 	var theSymbols = [];
 	for( var i=0; i<items.length; i++ ){
@@ -69,9 +69,9 @@ function insertSnapObjects( commandname, requested ){
 			}
 		}
 	}
-	
+
 	// *** 2. Check if there is a "special" layer. If it does not exist - create it. *** //
-	
+
 	// Check for the "special" layer existance.
 	var affectedLayers = currentDoc.getTimeline().layers;
 	for( var i=0; i<affectedLayers.length; i++ ){
@@ -86,7 +86,7 @@ function insertSnapObjects( commandname, requested ){
 	if( specialLayerNumber == -1 ){
 		createSpecialLayer( currentDoc );
 	}
-	
+
 	// *** 3. Create the necessary list of symbols. *** //
 	var originalStroke = currentDoc.getCustomStroke( "toolbar" );
 	if( weights.length > 0 ){
@@ -111,7 +111,7 @@ function insertSnapObjects( commandname, requested ){
 		}
 		currentDoc.setCustomStroke( originalStroke );
 	}
-	
+
 	// *** 4. Copy the symbols, so we can paste them in the center of the visible part of the stage. *** //
 	if( weights.length == 0 ){
 		copySymbols( currentDoc, requested, theSymbols, true );
@@ -119,12 +119,12 @@ function insertSnapObjects( commandname, requested ){
 	else{
 		copySymbols( tempDoc, requested, theSymbols, false );
 	}
-	
+
 	if( tempDoc ){
 		tempLib = null;
 		fl.closeDocument( tempDoc, false ); 
 	}
-	
+
 	// *** 5. Set the "special" layer as a current. *** //
 	currentDoc.getTimeline().currentLayer = specialLayerNumber;
 
@@ -196,7 +196,16 @@ function drawShape( theDocument, w ){
 		createCircle( 1, {x:0, y:0}, 6 );
 		path.makeShape();
 	}
+	// Select, ungroup and make fill and stroke invisible.
 	theDocument.selectAll();
+	var needToUngroup = false;
+	for( var i=0; i<theDocument.selection.length; i++ ){
+		if( theDocument.selection[i].isGroup ){
+			needToUngroup = true;
+			break;
+		}
+	}
+	if( needToUngroup ){ theDocument.unGroup(); }; 
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );
