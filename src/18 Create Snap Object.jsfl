@@ -109,7 +109,17 @@ function insertSnapObjects( commandname, requested ){
 				theSymbols.push( { weight:weights[i], item:mySymbol } );
 			}
 		}
-		currentDoc.setCustomStroke( originalStroke );
+		// A workaround for stroke "noStroke" Flash bug.
+		if( originalStroke.style == "noStroke" ){
+			currentDoc.swapStrokeAndFill();
+			var tempFill = currentDoc.getCustomFill( "toolbar" );
+			tempFill.style = "noFill";
+			currentDoc.setCustomFill( tempFill );
+			currentDoc.swapStrokeAndFill();
+		}
+		else{
+			currentDoc.setCustomStroke( originalStroke );
+		}	
 	}
 
 	// *** 4. Copy the symbols, so we can paste them in the center of the visible part of the stage. *** //
@@ -188,12 +198,12 @@ function copySymbols( theDocument, weights, theSymbols, isCurrent ){
 // Drawing functions
 function drawShape( theDocument, w ){
 	if( w == 1 || w == 2 ){
-		createCircle( w, {x:0, y:0}, 6 );
+		createCircle( theDocument, w, {x:0, y:0}, 6 );
 	}
 	else{
 		var data = createShapeData( w );
 		var path = polygonToPath( data );
-		createCircle( 1, {x:0, y:0}, 6 );
+		createCircle( theDocument, 1, {x:0, y:0}, 6 );
 		path.makeShape();
 	}
 	// Select, ungroup and make fill and stroke invisible.
@@ -219,23 +229,28 @@ function createShapeData( w ){
 	}
 }
 
-function createCircle( anumber, acenter, radius ){
+function createCircle( theDocument, anumber, acenter, radius ){
 	var l = acenter.x - radius;
 	var t = acenter.y - radius;
 	var r = acenter.x + radius;
 	var b = acenter.y + radius;
 	var f = radius * 0.4;
 	if( anumber == 1 ){
-		fl.getDocumentDOM().addNewOval( {left:l, top:t, right:r, bottom:b} );
+		theDocument.addNewOval( {left:l, top:t, right:r, bottom:b} );
 	}
 	else if( anumber == 2 ){
-		fl.getDocumentDOM().addNewOval( {left:l, top:t, right:r, bottom:b} );
-		fl.getDocumentDOM().addNewOval( {left:l+f, top:t+f, right:r-f, bottom:b-f} );
+		theDocument.addNewOval( {left:l, top:t, right:r, bottom:b} );
+		theDocument.addNewOval( {left:l+f, top:t+f, right:r-f, bottom:b-f} );
 	}
 	var lx = acenter.x;
 	var ly = acenter.y;
-	fl.getDocumentDOM().addNewLine({x:lx, y:-radius/4 + ly}, {x:lx, y:radius/4 + ly});
-	fl.getDocumentDOM().addNewLine({x:-radius/4+lx, y:ly}, {x:radius/4+lx, y:ly});	
+	theDocument.addNewLine({x:lx, y:-radius/4 + ly}, {x:lx, y:radius/4 + ly});
+	theDocument.addNewLine({x:-radius/4+lx, y:ly}, {x:radius/4+lx, y:ly});
+
+	theDocument.selectAll();
+	theDocument.setFillColor( null );
+	theDocument.setStrokeColor( "#00000001" );
+	theDocument.setStrokeStyle( "hairline" );	
 }
 
 function createStar( arms, center, rOuter, rInner ){
