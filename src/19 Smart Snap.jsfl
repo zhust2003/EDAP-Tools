@@ -1,19 +1,20 @@
-/*
-Electric Dog Flash Animation Power Tools
-Copyright (C) 2011  Vladin M. Mitov
+/**
+ * Electric Dog Flash Animation Power Tools
+ * Copyright (C) 2011  Vladin M. Mitov
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see http://www.gnu.org/licenses/.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+
 */
 
 try {
@@ -39,13 +40,15 @@ function runScript( commandname ){
 		var selectedElement =  sel[s];
 		var possibleSnapObjects = new Array();
 		for ( var i = 0; i < layers.length; i++) {
-			var elts = layers[i].frames[ currentframe].elements;
-			for (var j = 0; j < elts.length; j++) {
-				var elt = elts[j];
-				if( ! isInArray( sel, elt ) ){
-					if( elt.instanceType == "symbol" ){
-						elt.libraryItem.timeline.currentFrame =  elt.firstFrame; // bugfix  2011/08/31
-						checkInsideElement( selectedElement, elt.libraryItem.timeline, possibleSnapObjects, elt.matrix );
+			if( layers[i].frames[ currentframe ] ){ // bugfix  2012/08/18
+				var elts = layers[i].frames[ currentframe].elements;
+				for (var j = 0; j < elts.length; j++) {
+					var elt = elts[j];
+					if( ! isInArray( sel, elt ) ){
+						if( elt.instanceType == "symbol" ){
+							elt.libraryItem.timeline.currentFrame =  elt.firstFrame; // bugfix  2011/08/31
+							checkInsideElement( selectedElement, elt.libraryItem.timeline, possibleSnapObjects, elt.matrix );
+						}
 					}
 				}
 			}

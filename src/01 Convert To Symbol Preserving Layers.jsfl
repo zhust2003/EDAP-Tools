@@ -32,36 +32,26 @@ function runScript( commandname ){
 	// invoke the dialogue
 	var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/ConvertToSymbolPreservingLayers.xml" );
 	if( settings.dismiss == "accept" ){
+		
 		var selectedItems = fl.getDocumentDOM().selection;
 		if( selectedItems.length > 0 ){
-			symbolName = settings.name; // Get the symbol name
-			var symbolType = "graphic"; // Determine the symbol type ( default = "graphic" )
-			switch( settings.SymbolType ){
-				case "Movie Clip":
-					symbolType = "movie clip";
-					break;
-				case "Graphic":
-					symbolType = "graphic";
-					break;
-				case "Button":
-					symbolType = "button";
-					break;
-			}
-			var layerMap = createObjectStateMap( 
-												getLayers(), 
-												[ "name", "layerType", "color", "outline", "locked" ],
-												function( a ){ return Boolean( a.layerType != undefined && a.layerType != "folder" && a.locked == false ); } ); 
+			var symbolName = settings.name; // Get the symbol name
+			var symbolType = ( settings.SymbolType.toLowerCase().replace( /\s+$/,"" ) ) || "graphic"; // Get the symbol type
+			var layerMap = createObjectStateMap(
+							    getLayers(),
+							    [ "name", "layerType", "color", "outline", "locked" ],
+							    function( a ){ return Boolean( a.layerType != undefined && a.layerType != "folder" && a.locked == false ); } ); 
 			fl.getDocumentDOM().group();
-			var newSymbol = fl.getDocumentDOM().convertToSymbol( symbolType, symbolName, "center" );
+			var newSymbol = fl.getDocumentDOM().convertToSymbol( symbolType, symbolName, settings.regpoint.replace( "centre","center" ) );
 			if( newSymbol != null ){
 				fl.getDocumentDOM().enterEditMode( "inPlace" );
 				fl.getDocumentDOM().selectNone();
 				fl.getDocumentDOM().selectAll();
 				fl.getDocumentDOM().distributeToLayers();
-				fl.getDocumentDOM().unGroup();                      // bugfix 2011/02/28
-				var tl = fl.getDocumentDOM().getTimeline();			// Access symbol's timeline
-				tl.deleteLayer(0);									// Remove layer 1 - it is unnecessary									
-				restoreObjectStateFromMap( tl.layers, layerMap );   // Recreate layer properties from the previously stored map
+				fl.getDocumentDOM().unGroup();			// bugfix 2011/02/28
+				var tl = fl.getDocumentDOM().getTimeline();	// Access symbol's timeline
+				tl.deleteLayer(0);				// Remove layer 1 - it is unnecessary									
+				restoreObjectStateFromMap( tl.layers, layerMap );// Recreate layer properties from the previously stored map
 				fl.getDocumentDOM().selectNone();
 				fl.getDocumentDOM().exitEditMode();
 			}
