@@ -12,6 +12,7 @@ function runScript( command ){
 
 function insertSnapObjects( commandname, requested ){
 	var currentDoc = fl.getDocumentDOM();
+	var myTimeline = currentDoc.getTimeline();
 	var currentLib = currentDoc.library ;  
 	var items = currentLib.items;
 	var specialLayerNumber = -1;
@@ -43,7 +44,7 @@ function insertSnapObjects( commandname, requested ){
 	// *** 2. Check if there is a "special" layer. If it does not exist - create it. *** //
 
 	// Check for the "special" layer existance.
-	var affectedLayers = currentDoc.getTimeline().layers;
+	var affectedLayers = myTimeline.layers;
 	for( var i=0; i<affectedLayers.length; i++ ){
 		var l = affectedLayers[i];
 		if( l.layerType != "folder" ){
@@ -53,10 +54,14 @@ function insertSnapObjects( commandname, requested ){
 			}
 		}
 	}
+	
 	if( specialLayerNumber == -1 ){
-		createSpecialLayer( currentDoc );
+		var xlayer = createSpecialLayer( currentDoc );
+		specialLayerNumber = indexOf( myTimeline.layers, xlayer );
 	}
-
+	
+	fl.trace( "Special Layer: " + specialLayerNumber );
+	
 	// *** 3. Create the necessary list of symbols. *** //
 	var originalStroke = currentDoc.getCustomStroke( "toolbar" );
 	if( weights.length > 0 ){
@@ -106,10 +111,10 @@ function insertSnapObjects( commandname, requested ){
 	}
 
 	// *** 5. Set the "special" layer as a current. *** //
-	currentDoc.getTimeline().currentLayer = specialLayerNumber;
+	myTimeline.currentLayer = specialLayerNumber;
 
 	// *** 6. Paste the symbols in the centre of the visible area. *** //
-	if( currentDoc.getTimeline().layers[ currentDoc.getTimeline().currentLayer ].locked == false ){
+	if( myTimeline.layers[ myTimeline.currentLayer ].locked == false ){
 		currentDoc.clipPaste();
 	}
 	else{
@@ -131,7 +136,8 @@ function createSpecialLayer( doc ){
 	doc.getTimeline().addNewLayer( EDAPSettings.createSnapObject.layerName );
 	var xLayer = doc.getTimeline().layers[ doc.getTimeline().currentLayer ];
 	xLayer.color = "#FF0000";
-	xLayer.outline = true;	
+	xLayer.outline = true;
+	return xLayer;
 }
 function copySymbols( theDocument, weights, theSymbols, isCurrent ){
 	var timeline = theDocument.getTimeline();
