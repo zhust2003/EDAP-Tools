@@ -372,18 +372,18 @@ function createXML( level1, level2, level3 ){
 					'fl.xmlui.set( "dark5",  "'+EDAPSettings.layerColors.dark.colors[4] +'" );'+
 				'}' +
 				'function resetToDefaultColours(){' +
-					'var lc = [ "#FF33FF", "#4FFF4F", "#FFFF00", "#CCCCCC", "#66FFFF" ];' +
-					'fl.xmlui.set( "light1", lc[0] );'+
-					'fl.xmlui.set( "light2", lc[1] );'+
-					'fl.xmlui.set( "light3", lc[2] );'+
-					'fl.xmlui.set( "light4", lc[3] );'+
-					'fl.xmlui.set( "light5", lc[4] );'+
-					'var dc = [ "#000099", "#990000", "#006600", "#333333", "#9900CC" ];' +
-					'fl.xmlui.set( "dark1",  dc[0] );'+
-					'fl.xmlui.set( "dark2",  dc[1] );'+
-					'fl.xmlui.set( "dark3",  dc[2] );'+
-					'fl.xmlui.set( "dark4",  dc[3] );'+
-					'fl.xmlui.set( "dark5",  dc[4] );'+
+					
+					'fl.xmlui.set( "light1", "' + defineLightColors()[0] + '" );'+
+					'fl.xmlui.set( "light2", "' + defineLightColors()[1] + '" );'+
+					'fl.xmlui.set( "light3", "' + defineLightColors()[2] + '" );'+
+					'fl.xmlui.set( "light4", "' + defineLightColors()[3] + '" );'+
+					'fl.xmlui.set( "light5", "' + defineLightColors()[4] + '" );'+
+					
+					'fl.xmlui.set( "dark1",  "' + defineDarkColors()[0] + '" );'+
+					'fl.xmlui.set( "dark2",  "' + defineDarkColors()[1] + '" );'+
+					'fl.xmlui.set( "dark3",  "' + defineDarkColors()[2] + '" );'+
+					'fl.xmlui.set( "dark4",  "' + defineDarkColors()[3] + '" );'+
+					'fl.xmlui.set( "dark5",  "' + defineDarkColors()[4] + '" );'+
 				'}' +
 
 			'</script>'+
