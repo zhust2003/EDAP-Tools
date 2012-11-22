@@ -1,43 +1,13 @@
 try {
-	var theKey = fl.tools.getKeyDown();
-	runScript( "Create Snap Object", theKey );
+	runScript( "Create Snap Object" );
 }catch( error ){
 	fl.trace( error );
 }
 
-function runScript( command, activeKey ){
+function runScript( command ){
 	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 	initialize();
-	switch( activeKey ) {
-		case 49:
-			insertSnapObjects( command, [1] );
-			break;
-		case 50:
-			insertSnapObjects( command, [2] );
-			break;
-		case 51:
-			insertSnapObjects( command, [3] );
-			break;
-		case 52:
-			insertSnapObjects( command, [4] );
-			break;
-		case 53:
-			insertSnapObjects( command, [5] );
-			break;
-		default:
-			// Menu or default shortcut
-			var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/CreateSnapObject.xml" );
-			if( settings.dismiss == "accept" ){
-				objects = [];
-				if( settings.one   == "true" ){ objects.push(1); }
-				if( settings.two   == "true" ){ objects.push(2); }
-				if( settings.three == "true" ){ objects.push(3); }
-				if( settings.four  == "true" ){ objects.push(4); }
-				if( settings.five  == "true" ){ objects.push(5); }
-				insertSnapObjects( command, objects );
-			}
-			break;
-	}
+	insertSnapObjects( command, [1] );
 }
 
 function insertSnapObjects( commandname, requested ){
@@ -156,8 +126,6 @@ function insertSnapObjects( commandname, requested ){
 		}
 	}
 }
-
-
 function createSpecialLayer( doc ){
 	doc.getTimeline().currentLayer = 0;
 	doc.getTimeline().addNewLayer( EDAPSettings.createSnapObject.layerName );
@@ -165,7 +133,6 @@ function createSpecialLayer( doc ){
 	xLayer.color = "#FF0000";
 	xLayer.outline = true;	
 }
-
 function copySymbols( theDocument, weights, theSymbols, isCurrent ){
 	var timeline = theDocument.getTimeline();
 	if( isCurrent ){
@@ -197,15 +164,7 @@ function copySymbols( theDocument, weights, theSymbols, isCurrent ){
 
 // Drawing functions
 function drawShape( theDocument, w ){
-	if( w == 1 || w == 2 ){
-		createCircle( theDocument, w, {x:0, y:0}, 6 );
-	}
-	else{
-		var data = createShapeData( w );
-		var path = polygonToPath( data );
-		createCircle( theDocument, 1, {x:0, y:0}, 6 );
-		path.makeShape();
-	}
+	createCircle( theDocument, w, {x:0, y:0}, 6 );
 	// Select, ungroup and make fill and stroke invisible.
 	theDocument.selectAll();
 	var needToUngroup = false;
@@ -220,28 +179,13 @@ function drawShape( theDocument, w ){
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );
 }
-
-function createShapeData( w ){
-	switch( w ){
-		case 3:	return createPolygon( 3, {x:0, y:0}, 5 );
-		case 4: return createPolygon( 4, {x:0, y:0}, 5 );
-		case 5: return createStar( 5, {x:0, y:0}, 5.5, 2 );
-	}
-}
-
 function createCircle( theDocument, anumber, acenter, radius ){
 	var l = acenter.x - radius;
 	var t = acenter.y - radius;
 	var r = acenter.x + radius;
 	var b = acenter.y + radius;
 	var f = radius * 0.4;
-	if( anumber == 1 ){
-		theDocument.addNewOval( {left:l, top:t, right:r, bottom:b} );
-	}
-	else if( anumber == 2 ){
-		theDocument.addNewOval( {left:l, top:t, right:r, bottom:b} );
-		theDocument.addNewOval( {left:l+f, top:t+f, right:r-f, bottom:b-f} );
-	}
+	theDocument.addNewOval( {left:l, top:t, right:r, bottom:b} );
 	var lx = acenter.x;
 	var ly = acenter.y;
 	theDocument.addNewLine({x:lx, y:-radius/4 + ly}, {x:lx, y:radius/4 + ly});
@@ -252,42 +196,6 @@ function createCircle( theDocument, anumber, acenter, radius ){
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );	
 }
-
-function createStar( arms, center, rOuter, rInner ){
-    var out = new Array();
-    var angle = Math.PI / arms;
-    for ( var i = 0; i < 2 * arms; i++ ) {
-        var r = (i & 1) == 0 ? rOuter : rInner;
-		out.push( center.x + Math.cos(i * angle) * r );
-		out.push( center.y + Math.sin(i * angle) * r );	
-    }
-	out.push( out[0] );
-	out.push( out[1] );
-    return out;
-}
-
-function createPolygon( sides, center, radius ){
-	var out = new Array();
-	out.push( center.x +  radius * Math.cos(0) );
-	out.push( center.y +  radius *  Math.sin(0) );
-	for (var i = 1; i <= sides;i += 1) {
-		out.push( center.x + radius * Math.cos(i * 2 * Math.PI / sides ) );
-		out.push( center.y + radius * Math.sin(i * 2 * Math.PI / sides ) );	
-	}
-	return out;
-}
-
-function polygonToPath( thePolygon ) {
-	var path = fl.drawingLayer.newPath();
-	path.addPoint( thePolygon[0],  thePolygon[1] );
-	var index = 3;
-	while ( index < thePolygon.length ){
-		path.addPoint( thePolygon[index-1],  thePolygon[index] );
-		index += 2;
-	}
-	return path;
-}
-
 function createStroke(){
 	return { thickness:1, 
 			color:"#000000",

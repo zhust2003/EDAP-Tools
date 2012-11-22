@@ -21,11 +21,9 @@ along with this program.  If not, see http://www.gnu.org/licenses/.
 initialize = function(){
 	var context;
 	if( getVersion() < 11 ){
-		//fl.trace( "F8 - CS4" ); //***
 		context = getGlobal();
 	}
 	else{
-		//fl.trace( "CS5" );//***
 		context = this;
 	}
 	if( typeof context.EDAPSettings != "object" ){
@@ -226,6 +224,93 @@ getLayers = function(){
 	return selectedLayers;
 }
 
+getRigData = function( element ){
+	if( isElementSymbol( element ) ){
+		if( element.hasPersistentData( "rigData" ) ){
+			var data = element.getPersistentData( "rigData" );
+			if( data != 0 ){
+				data = JSON.parse( data );
+				return data;
+			}
+			return null;
+		}
+		return null;
+	}
+	return null;
+}
+
+filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, needKey, excludeElements ){
+	/*
+		Iterates through all elements in a given timeline and executes a function for each of them.
+
+		aFunction		- The function to be executed on each element in the timeline.
+		aTimeline		- the context of execution.
+		isFilter		- If true, the function result evaluates to boolean.
+		returnFirst		- If true, returns the first finded/processed element.
+		needKey			- If the function needs a keyframe during its execution, it will be created temporarily.
+		excludeElements	- Array of elements to exclude from search.
+	*/
+	
+	// Arguments to pass when the function is call
+	var args = [];
+    for( var i=6; i<arguments.length; i++ ){
+        args.push( arguments[ i ] );
+    }
+	
+	var layers = aTimeline.layers;
+	var cf = aTimeline.currentFrame;
+	var i = 0;
+	var retval = [];
+	while ( i < layers.length ){
+		var layer = layers [i];
+		var frames = layer.frames;
+		if( frames[ cf ] ){
+			var elements = frames[ cf ].elements;
+			var n = 0;
+			while ( n < elements.length ){
+				if( ! include( excludeElements, layer.frames[ cf ].elements[n] ) ){
+					if( needKey ){
+						if( layer.frames[ cf ].startFrame != cf ){ // The current frame is not a key.
+							var removeKey = false;
+							var currentLayernum = indexOf( layers, layer );
+							aTimeline.currentLayer = currentLayernum;
+							aTimeline.convertToKeyframes( cf );
+							removeKey = true;
+						}
+					}
+					if( ! isFilter ){
+						
+						var res = aFunction.apply( this, [ layer.frames[ cf ].elements[n] ].concat( args ) );
+						if( res ){
+							retval.push( res );
+						}
+						if( returnFirst ){
+							return retval;
+						}
+					}
+					else{
+						if( aFunction.apply( this, [ layer.frames[ cf ].elements[n] ].concat( args ) ) == true ){
+							retval.push( layer.frames[ cf ].elements[n] );
+							if( returnFirst ){
+								return retval;
+							}
+						}
+					}
+
+					if( removeKey ){
+						aTimeline.currentLayer = currentLayernum;
+						aTimeline.clearKeyframes( cf );
+					}
+					
+				}
+				n ++;
+			}
+		}
+		i ++;
+	}
+	return retval;
+}
+
 
 
 
@@ -302,12 +387,13 @@ indexOf = function( array, element ){
 }
 
 include = function( arr, obj ) {
-  for( var i=0; i<arr.length; i++ ) {
-    if (arr[i] == obj) return true;
-  }
-  return false;
+	var cnt = arr.length;
+	while( cnt -- ){
+		if ( arr[cnt] == obj ){
+			return true;
+		}
+	} 
 }
-
 
 
 
@@ -320,29 +406,15 @@ defineLightColors = function(){
 	return [ "#FF33FF", "#4FFF4F", "#FFFF00", "#CCCCCC", "#66FFFF" ];
 }
 
-setAllCommandBoxes = function( astate ){
-	for( var i=0; i<EDAPSettings.commands.settings.length; i++ ){
-		fl.xmlui.set( EDAPSettings.commands.settings[i].id, astate );
-	}
-}
-
-getAllCommandBoxes = function(){
-	var output = new Array();
-	for( var i=0; i<EDAPSettings.commands.settings.length; i++ ){
-		output.push( fl.xmlui.get( EDAPSettings.commands.settings[i].id ) );
-	}
-	return output;
-}
-
 moveCommandFiles = function(){
-	var fpath = fl.configURI + "Commands/EDAPT Hidden Commands";
+	var fpath = fl.configURI + "Javascript/EDAPT Disabled Commands";
 	var created = FLfile.createFolder( fpath );
 	var ext = ".jsfl";
 	for( var i=0; i < EDAPSettings.commands.settings.length; i++ ){
 		var command = EDAPSettings.commands.settings[i];
 		for( j=0; j< command.name.length; j++){
 			var workingPath = fl.configURI + "Commands/" + command.name[j] + ext;
-			var disabledPath = fl.configURI + "Commands/EDAPT Hidden Commands/" + command.name[j] + ext;
+			var disabledPath = fl.configURI + "Javascript/EDAPT Disabled Commands/" + command.name[j] + ext;
 			if( command.state == false ){
 				if( ! FLfile.exists( disabledPath ) ){
 					//fl.trace( "Disabling " + workingPath ); //***
@@ -523,6 +595,88 @@ JSON = function () {
     };
 }();
 
+var keyStr = "ABCDEFGHIJKLMNOP" +
+               "QRSTUVWXYZabcdef" +
+               "ghijklmnopqrstuv" +
+               "wxyz0123456789+/" +
+               "=";
+
+encode64 = function (input) {
+ input = escape(input);
+ var output = "";
+ var chr1, chr2, chr3 = "";
+ var enc1, enc2, enc3, enc4 = "";
+ var i = 0;
+
+ do {
+	chr1 = input.charCodeAt(i++);
+	chr2 = input.charCodeAt(i++);
+	chr3 = input.charCodeAt(i++);
+
+	enc1 = chr1 >> 2;
+	enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+	enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+	enc4 = chr3 & 63;
+
+	if (isNaN(chr2)) {
+	   enc3 = enc4 = 64;
+	} else if (isNaN(chr3)) {
+	   enc4 = 64;
+	}
+
+	output = output +
+	   keyStr.charAt(enc1) +
+	   keyStr.charAt(enc2) +
+	   keyStr.charAt(enc3) +
+	   keyStr.charAt(enc4);
+	chr1 = chr2 = chr3 = "";
+	enc1 = enc2 = enc3 = enc4 = "";
+ } while (i < input.length);
+
+ return output;
+}
+
+decode64 = function (input) {
+ var output = "";
+ var chr1, chr2, chr3 = "";
+ var enc1, enc2, enc3, enc4 = "";
+ var i = 0;
+
+ // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
+ var base64test = /[^A-Za-z0-9\+\/\=]/g;
+ if (base64test.exec(input)) {
+	alert("There were invalid base64 characters in the input text.\n" +
+		  "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
+		  "Expect errors in decoding.");
+ }
+ input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+ do {
+	enc1 = keyStr.indexOf(input.charAt(i++));
+	enc2 = keyStr.indexOf(input.charAt(i++));
+	enc3 = keyStr.indexOf(input.charAt(i++));
+	enc4 = keyStr.indexOf(input.charAt(i++));
+
+	chr1 = (enc1 << 2) | (enc2 >> 4);
+	chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+	chr3 = ((enc3 & 3) << 6) | enc4;
+
+	output = output + String.fromCharCode(chr1);
+
+	if (enc3 != 64) {
+	   output = output + String.fromCharCode(chr2);
+	}
+	if (enc4 != 64) {
+	   output = output + String.fromCharCode(chr3);
+	}
+
+	chr1 = chr2 = chr3 = "";
+	enc1 = enc2 = enc3 = enc4 = "";
+
+ } while (i < input.length);
+
+ return unescape(output);
+}
 
 
 

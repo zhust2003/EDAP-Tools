@@ -66,8 +66,8 @@ function runScript( commandname ){
 			EDAPSettings.layerColors.light.colors[i] = validateHEX( settings[p1] )? settings[p1] : EDAPSettings.layerColors.light.colors;
 			EDAPSettings.layerColors.dark.colors[i] = validateHEX( settings[p2] )? settings[p2] : EDAPSettings.layerColors.dark.colors[i];
 		}
-		EDAPSettings.smartSnap.distanceThreshold = settings.SmartSnapDistance;
-		EDAPSettings.layerColors.forceOutline = ( settings.forceOutline === "true");
+		EDAPSettings.smartSnap.distanceThreshold = parseInt( settings.SmartSnapDistance );
+		EDAPSettings.layerColors.forceOutline = Boolean( settings.forceOutline === "true");
 		EDAPSettings.traceLevel = parseInt( settings.traceLevel );
 		
 		if( settings.resetDialogs == "true" ){
@@ -80,7 +80,7 @@ function runScript( commandname ){
 
 		for( var i=0; i < EDAPSettings.commands.settings.length; i++  ){
 			var val = settings[ EDAPSettings.commands.settings[i].id ];
-			EDAPSettings.commands.settings[i].state = ( val === "true");
+			EDAPSettings.commands.settings[i].state = Boolean( val === "true");
 		}
 
 		// Save settings
@@ -316,10 +316,45 @@ function createXML( level1, level2, level3 ){
 				'var state = false;' +
 				'function invertState(){' +
 					'state = !state;' +
-					'setAllCommandBoxes( state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[0].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[1].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[2].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[3].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[4].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[5].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[6].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[7].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[8].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[9].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[10].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[11].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[12].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[13].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[14].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[15].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[16].id + '", state );' +
 				'}' +
+				
+				
 				'function getCommandBoxes(){'+
-					'var bstates = getAllCommandBoxes();'+
+					'var bstates = [];'+
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[0].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[1].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[2].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[3].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[4].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[5].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[6].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[7].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[8].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[9].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[10].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[11].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[12].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[13].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[14].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[15].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[16].id + '" ) );' +
 					'fl.xmlui.set( "allBoxes", bstates );'+
 				'}' +
 				
@@ -337,13 +372,13 @@ function createXML( level1, level2, level3 ){
 					'fl.xmlui.set( "dark5",  "'+EDAPSettings.layerColors.dark.colors[4] +'" );'+
 				'}' +
 				'function resetToDefaultColours(){' +
-					'var lc = defineLightColors();' +
+					'var lc = [ "#FF33FF", "#4FFF4F", "#FFFF00", "#CCCCCC", "#66FFFF" ];' +
 					'fl.xmlui.set( "light1", lc[0] );'+
 					'fl.xmlui.set( "light2", lc[1] );'+
 					'fl.xmlui.set( "light3", lc[2] );'+
 					'fl.xmlui.set( "light4", lc[3] );'+
 					'fl.xmlui.set( "light5", lc[4] );'+
-					'var dc = defineDarkColors();' +
+					'var dc = [ "#000099", "#990000", "#006600", "#333333", "#9900CC" ];' +
 					'fl.xmlui.set( "dark1",  dc[0] );'+
 					'fl.xmlui.set( "dark2",  dc[1] );'+
 					'fl.xmlui.set( "dark3",  dc[2] );'+
