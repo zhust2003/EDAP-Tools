@@ -44,7 +44,7 @@ function runScript( commandname ){
 				var inf = getRigData( el );
 				if( inf ){ //  The element is part of a rig.
 					var inf = getRigData( el );
-					var parentlist = filterStageElements( isMyParent, myTimeline, true, false, false, [ el ], inf ); // No keys created
+					var parentlist = filterStageElements( isMyParent, myTimeline, true, false, [ el ], inf ); // No keys created
 					if( parentlist.length == 1 ){ 
 						if( ! include( parents, parentlist[0] ) ){
 							parents.push( parentlist[0] );
@@ -121,7 +121,7 @@ function setSelectionAndTransformPoint( doc, parent, children ){
 	doc.setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
 }
 function getMyChildren( element, children, tml ){
-	var retval = filterStageElements( isMyChild, tml, true, false, false, [ element ], getRigData( element ) ); // No keys created
+	var retval = filterStageElements( isMyChild, tml, true, false, [ element ], getRigData( element ) ); // No keys created
 	if( retval.length ){
 		for( var i=0; i<retval.length; i++ ){
 			getMyChildren( retval[i], children, tml );
@@ -131,7 +131,7 @@ function getMyChildren( element, children, tml ){
 		}
 	}
 }
-function isMyParent( element, inf ){
+function isMyParent( element, aTimeline, currentLayernum, cf, n, inf ){
 	var data = getRigData( element );
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
@@ -141,7 +141,7 @@ function isMyParent( element, inf ){
 	}
 	return false;
 }
-function isMyChild( element, inf ){
+function isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
 	var data = getRigData( element );
 	if( data ){
 		if( ( data.rig == inf.rig && data.parent == inf.id ) ){

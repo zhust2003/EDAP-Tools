@@ -20,7 +20,6 @@ try {
 }catch( error ){
 	fl.trace( error );
 }
-
 function runScript( commandname ){
 	var doc = fl.getDocumentDOM(); 
 	if( doc == null ){
@@ -30,7 +29,6 @@ function runScript( commandname ){
 	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 	initialize();
 
-	var doc = fl.getDocumentDOM();
 	var originalSelection = doc.selection;
 	var myElements = originalSelection.slice();
 	var myTimeline = doc.getTimeline();
@@ -41,18 +39,19 @@ function runScript( commandname ){
 		var isRig = false;
 		if( isElementSymbol( el ) ){
 			// For each element in the selection...
+			var parents;
 			if( el.hasPersistentData( "rigData" ) ){
 				// Remember that the object is part of a rig
 				// Create a collection of parent object matrices for the element.
 				isRig = true;
 				var inf = getRigData( el );
-				var parents = filterStageElements( getParentMatrix, myTimeline, false, false, true, [ el ], inf );	
+				parents = filterStageElements( getParentMatrix, myTimeline, false, true, [ el ], inf ); //***
 			}
 			else{
 
 				// Create a collection with matrices of possible target objects for the element.
 				// Modify the objects, adding "distance" property, describing the distance between the element and the possible target object.
-				var parents = filterStageElements( getMatrix, myTimeline, false, false, true, [el] );
+				parents = filterStageElements( getMatrix, myTimeline, false, false, [ el ] );//***
 				for( var i=0; i<parents.length; i++ ){
 						var p = parents[i];
 						var pt = { x:p.matrix.tx, y:p.matrix.ty };
@@ -62,13 +61,14 @@ function runScript( commandname ){
 				}
 				// Sort the possible target objects on its distance. The colosest object becomes first in the collection.
 				parents.sort( sortOnDistance );
+	
 			}
 			
 			if( parents.length > 0 ){
 				// Get the first ( closest ) parent object
 				// Create a collection of snap-objects within it.
 				var myParent = parents[0];
-				var snaps = filterStageElements( isSnapObject, myParent.element.libraryItem.timeline, true, false, true, [el] );
+				var snaps = filterStageElements( isSnapObject, myParent.element.libraryItem.timeline, true, false, [ el ] );
 				// Modify the objects, adding "distance" property, describing the distance between the element and the possible snap-object.
 				for( var i=0; i<snaps.length; i++ ){
 					var obj  = { element:snaps[i] };
@@ -113,19 +113,13 @@ function runScript( commandname ){
 function sortOnDistance( a, b ){
 	return a.distance - b.distance;
 }
-function isSnapObject( element ){
+function isSnapObject( element, aTimeline, currentLayernum, cf, n ){
 	if( isElementSymbol( element ) ){
 		return Boolean( element.libraryItem.getData( "weight" ) == 1 );
 	}
 	else{
 		return false;
 	}
-}
-function getMatrix( element ){
-	if( ! getRigData( element ) && hasSnapObject( element ) ){
-		return { element:element, matrix:element.matrix };
-	}
-	return null;
 }
 function hasSnapObject( element ){
 	if( isElementSymbol( element ) ){
@@ -134,15 +128,47 @@ function hasSnapObject( element ){
 	}
 	return false;
 }
-function getParentMatrix( element, inf ){
+function getMatrix( element, aTimeline, currentLayernum, cf, n ){
+	var remove = false;
+	if( ! getRigData( element ) && hasSnapObject( element ) ){
+		var layer = aTimeline.layers[ currentLayernum ];
+		if( layer.frames[ cf ].startFrame != cf ){
+			aTimeline.currentLayer = currentLayernum;
+			aTimeline.convertToKeyframes( cf );
+			remove = true;
+		}
+		var el = layer.frames[ cf ].elements[n];
+		var retval = { element:el, matrix:el.matrix };
+		if( remove ){
+			aTimeline.clearKeyframes( cf );
+		}
+		return retval;
+	}
+	return null;
+}
+function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
 	var data = getRigData( element );
+	var remove = false;
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
-			return { element:element, matrix:element.matrix };
+			var layer = aTimeline.layers[ currentLayernum ];
+			if( layer.frames[ cf ].startFrame != cf ){
+				aTimeline.currentLayer = currentLayernum;
+				aTimeline.convertToKeyframes( cf );
+				remove = true;
+			}
+			var el = layer.frames[ cf ].elements[n];
+			var retval = { element:el, matrix:el.matrix };
+			
+			if( remove ){
+				aTimeline.clearKeyframes( cf );
+			}						
+			return retval;
 		}
 		return null;
 	}
 	return null;
+
 }
 function sortOnParent( a, b ){
 	// Sorts stage elements on its "parent" id.

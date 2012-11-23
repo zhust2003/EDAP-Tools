@@ -239,7 +239,7 @@ getRigData = function( element ){
 	return null;
 }
 
-filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, needKey, excludeElements ){
+filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, excludeElements ){
 	/*
 		Iterates through all elements in a given timeline and executes a function for each of them.
 
@@ -247,20 +247,19 @@ filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, nee
 		aTimeline		- the context of execution.
 		isFilter		- If true, the function result evaluates to boolean.
 		returnFirst		- If true, returns the first finded/processed element.
-		needKey			- If the function needs a keyframe during its execution, it will be created temporarily.
 		excludeElements	- Array of elements to exclude from search.
 	*/
 	
 	// Arguments to pass when the function is call
 	var args = [];
-    for( var i=6; i<arguments.length; i++ ){
+    for( var i=5; i<arguments.length; i++ ){
         args.push( arguments[ i ] );
     }
-	
 	var layers = aTimeline.layers;
 	var cf = aTimeline.currentFrame;
 	var i = 0;
 	var retval = [];
+
 	while ( i < layers.length ){
 		var layer = layers [i];
 		var frames = layer.frames;
@@ -269,39 +268,23 @@ filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, nee
 			var n = 0;
 			while ( n < elements.length ){
 				if( ! include( excludeElements, layer.frames[ cf ].elements[n] ) ){
-					if( needKey ){
-						if( layer.frames[ cf ].startFrame != cf ){ // The current frame is not a key.
-							var removeKey = false;
-							var currentLayernum = indexOf( layers, layer );
-							aTimeline.currentLayer = currentLayernum;
-							aTimeline.convertToKeyframes( cf );
-							removeKey = true;
-						}
-					}
 					if( ! isFilter ){
-						
-						var res = aFunction.apply( this, [ layer.frames[ cf ].elements[n] ].concat( args ) );
+						var res = aFunction.apply( this, [ layer.frames[ cf ].elements[n] ].concat( [ aTimeline, i, cf, n ] ).concat( args ) );
 						if( res ){
 							retval.push( res );
-						}
-						if( returnFirst ){
-							return retval;
+							if( returnFirst ){
+								return retval;
+							}
 						}
 					}
 					else{
-						if( aFunction.apply( this, [ layer.frames[ cf ].elements[n] ].concat( args ) ) == true ){
+						if( aFunction.apply( this, [ layer.frames[ cf ].elements[n] ].concat( [ aTimeline, i, cf, n ] ).concat( args ) ) == true ){
 							retval.push( layer.frames[ cf ].elements[n] );
 							if( returnFirst ){
 								return retval;
 							}
 						}
 					}
-
-					if( removeKey ){
-						aTimeline.currentLayer = currentLayernum;
-						aTimeline.clearKeyframes( cf );
-					}
-					
 				}
 				n ++;
 			}
