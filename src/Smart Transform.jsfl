@@ -118,6 +118,7 @@ function runScript( commandname ){
 function setSelectionAndTransformPoint( doc, parent, children ){
 	doc.selectNone();
 	doc.selection = children;
+	doc.scaleSelection( 1, 1 );
 	doc.setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
 }
 function getMyChildren( element, children, tml ){
