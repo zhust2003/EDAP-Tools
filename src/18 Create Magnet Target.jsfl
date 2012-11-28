@@ -60,8 +60,6 @@ function insertSnapObjects( commandname, requested ){
 		specialLayerNumber = indexOf( myTimeline.layers, xlayer );
 	}
 	
-	fl.trace( "Special Layer: " + specialLayerNumber );
-	
 	// *** 3. Create the necessary list of symbols. *** //
 	var originalStroke = currentDoc.getCustomStroke( "toolbar" );
 	if( weights.length > 0 ){
@@ -72,7 +70,7 @@ function insertSnapObjects( commandname, requested ){
 
 		// Create needed symbols.
 		for( var i=0; i<weights.length; i++ ){
-			var name =  "SnapObject" + weights[i].toString();
+			var name =  "MagnetTarget" + weights[i].toString();
 			var success = tempLib.addNewItem( "graphic", name );
 			if( success ){
 				var mySymbol = tempLib.getSelectedItems()[0];
