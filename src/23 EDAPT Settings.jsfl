@@ -56,7 +56,8 @@ function runScript( commandname ){
 	}
 	FLfile.write( xmlFile, xmlContent );
 	var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
-
+	FLfile.remove( xmlFile );
+	
 	if( settings.dismiss == "accept" ){
 		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
 		// Assign new values
@@ -96,7 +97,7 @@ function runScript( commandname ){
 			}
 		}
 	}
-	FLfile.remove( xmlFile );
+	//FLfile.remove( xmlFile );
 	
 	if( messageFlag ){
 		moveCommandFiles();
@@ -124,9 +125,10 @@ function validateHEX( colorcode ){
 
 function createXML( level1, level2, level3 ){
 	var cmd = EDAPSettings.commands.settings;
+	//buttons="accept, cancel"
 	var sep = "  /  ";
 	return '<?xml version="1.0"?>' +
-	'<dialog title="Electric Dog Animation Power Tools - Settings" buttons="accept, cancel">' +
+	'<dialog title="Electric Dog Animation Power Tools - Settings" >' +
 		'<vbox>' +
 			// LAYER COLORS---------------------------
 			'<label value="Layer Outline Colors" />' +
@@ -196,12 +198,12 @@ function createXML( level1, level2, level3 ){
 				'<row>' +
 					'<label value="Smart Magnet Range:     " />' +
 					'<textbox id="SmartSnapDistance" size="5" value="' + EDAPSettings.smartMagnetJoint.distanceThreshold + '"/>' +
-					'<label value="          Smart Magnet Range 50 pixels. This is the radius which defines the range" />' +
+					'<label value="          This is the radius which defines the range in which &quot;19 Smart Magnet Joint&quot; will search for a Magnet Target " />' +
 				'</row>' +
 				'<row>' +
 					'<label value="" />' +
 					'<label value="" />' +
-					'<label value="in which 19 Smart Magnet Joint will search for a Magnet Target in case when symbols were not linked using Smart Magnet Rig panel." />' +
+					'<label value="          in case when symbols were not linked using &quot;Smart Magnet Rig&quot; panel." />' +
 				'</row>' +
 				
 			'</rows>' +
@@ -317,10 +319,44 @@ function createXML( level1, level2, level3 ){
 			// RESET DIALOGUES---------------------------
 			'<property id="allBoxes" value="false" ></property>' +
 			'<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
-				
+			
+			// ------------------------------------------
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<grid>' +
+				'<columns>' +
+					'<column/>' +
+					'<column/>' +
+					'<column/>' +
+				'</columns>' +
+				'<row>' +
+					'<label value="                                                                               " />' +
+					'<label value="                                                                               " />' +
+					'<hbox>' +
+						'<button label="Save and Close" oncommand = "confirmDialogue()"/>' +		
+						'<button label="Cancel" oncommand = "fl.xmlui.cancel();"/>' +
+					'</hbox>' +
+				'</row>' +
+			'</grid>'+
+			
+
 			// ------------------------------------------
 			'<script>' +
 				'var state = false;' +
+				'function confirmDialogue(){' +
+					'var dist = Number( fl.xmlui.get( "SmartSnapDistance" ) );' +
+					'if( typeof dist == "number" ){' +
+						'fl.xmlui.accept();'+
+					'}' +
+					'else{' +
+						'alert( "Please, provide a valid number for Smart Magnet Range field." );' +
+					'}' +
+				'}' +
+
 				'function invertState(){' +
 					'state = !state;' +
 					'fl.xmlui.set( "' + EDAPSettings.commands.settings[0].id + '", state );' +
