@@ -70,16 +70,14 @@ createSettings = function( context ){
 	context.EDAPSettings.setSelectionPivotToParentRegPoint.showAlert = true;
 
 	//CreateSnapObject
-	context.EDAPSettings.createSnapObject = new Object();
-	context.EDAPSettings.createSnapObject.name = "_SnapObject";
-	context.EDAPSettings.createSnapObject.layerName = "Snap Object(s)";
-	context.EDAPSettings.createSnapObject.showAlert = true;
+	context.EDAPSettings.createMagnetTarget = new Object();
+	context.EDAPSettings.createMagnetTarget.layerName = "Magnet Target(s)";
+	context.EDAPSettings.createMagnetTarget.showAlert = true;
 
 	//SmartSnap
-	context.EDAPSettings.smartSnap = new Object();
-	context.EDAPSettings.smartSnap.distanceThreshold = 50;
-	context.EDAPSettings.smartSnap.depthLevel = 2;
-	context.EDAPSettings.smartSnap.weightsOrder = "right"; // "left"
+	context.EDAPSettings.smartMagnetJoint = new Object();
+	context.EDAPSettings.smartMagnetJoint.distanceThreshold = 50;
+	context.EDAPSettings.smartMagnetJoint.depthLevel = 2;
 	
 	//Commands
 	//Couples: 6,7   14,15   18,19
@@ -102,12 +100,13 @@ createSettings = function( context ){
 	context.EDAPSettings.commands.settings.push( { id:"comm13", name:["13 Enter Symbol At Current Frame"], state:true } );				//10
 	context.EDAPSettings.commands.settings.push( { id:"comm16", name:["16 Swap Multiple Symbols"], state:true } );						//11
 	context.EDAPSettings.commands.settings.push( { id:"comm17", name:["17 Sync Symbols to Timeline"], state:true } );					//12
-	context.EDAPSettings.commands.settings.push( { id:"comm21", name:["21 EDAPT Shortcuts Map"], state:true } );						//13
+	context.EDAPSettings.commands.settings.push( { id:"comm18", name:["20 Smart Transform"], state:true } );							//13
+	context.EDAPSettings.commands.settings.push( { id:"comm19", name:["22 EDAPT Shortcuts Map"], state:true } );						//14
 	
 	
-	context.EDAPSettings.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );						//14
-	context.EDAPSettings.commands.settings.push( { id:"pair2",  name:["14 Record Parent Reg Point", "15 Set Selection Pivot To Parent Reg Point"], state:true } );	//15
-	context.EDAPSettings.commands.settings.push( { id:"pair3",  name:["18 Create Snap Object", "19 Smart Snap"], state:true } );									//16	
+	context.EDAPSettings.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );						//15
+	context.EDAPSettings.commands.settings.push( { id:"pair2",  name:["14 Record Parent Reg Point", "15 Set Selection Pivot To Parent Reg Point"], state:true } );	//16
+	context.EDAPSettings.commands.settings.push( { id:"pair3",  name:["18 Create Magnet Target", "19 Smart Magnet Joint"], state:true } );							//17	
 
 }
 

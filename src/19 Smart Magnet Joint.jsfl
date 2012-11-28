@@ -92,7 +92,7 @@ function runScript( commandname ){
 					*/
 					var closest = snaps[0];
 					if( ! isRig ){
-						if( closest.distance <= EDAPSettings.smartSnap.distanceThreshold ){
+						if( closest.distance <= EDAPSettings.smartMagnetJoint.distanceThreshold ){
 							doc.selectNone();
 							doc.selection = [ el ];
 							doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );	

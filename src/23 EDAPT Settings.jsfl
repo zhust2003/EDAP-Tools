@@ -66,7 +66,7 @@ function runScript( commandname ){
 			EDAPSettings.layerColors.light.colors[i] = validateHEX( settings[p1] )? settings[p1] : EDAPSettings.layerColors.light.colors;
 			EDAPSettings.layerColors.dark.colors[i] = validateHEX( settings[p2] )? settings[p2] : EDAPSettings.layerColors.dark.colors[i];
 		}
-		EDAPSettings.smartSnap.distanceThreshold = parseInt( settings.SmartSnapDistance );
+		EDAPSettings.smartMagnetJoint.distanceThreshold = parseInt( settings.SmartSnapDistance );
 		EDAPSettings.layerColors.forceOutline = Boolean( settings.forceOutline === "true");
 		EDAPSettings.traceLevel = parseInt( settings.traceLevel );
 		
@@ -194,10 +194,16 @@ function createXML( level1, level2, level3 ){
 			'</columns>' +
 			'<rows>' +
 				'<row>' +
-					'<label value="Smart Snap Distance:     " />' +
-					'<textbox id="SmartSnapDistance" size="5" value="' + EDAPSettings.smartSnap.distanceThreshold + '"/>' +
-					'<label value="          Lorem ipsum dolor sit amet. Est cu tantas elaboraret, sed ubique postea cu, conceptam pertinacia eum ea." />' +
+					'<label value="Smart Magnet Range:     " />' +
+					'<textbox id="SmartSnapDistance" size="5" value="' + EDAPSettings.smartMagnetJoint.distanceThreshold + '"/>' +
+					'<label value="          Smart Magnet Range 50 pixels. This is the radius which defines the range" />' +
 				'</row>' +
+				'<row>' +
+					'<label value="" />' +
+					'<label value="" />' +
+					'<label value="in which 19 Smart Magnet Joint will search for a Magnet Target in case when symbols were not linked using Smart Magnet Rig panel." />' +
+				'</row>' +
+				
 			'</rows>' +
 			'</grid>' +
 			// ------------------------------------------
@@ -266,12 +272,13 @@ function createXML( level1, level2, level3 ){
 					'<row>' +
 						'<checkbox id="'+cmd[3].id+'" label="'+cmd[3].name.join( sep ) +'" checked="'+cmd[3].state+'" />' +			// 04 LB Trim Characters
 						'<checkbox id="'+cmd[8].id+'" label="'+cmd[8].name.join( sep ) +'" checked="'+cmd[8].state+'" />' +			// 11 Layer Color Light
-						'<checkbox id="'+cmd[13].id+'" label="'+cmd[13].name.join( sep ) +'" checked="'+cmd[13].state+'" />' +		// 21 EDAPT Shortcuts Map
+						'<checkbox id="'+cmd[13].id+'" label="'+cmd[13].name.join( sep ) +'" checked="'+cmd[13].state+'" />' +		// 20 Smart Transform
 					'</row>' +
 					
 					'<row>' +
 						'<checkbox id="'+cmd[4].id+'" label="'+cmd[4].name.join( sep ) +'" checked="'+cmd[4].state+'" />' +			// 05 LB Enumeration
 						'<checkbox id="'+cmd[9].id+'" label="'+cmd[9].name.join( sep ) +'" checked="'+cmd[9].state+'" />' +			// 12 Set Reg Point To Transform Point
+						'<checkbox id="'+cmd[14].id+'" label="'+cmd[14].name.join( sep ) +'" checked="'+cmd[14].state+'" />' +		// 21 EDAPT Shortcuts Map
 					'</row>' +
 
 				'</rows>' +
@@ -288,15 +295,15 @@ function createXML( level1, level2, level3 ){
 				'<rows>' +
 					'<row>' +
 						'<label value="" />'+
-						'<checkbox id="'+cmd[14].id+'" label="'+cmd[14].name.join( sep ) +'" checked="'+cmd[14].state+'" />' +		// 06 Next Frame In Symbol and 07 Prev Frame In Symbol
+						'<checkbox id="'+cmd[15].id+'" label="'+cmd[15].name.join( sep ) +'" checked="'+cmd[15].state+'" />' +		// 06 Next Frame In Symbol and 07 Prev Frame In Symbol
 					'</row>' +
 					'<row>' +
 						'<label value="These commands work in pairs                                      " />' +
-						'<checkbox id="'+cmd[15].id+'" label="'+cmd[15].name.join( sep ) +'" checked="'+cmd[15].state+'" />' +		// 14 Record Parent Reg Pointand 15 Set Selection Pivot To Parent Reg Point
+						'<checkbox id="'+cmd[16].id+'" label="'+cmd[16].name.join( sep ) +'" checked="'+cmd[16].state+'" />' +		// 14 Record Parent Reg Pointand 15 Set Selection Pivot To Parent Reg Point
 					'</row>' +
 					'<row>' +
 						'<label value="" />' +
-						'<checkbox id="'+cmd[16].id+'" label="'+cmd[16].name.join( sep ) +'" checked="'+cmd[16].state+'" />' +		// 18 Create Snap Object and 19 Smart Snap
+						'<checkbox id="'+cmd[17].id+'" label="'+cmd[17].name.join( sep ) +'" checked="'+cmd[17].state+'" />' +		// 18 Create Snap Object and 19 Smart Snap
 					'</row>' +
 				'</rows>' +
 			'</grid>' +
@@ -333,6 +340,7 @@ function createXML( level1, level2, level3 ){
 					'fl.xmlui.set( "' + EDAPSettings.commands.settings[14].id + '", state );' +
 					'fl.xmlui.set( "' + EDAPSettings.commands.settings[15].id + '", state );' +
 					'fl.xmlui.set( "' + EDAPSettings.commands.settings[16].id + '", state );' +
+					'fl.xmlui.set( "' + EDAPSettings.commands.settings[17].id + '", state );' +
 				'}' +
 				
 				
@@ -355,6 +363,7 @@ function createXML( level1, level2, level3 ){
 					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[14].id + '" ) );' +
 					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[15].id + '" ) );' +
 					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[16].id + '" ) );' +
+					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[17].id + '" ) );' +
 					'fl.xmlui.set( "allBoxes", bstates );'+
 				'}' +
 				

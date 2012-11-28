@@ -48,7 +48,7 @@ function insertSnapObjects( commandname, requested ){
 	for( var i=0; i<affectedLayers.length; i++ ){
 		var l = affectedLayers[i];
 		if( l.layerType != "folder" ){
-			if( l.name == EDAPSettings.createSnapObject.layerName ){
+			if( l.name == EDAPSettings.createMagnetTarget.layerName ){
 				specialLayerNumber = i;
 				break;
 			}
@@ -118,22 +118,22 @@ function insertSnapObjects( commandname, requested ){
 		currentDoc.clipPaste();
 	}
 	else{
-		displayMessage( commandname + " : The '" + EDAPSettings.createSnapObject.layerName + "' layer is locked.", 2 );	
+		displayMessage( commandname + " : The '" + EDAPSettings.createMagnetTarget.layerName + "' layer is locked.", 2 );	
 	}
 
 	// *** 7. Display messages. *** //
-	if( EDAPSettings.createSnapObject.showAlert == true ){
-		var message = "A layer called &quot;" + EDAPSettings.createSnapObject.layerName + "&quot; was created for convenience." + "\n" +
+	if( EDAPSettings.createMagnetTarget.showAlert == true ){
+		var message = "A layer called &quot;" + EDAPSettings.createMagnetTarget.layerName + "&quot; was created for convenience." + "\n" +
 		"It is recommended to place all needed instances of" + "\n" +
 		"the snap objects onto this layer.";
 		if( specialLayerNumber == -1 ){
-			displayOptionalMessageBox( commandname,  message, "createSnapObject" );
+			displayOptionalMessageBox( commandname,  message, "createMagnetTarget" );
 		}
 	}
 }
 function createSpecialLayer( doc ){
 	doc.getTimeline().currentLayer = 0;
-	doc.getTimeline().addNewLayer( EDAPSettings.createSnapObject.layerName );
+	doc.getTimeline().addNewLayer( EDAPSettings.createMagnetTarget.layerName );
 	var xLayer = doc.getTimeline().layers[ doc.getTimeline().currentLayer ];
 	xLayer.color = "#FF0000";
 	xLayer.outline = true;
