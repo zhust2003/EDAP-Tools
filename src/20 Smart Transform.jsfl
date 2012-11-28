@@ -29,96 +29,103 @@ function runScript( commandname ){
 	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 	initialize();
 	
+	var myElements = doc.selection.slice();
 	var myTimeline = doc.getTimeline();
-	var mySelection = doc.selection.slice();
-	var parents = [];
-	var root = null;
-	
-	// Part one: Finding the parent(s) of the selected elements.
-	var cnt = mySelection.length;
-	
-	if( mySelection.length > 0 ){
-		while( cnt -- ){
-			var el = mySelection[ cnt ];
-			if( isElementSymbol( el ) ){
+
+	// Remove non-rig elements.
+	var i = myElements.length;
+	while( i-- ){
+		if( ! getRigData( myElements[i] ) ){
+			myElements.splice( i, 1 );
+		}
+	}
+	myElements.sort( sortOnParent );
+
+	if( myElements.length == 1 ){
+		var el = myElements[ 0 ];
+		if( isElementSymbol( el ) ){
+			var inf = getRigData( el );
+			if( inf ){
 				var inf = getRigData( el );
-				if( inf ){ //  The element is part of a rig.
-					var inf = getRigData( el );
-					var parentlist = filterStageElements( isMyParent, myTimeline, true, false, [ el ], inf ); // No keys created
-					if( parentlist.length == 1 ){ 
-						if( ! include( parents, parentlist[0] ) ){
-							parents.push( parentlist[0] );
-						}
-					}
-					else if( inf.parent == "" ){
-						root = el;
-					}
+				if( inf.parent == "" ){ 
+					//fl.trace( "ROOT" );
+					var children = [el];
+					getMyChildren( el, children, myTimeline );
+					setSelectionAndTransformPoint( doc, el, children, true );
+				}
+				else{
+					//fl.trace( "Select to the end of chain" );
+					var children = [el];
+					getMyChildren( el, children, myTimeline );
+					setSelectionAndTransformPoint( doc, el, children, true );
 				}
 			}
 		}
+		
+	}
+	else if( myElements.length > 1 ){
+		var result = checkChain( myElements, myTimeline );
+		switch( result ){
+			case 1: //"two consequtive"
+				setSelectionAndTransformPoint( doc, myElements[ myElements.length-1 ], null, false );
+				break;
+			case 2: //"chain - broken or not"
+				setSelectionAndTransformPoint( doc, myElements[ myElements.length-1 ], null, false );
+				break;
+			case 3: //"multiple chains"
+				fl.trace( "Multiple chains are selected." );
+				break;
+			default:
+		}
+
 	}
 	else{
 		fl.trace( "No stage selection." );
 		return;
 	}
-	
-	//  Part two: Decide what to do
-	if( root ){
-		var children = new Array();
-		getMyChildren( root, children, myTimeline );
-		children.push( root );
-		setSelectionAndTransformPoint( doc, root, children );
-		return;
+}
+function checkChain( elements,atimeline ){
+	var first = elements[0];
+	var last = elements[ elements.length-1 ]
+	inf1 = getRigData( first );
+	inf2 = getRigData( last );
+	if( inf1.parent = inf2.id ){
+		return 1;
 	}
-
 	else{
-		if( mySelection.length == 1 ){
-			if( parents.length == 1 ){
-				var parent = mySelection[0];
-				var children = [];
-				getMyChildren( parent, children, myTimeline );
-				if( children.length > 0 ){
-					children.push( parent );
-					setSelectionAndTransformPoint( doc, parent, children );
-					return;
-				}
-				else{
-					//fl.trace( "Last element" );
-					return;
-				}
-			}
-		}
-		else{
-			if( parents.length == 1 ){
-				//fl.trace( "First level branches" );
-				return;
-			}
-			else{
-				var oneChain = false;
-				for( p in parents ){
-					if( include( mySelection, parents[ p ] ) ){
-						oneChain = true;
-						break;
+		var parents = [];
+		var parent = filterStageElements( getParent, atimeline, false, true, [], inf1 )[0];
+		while( parent ){
+			var rig = getRigData( parent );
+			if( rig ){
+				parent = filterStageElements( getParent, atimeline, false, true, [], rig )[0];
+				if( parent ){
+					if( parent == last ){
+						return 2;
 					}
 				}
-				if( oneChain ){
-					mySelection.sort( sortOnParent );
-					var parent = mySelection[ mySelection.length-1 ];
-					doc.setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
-					return;
-				}
-				else{
-					//fl.trace( "Multiple chains" );
-					return;
-				}
 			}
 		}
+		return 3;
 	}
+	return 3;
 }
-function setSelectionAndTransformPoint( doc, parent, children ){
-	doc.selectNone();
-	doc.selection = children;
-	doc.scaleSelection( 1, 1 );	// Bug fix - forces the Flash to show/redraw the transformation handles.
+function getParent( element, aTimeline, currentLayernum, cf, n, inf ){
+	var data = getRigData( element );
+	if( data ){
+		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
+			return element;
+		}
+		return null;
+	}
+	return null;
+}
+function setSelectionAndTransformPoint( doc, parent, children, changeSelection ){
+	if( changeSelection ){
+		doc.selectNone();
+		doc.selection = children;
+		doc.scaleSelection( 1, 1 );	// Bug fix - forces the Flash to show/redraw the transformation handles.
+	}
 	doc.setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
 }
 function getMyChildren( element, children, tml ){
@@ -131,16 +138,6 @@ function getMyChildren( element, children, tml ){
 			children.push( retval[j] );
 		}
 	}
-}
-function isMyParent( element, aTimeline, currentLayernum, cf, n, inf ){
-	var data = getRigData( element );
-	if( data ){
-		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
-			return true;
-		}
-		return false;
-	}
-	return false;
 }
 function isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
 	var data = getRigData( element );
