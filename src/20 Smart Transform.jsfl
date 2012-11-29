@@ -51,13 +51,13 @@ function runScript( commandname ){
 					//fl.trace( "ROOT" );
 					var children = [el];
 					getMyChildren( el, children, myTimeline );
-					setSelectionAndTransformPoint( doc, el, children, true );
+					setSelectionAndTransformPoint( doc, myTimeline, el, children, true );
 				}
 				else{
 					//fl.trace( "Select to the end of chain" );
 					var children = [el];
 					getMyChildren( el, children, myTimeline );
-					setSelectionAndTransformPoint( doc, el, children, true );
+					setSelectionAndTransformPoint( doc, myTimeline, el, children, true );
 				}
 			}
 		}
@@ -67,10 +67,10 @@ function runScript( commandname ){
 		var result = checkChain( myElements, myTimeline );
 		switch( result ){
 			case 1: //"two consequtive"
-				setSelectionAndTransformPoint( doc, myElements[ myElements.length-1 ], null, false );
+				setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false );
 				break;
 			case 2: //"chain - broken or not"
-				setSelectionAndTransformPoint( doc, myElements[ myElements.length-1 ], null, false );
+				setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false );
 				break;
 			case 3: //"multiple chains"
 				fl.trace( "Multiple chains are selected." );
@@ -120,10 +120,27 @@ function getParent( element, aTimeline, currentLayernum, cf, n, inf ){
 	}
 	return null;
 }
-function setSelectionAndTransformPoint( doc, parent, children, changeSelection ){
+function setSelectionAndTransformPoint( doc, atimeline, parent, children, changeSelection ){
 	if( changeSelection ){
+		var map = [];
+		var cf = atimeline.currentFrame;
+		for( var i=1; i<children.length; i++ ){ // The parent is at position 0
+			var el = children[i];
+			var ln = indexOf( atimeline.layers, el.layer );
+			var en = indexOf( atimeline.layers[ln].frames[cf].elements, el );
+			map.push( [ ln, en ] );
+			if( atimeline.layers[ln].frames[cf].startFrame != cf ){
+				atimeline.currentLayer = ln;
+				atimeline.convertToKeyframes( cf );
+			}
+		}
+		var newSel = [parent];
+		for( j=0; j<map.length; j++ ){
+			var item = map[j];
+			newSel.push( atimeline.layers[item[0]].frames[cf].elements[item[1]] );
+		}
 		doc.selectNone();
-		doc.selection = children;
+		doc.selection = newSel;
 		doc.scaleSelection( 1, 1 );	// Bug fix - forces the Flash to show/redraw the transformation handles.
 	}
 	doc.setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
