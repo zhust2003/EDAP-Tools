@@ -57,7 +57,9 @@ function runScript( commandname ){
 					//fl.trace( "Select to the end of chain" );
 					var children = [el];
 					getMyChildren( el, children, myTimeline );
-					setSelectionAndTransformPoint( doc, myTimeline, el, children, true );
+					if( children.length > 1 ){
+						setSelectionAndTransformPoint( doc, myTimeline, el, children, true );
+					}
 				}
 			}
 		}
@@ -73,14 +75,14 @@ function runScript( commandname ){
 				setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false );
 				break;
 			case 3: //"multiple chains"
-				fl.trace( "Multiple chains are selected." );
+				displayMessage( commandname + ": " + "Multiple chains are selected.", 2 );
 				break;
 			default:
 		}
 
 	}
 	else{
-		fl.trace( "No stage selection." );
+		displayMessage( commandname + ": " + "Please, select symbol(s) on the stage.", 1 );
 		return;
 	}
 }
