@@ -21,15 +21,16 @@ try {
 }catch( error ){
 	fl.trace( error );
 }
-
 function runScript( commandname ){
 	if( fl.getDocumentDOM() == null ){
 		fl.trace( "No document open." );
 		return;
 	}
-	// invoke the dialogue
-	var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/TrimCharacters.xml" );		
-
+	// invoke the dialogue	
+	var xmlContent = createXML();
+	var settings = displayPanel( "TrimCharacters" , xmlContent )
+	
+	
 	if( settings.dismiss == "accept" ){
 		fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 		initialize();
@@ -62,12 +63,10 @@ function runScript( commandname ){
 		displayMessage( commandname + " : " + counter + " object" + tail + " affected.", 2 );
 	}
 }
-
 function trim( astring, leftNum, rightNum ){
 	var itm = astring.substr( astring.lastIndexOf("/") + 1);
 	return rightTrim( leftTrim( itm, leftNum ), rightNum );
 }
-
 function leftTrim( astring, n ){
     var l = 0;
     while( l < n ){
@@ -75,7 +74,6 @@ function leftTrim( astring, n ){
     }
     return astring.substring( l, astring.length );
 }
-
 function rightTrim( astring, n ){
     var r = astring.length;
     var e = r - n;
@@ -83,4 +81,37 @@ function rightTrim( astring, n ){
       r --;
     }
     return astring.substring( 0, r )   
-} 
+}
+function createXML(){
+	var ver = getProductVersion( "all" );
+	var result =
+	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
+		'<vbox>' +
+			'<grid>' +
+				'<columns>' +
+					'<column />' +
+					'<column />' +
+				'</columns>' +
+				'<rows>' +
+					'<row>' +
+						'<spacer></spacer>' +
+						'<label value="Trim Characters"/>' +
+					'</row>' +
+					'<row>' +
+						'<label value="Left:       " />' +
+						'<textbox id="LeftTrim" size="5" value="1" />' +
+					'</row>' +
+					'<row>' +
+						'<label value="Right:      " />' +
+						'<textbox id="RightTrim" size="5" value="2"/>' +
+					'</row>' +
+				'</rows>' +
+			'</grid>' +
+		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "false" />' +
+		'<spacer></spacer>' +
+		'<separator></separator>' +
+		'<spacer></spacer>' +
+		'</vbox>' +
+	'</dialog>';
+	return result;
+}

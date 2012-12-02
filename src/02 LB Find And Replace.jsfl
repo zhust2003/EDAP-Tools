@@ -23,14 +23,15 @@ try {
 }catch( error ){
 	fl.trace( error );
 }
-
 function runScript( commandname ){
 	if( fl.getDocumentDOM() == null ){
 		fl.trace( "No document open." );
 		return;
 	}
 	// invoke the dialogue
-	var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/FindAndReplace.xml" );		
+	var xmlContent = createXML();
+	var settings = displayPanel( "FindAndReplace" , xmlContent )	
+
 	if( settings.dismiss == "accept" ){
 		// Get the user input
 		var oldName = settings.Find;														
@@ -66,7 +67,6 @@ function runScript( commandname ){
 		displayMessage( commandname + " : " + counter + " symbol" + tail + " affected.", 2 );
 	}
 }
-
 function createNewName( str, oldstr, newstr, g, s ){
     var itm = str.substr( str.lastIndexOf("/") + 1);
     if( g == true ){
@@ -81,4 +81,40 @@ function createNewName( str, oldstr, newstr, g, s ){
     var match = new RegExp( oldstr, params );     
     var retval = itm.replace( match, newstr );
 	return retval;    
+}
+function createXML(){
+	var ver = getProductVersion( "all" );
+	var result = 	
+	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
+		'<vbox>' +
+			'<grid>' +
+				'<columns>' +
+					'<column />' +
+					'<column />' +
+				'</columns>' +
+				'<rows>' +
+					'<row>' +
+						'<label value="Find:" control="fString" />' +
+						'<textbox id="Find" size="40" value="'+ EDAPSettings.smartMagnetJoint.distanceThreshold +'"/>' +
+					'</row>' +
+					'<row>' +
+						'<label value="Replace:" />' +
+						'<textbox id="Replace" size="40" />' +
+					'</row>' +	
+				'</rows>' +
+			'</grid>' +
+			//checks
+			'<hbox>' +
+				'<checkbox id="Sensitive" label="Case Sensitive?" checked = "false" />' +
+				'<checkbox id="FirstOnly" label="First Occurence Only?" checked = "false" />' +
+			'</hbox>' +
+		'<spacer></spacer>' +
+		'<spacer></spacer>' +
+		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "false" />' +
+		'<spacer></spacer>' +
+		'<separator></separator>' +
+		'<spacer></spacer>' +
+		'</vbox>' +
+	'</dialog>';
+	return result;
 }

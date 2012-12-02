@@ -20,7 +20,7 @@ along with this program.  If not, see http://www.gnu.org/licenses/.
 // Library initialization
 initialize = function(){
 	var context;
-	if( getVersion() < 11 ){
+	if( getFlashVersion() < 11 ){
 		context = getGlobal();
 	}
 	else{
@@ -47,7 +47,7 @@ initialize = function(){
 }
 
 createSettings = function( context ){
-	//fl.trace( "CREATE FRESH... " + getVersion() ); //*****
+	//fl.trace( "CREATE FRESH... " + getFlashVersion() ); //*****
 	context.EDAPSettings = new Object();
 	context.EDAPSettings.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
 
@@ -415,7 +415,16 @@ moveCommandFiles = function(){
 	}
 }
 
-
+displayPanel = function( commandName, xmlContent ){
+	var xmlFile = fl.configURI + "Commands/" + commandName + ".xml";
+	if ( FLfile.exists( xmlFile ) ) {
+		FLfile.remove( xmlFile );	
+	}
+	FLfile.write( xmlFile, xmlContent );
+	var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
+	FLfile.remove( xmlFile );
+	return settings;
+}
 
 
 // Serialization
@@ -669,8 +678,15 @@ getGlobal = function(){
 	}).call(null);
 }
 
-getVersion = function( astring ){
+getFlashVersion = function(){
 	astring = fl.version;
 	s1 = astring.split( " " )[ 1 ];
 	return parseInt( s1.split( "," )[0] );
+}
+getProductVersion = function( aprop ){
+	var version = { main:2, sub:1, build:0 };
+	if( aprop == "all" ){
+		return version.main + "." + version.sub + "." + version.build;
+	}
+	return version[ aprop ];
 } 

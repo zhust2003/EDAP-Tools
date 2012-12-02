@@ -21,7 +21,6 @@ try {
 }catch( error ){
 	fl.trace( error );
 }
-
 function runScript( commandname ){
 	if( fl.getDocumentDOM() == null ){
 		fl.trace( "No document open." );
@@ -30,7 +29,9 @@ function runScript( commandname ){
 	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 	initialize();
 	// invoke the dialogue
-	var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/PrefixSuffix.xml" );		
+	var xmlContent = createXML();
+	var settings = displayPanel( "PrefixSuffix" , xmlContent )
+	
 	if( settings.dismiss == "accept" ){
 		// Get the user input
 		var Prefix = settings.Prefix;
@@ -60,8 +61,40 @@ function runScript( commandname ){
 		displayMessage( commandname + " : " + counter + " object" + tail + " affected.", 2 );
 	}
 }
-
 function prefixSuffix( astring, pref, suff ){
 	var itm = astring.substr( astring.lastIndexOf( "/" ) + 1 );
 	return pref + itm + suff;
+}
+function createXML(){
+	var ver = getProductVersion( "all" );
+	var result =
+	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
+		'<vbox>' +
+			'<grid>' +
+				'<columns>' +
+					'<column />' +
+					'<column />' +
+				'</columns>' +
+				'<rows>' +
+					'<row>' +
+						'<spacer></spacer>' +
+						'<label value="Prefix / Suffix"/>' +
+					'</row>' +
+					'<row>' +
+						'<label value="Prefix:      " />' +
+						'<textbox id="Prefix" size="40"/>' +
+					'</row>' +
+					'<row>' +
+						'<label value="Suffix:      " />' +
+						'<textbox id="Suffix" size="40"/>' +
+					'</row>' +
+				'</rows>' +
+			'</grid>' +
+		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "false" />' +
+		'<spacer></spacer>' +
+		'<separator></separator>' +
+		'<spacer></spacer>' +
+		'</vbox>' +
+	'</dialog>';
+	return result;
 }

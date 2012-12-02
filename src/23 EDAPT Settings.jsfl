@@ -49,14 +49,7 @@ function runScript( commandname ){
 	}
 
 	var xmlContent = createXML( level1, level2, level3 );
-	
-	var xmlFile = fl.configURI + "Commands/EDAPTsettingsGUI.xml";
-	if ( FLfile.exists( fpath ) ) {
-		FLfile.remove( xmlFile );	
-	}
-	FLfile.write( xmlFile, xmlContent );
-	var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
-	FLfile.remove( xmlFile );
+	var settings = displayPanel( "EDAPTSettings", xmlContent )
 	
 	if( settings.dismiss == "accept" ){
 		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
@@ -97,7 +90,7 @@ function runScript( commandname ){
 			}
 		}
 	}
-	//FLfile.remove( xmlFile );
+
 	
 	if( messageFlag ){
 		moveCommandFiles();
@@ -125,10 +118,11 @@ function validateHEX( colorcode ){
 
 function createXML( level1, level2, level3 ){
 	var cmd = EDAPSettings.commands.settings;
-	//buttons="accept, cancel"
+	var ver = getProductVersion( "all" );
 	var sep = "  /  ";
 	return '<?xml version="1.0"?>' +
-	'<dialog title="Electric Dog Animation Power Tools - Settings" >' +
+	'<dialog title="Electric Dog Animation Power Tools - Settings    ' + ver + '" >' +
+
 		'<vbox>' +
 			// LAYER COLORS---------------------------
 			'<label value="Layer Outline Colors" />' +
@@ -347,16 +341,48 @@ function createXML( level1, level2, level3 ){
 			// ------------------------------------------
 			'<script>' +
 				'var state = false;' +
+	
 				'function confirmDialogue(){' +
-					'var dist = Number( fl.xmlui.get( "SmartSnapDistance" ) );' +
-					'if( typeof dist == "number" ){' +
-						'fl.xmlui.accept();'+
+					'var input = [];' +
+					'input.push( { value:fl.xmlui.get( "SmartSnapDistance" ), validator:isValidDistance, message:"Smart Magnet Range can only be a whole number. Minimum value is 10." } );' +
+
+					'var error = checkValue( input, 0 );' +
+					
+					'if( ! error ){' +
+						'fl.xmlui.accept();' +
 					'}' +
 					'else{' +
-						'alert( "Please, provide a valid number for Smart Magnet Range field." );' +
+						'alert( error.message );' +
 					'}' +
 				'}' +
 
+				'function checkValue( alist, n ){' +
+				  'if( n &lt; alist.length ){' +
+					'var checked = alist[ n ];' +
+					'if( checked.validator( checked.value ) == false ){' +
+					  'return { message:checked.message, value:checked.value};' +
+					'}' +
+					'n++;' +
+					'return checkValue( alist, n );' +
+				  '}' +
+				'}' +
+				
+				
+				'function isValidDistance( data ){' +
+					'if( isNumeric( data ) ){' +
+						'if( ( data &gt; 0 ) || ( data == 0 )  ){' +
+							'return true;' +
+						'}' +
+						'return false;' +
+					'}' +
+					'return false;' +
+				'}' +
+
+				'function isNumeric( data ){' +
+					'var f = parseFloat( data );' +
+					'return ( f == data );' +
+				'}' +
+				
 				'function invertState(){' +
 					'state = !state;' +
 					'fl.xmlui.set( "' + EDAPSettings.commands.settings[0].id + '", state );' +
