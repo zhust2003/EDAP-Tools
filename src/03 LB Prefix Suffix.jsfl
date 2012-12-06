@@ -28,6 +28,7 @@ function runScript( commandname ){
 	}
 	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 	initialize();
+	
 	// invoke the dialogue
 	var xmlContent = createXML();
 	var settings = displayPanel( "PrefixSuffix" , xmlContent )
@@ -59,6 +60,12 @@ function runScript( commandname ){
 		if( counter == 1 ){ tail = "";}
 		else{ tail = "s"; }
 		displayMessage( commandname + " : " + counter + " object" + tail + " affected.", 2 );
+		
+		// save settings
+		EDAPSettings.PrefixSuffix.prefix = Prefix;
+		EDAPSettings.PrefixSuffix.suffix = Suffix;
+		EDAPSettings.PrefixSuffix.entireLibrary = EntireLibrary;
+		serialize( EDAPSettings, fl.configURI + "Javascript/EDAPTsettings.txt" );
 	}
 }
 function prefixSuffix( astring, pref, suff ){
@@ -82,15 +89,15 @@ function createXML(){
 					'</row>' +
 					'<row>' +
 						'<label value="Prefix:      " />' +
-						'<textbox id="Prefix" size="40"/>' +
+						'<textbox id="Prefix" size="40" value="'+ EDAPSettings.PrefixSuffix.prefix +'"/>' +
 					'</row>' +
 					'<row>' +
 						'<label value="Suffix:      " />' +
-						'<textbox id="Suffix" size="40"/>' +
+						'<textbox id="Suffix" size="40" value="'+ EDAPSettings.PrefixSuffix.suffix +'"/>' +
 					'</row>' +
 				'</rows>' +
 			'</grid>' +
-		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "false" />' +
+		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ EDAPSettings.PrefixSuffix.entireLibrary +'" />' +
 		'<spacer></spacer>' +
 		'<separator></separator>' +
 		'<spacer></spacer>' +

@@ -26,6 +26,9 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
+	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
+	initialize();
+		
 	// invoke the dialogue
 	var xmlContent = createXML();
 	var settings = displayPanel( "Enumeration" , xmlContent )
@@ -108,12 +111,20 @@ function runScript( commandname ){
 			fl.getDocumentDOM().library.items[ itmIndex ].name = parsedName;		// RENAME
 			counter = counter + step // increase counter
 		}
-		fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-		initialize();
 		var tail;
 		if( counter == 1 ){ tail = "";}
 		else{ tail = "s"; }
 		displayMessage( commandname + " : " + counter + " symbol" + tail + " affected.", 2 );
+		
+		// save settings
+		EDAPSettings.Enumeration.pattern = pattern;
+		EDAPSettings.Enumeration.useFolderNames = useFolderNames;
+		EDAPSettings.Enumeration.resetCounterOnEachFolder = resetOnEachFolder;
+		EDAPSettings.Enumeration.start = start;
+		EDAPSettings.Enumeration.step = step;
+		EDAPSettings.Enumeration.leadingZeroes = padding;
+		EDAPSettings.Enumeration.entireLibrary = EntireLibrary;
+		serialize( EDAPSettings, fl.configURI + "Javascript/EDAPTsettings.txt" );
 	}	
 }
 function filterTags( apattern ){
@@ -148,10 +159,18 @@ function createNumber( n, totalDigits) {
 function excludePath( str ){
 	return str.substr( str.lastIndexOf("/") + 1 );
 }
+function decode( astring ){
+	var match1 = new RegExp( "<", "gi" );
+	parsed1 = astring.replace( match1, "&lt;" );
+	var match2 = new RegExp( ">", "gi" );
+	parsed2 = parsed1.replace( match2, "&gt;" );
+	return parsed2;
+}
 function createXML(){
+	var ptrn = decode( EDAPSettings.Enumeration.pattern );
 	var ver = getProductVersion( "all" );
 	var result =	
-	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
+	'<dialog title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +
 			'<label value="Use &lt;name&gt; and &lt;enum&gt; tags or combine them with free" />' +
 			'<label value="text to create enumeration format. Example:" />' +
@@ -165,49 +184,230 @@ function createXML(){
 			'<separator></separator>' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
+
+			'<label value="Name:" />' +
+			'<hbox>' +
+				'<textbox id="Pattern" size="37" value="'+ ptrn +'"/>' +
+				'<checkbox id="UseFolderNames" label="Use Folder Names?" checked = "'+ EDAPSettings.Enumeration.useFolderNames +'" />' +
+			'</hbox>' +
 			'<spacer></spacer>' +
-			'<textbox id="Pattern" size="55" value="&lt;name&gt; &lt;enum&gt;"/>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<label value="Enumeration:" />' +
+			'<spacer></spacer>' +
 			
 			'<grid>' +
 				'<columns>' +
 					'<column/>' +
 					'<column/>' +
 					'<column/>' +
-					'<column/>' +
 				'</columns>' +
-				'<rows>' +
+				'<rows>' +	
 					'<row>' +
-						'<spacer></spacer>' +
-						'<checkbox id="UseFolderNames" label="Use Folder Names?" checked = "true" />' +
-					'</row>' +
-					'<row>' +
-						'<spacer></spacer>' +
-						'<checkbox id="ResetOnEachFolder" label="Reset Counter on Each Folder ?" checked = "true" />' +
-					'</row>' +			
-					'<row>' +
-						'<label value="Start Value   " />' +
-						'<textbox id="StartValue" size="5" value="1" />' +
-						'<label value="             " />' +
-					'</row>' +
-					
-					'<row>' +
-						'<label value="Step             " />' +
-						'<textbox id="Step" size="5" value="1" />' +
+						'<hbox>' +
+							'<label value="Start:                 " />' +
+							'<textbox id="StartValue" size="5" value="'+ EDAPSettings.Enumeration.start +'" />' +
+						'</hbox>' +
+						'<hbox>' +
+							'<label value="        Step:" />' +
+							'<textbox id="Step" size="5" value="'+ EDAPSettings.Enumeration.step +'" />' +
+						'</hbox>' +
+						'<hbox>' +
+							'<label value="   " />' +
+							'<checkbox id="ResetOnEachFolder" label="Reset Counter on Each Folder ?" checked = "'+ EDAPSettings.Enumeration.resetCounterOnEachFolder +'" />' +
+						'</hbox>' +
 					'</row>' +
 					
 					'<row>' +
-						'<label value="Zero Padding   " />' +
-						'<textbox id="ZeroPadding" size="5" value="2"/>' +
-						'<label value="             " />' +
+						'<hbox>' +
+							'<label value="Leading Zeroes:" />' +
+							'<textbox id="ZeroPadding" size="5" value="'+ EDAPSettings.Enumeration.leadingZeroes +'"/>' +
+						'</hbox>' +
+						'<label value="" />' +
+						'<label value="" />' +
 					'</row>' +
 					
 				'</rows>' +
 			'</grid>' +
-			'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "false" />' +
+			
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			
+			'<radiogroup label="Preview" groupbox="true" >' +
+				'<grid>' +
+					'<columns>' +
+						'<column/>' +
+						'<column/>' +
+						'<column/>' +
+					'</columns>' +
+					'<row>' +
+						'<listbox id="preview" width="300" rows="6">' +
+							'<listitem label="square" value="square" />' +
+							'<listitem label="circle" value="circle" />' +
+							'<listitem label="triangle" value="triangle" />' +
+							'<listitem label="rectangle" value="rectangle" />' +
+						'</listbox>' +
+						'<label value="      " />' +
+						'<button label="Generate" oncreate="createPreview();" oncommand = "createPreview();"/>' +
+					'</row>' +
+				'</grid>'+
+			'</radiogroup>' +
+
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			
+			'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ EDAPSettings.Enumeration.entireLibrary +'" />' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
 			'<spacer></spacer>' +
 			'<separator></separator>' +
 			'<spacer></spacer>' +
 		'</vbox>' +
+		
+		'<grid>' +
+			'<columns>' +
+				'<column/>' +
+				'<column/>' +
+				'<column/>' +
+			'</columns>' +
+			'<row>' +
+				'<button label="Defaults" oncommand = "resetDialogue();"/>' +
+				'<label value="                                               " />' +
+				'<hbox>' +
+					'<button label="Rename" oncommand = "confirmDialogue()"/>' +
+					'<button label="Cancel" oncommand = "fl.xmlui.cancel();"/>' +
+				'</hbox>' +
+			'</row>' +
+		'</grid>'+
+	'<script>' +
+	
+		'function confirmDialogue(){' +
+			'var input = [];' +
+			'input.push( { value:fl.xmlui.get( "StartValue" ), validator:isNumber, message:"\'Start Value\' must be a whole number." } );' +
+			'input.push( { value:fl.xmlui.get( "Step" ), validator:isPositiveNumber, message:"\'Step\' must be a whole, positive number." } );' +
+			'input.push( { value:fl.xmlui.get( "ZeroPadding" ), validator:isPositiveNumber, message:"\'Leading Zeroes\' must be a whole, positive number." } );' +
+			'var error = checkValue( input, 0 );' +	
+			'if( ! error ){' +
+				'fl.xmlui.accept();' +
+			'}' +
+			'else{' +
+				'alert( error.message );' +
+			'}' +
+		'}' +
+
+		'function isNumber( value ){' +
+		  'var a = ( parseFloat( value ) == parseInt( value ) );' +
+		  'var b = ! isNaN( value );' +
+		  'return Boolean( ( a + b ) == 2 );' +
+		'}' +
+		
+		'function isPositiveNumber( n ){' +
+			'var a = isNumber( n );' +
+			'var b = Boolean( n &gt; 0 );' +
+			'return ( a+b ) == 2;'+
+		'}' +
+		
+		'function resetDialogue(){' +
+			'fl.xmlui.set( "Pattern", "&lt;name&gt; &lt;enum&gt;" );' +
+			'fl.xmlui.set( "UseFolderNames", "true" );' +
+			'fl.xmlui.set( "StartValue", "1" );' +
+			'fl.xmlui.set( "Step", "1" );' +
+			'fl.xmlui.set( "ZeroPadding", "2" );' +
+			'fl.xmlui.set( "ResetOnEachFolder", "true" );' +
+			'fl.xmlui.set( "EntireLibrary", "false" );' +
+		'}' +
+		'function checkValue( alist, n ){' +
+		  'if( n &lt; alist.length ){' +
+			'var checked = alist[ n ];' +
+			'if( checked.validator( checked.value ) == false ){' +
+			  'return { message:checked.message, value:checked.value};' +
+			'}' +
+			'n++;' +
+			'return checkValue( alist, n );' +
+		  '}' +
+		'}' +
+		
+		'function createPreview(){' +
+		  'var pattern = fl.xmlui.get("Pattern");' +
+		  'var start = parseInt( fl.xmlui.get("StartValue") );' +
+		  'var step = parseInt( fl.xmlui.get("Step") );' +
+		  'var leading = parseInt( fl.xmlui.get("ZeroPadding") );' +
+		  'var usefoldernames = Boolean( fl.xmlui.get("UseFolderNames") == "true" );' +
+		  'var resetoneach = Boolean( fl.xmlui.get("ResetOnEachFolder") == "true" );' +
+		  
+		  'var fname;' +
+		  'if( usefoldernames == true ){' +
+			'fname = "FolderName";' +
+		  '}' +
+		  'else{' +
+			'fname = "SymbolName";' +
+		  '}' +
+		  'var steps;' +
+		  'if( resetoneach == true ){' +
+			'steps = [start, start, start, start, start];' +
+		  '}' +
+		  'else{' +
+			'steps = [ start, start+step, start+2*step, start+3*step, start+4*step];' +
+		  '}' +
+
+		  'var match = new RegExp( "&lt;name&gt;", "gi" );' +
+		  'xname = pattern.replace( match, fname );' +
+
+		  'match = new RegExp( "&lt;enum&gt;", "gi" );' +
+		  'var p1 = xname.replace( match, createNumber( steps[0], leading ) );' +
+		  'var p2 = xname.replace( match, createNumber( steps[1], leading ) );' +
+		  'var p3 = xname.replace( match, createNumber( steps[2], leading ) );' +
+		  'var p4 = xname.replace( match, createNumber( steps[3], leading ) );' +
+		  'var p5 = xname.replace( match, createNumber( steps[4], leading ) );' +
+		
+			'var elements = [];' +
+			'elements.push( {label:"SymbolName1 -- &gt; " + p1, value:"SymbolName1 -- &gt; " + p1} );' +
+			'elements.push( {label:"SymbolName2 -- &gt; " + p2, value:"SymbolName2 -- &gt; " + p2} );' +
+			'elements.push( {label:"SymbolName3 -- &gt; " + p3, value:"SymbolName3 -- &gt; " + p3} );' +
+			'elements.push( {label:"SymbolName4 -- &gt; " + p4, value:"SymbolName4 -- &gt; " + p4} );' +
+			'elements.push( {label:"SymbolName5 -- &gt; " + p5, value:"SymbolName5 -- &gt; " + p5} );' +
+			'fl.xmlui.setControlItemElements( "preview", elements ); ' +
+
+		'}' +
+
+		'function createNumber( n, totalDigits) {' +
+			'n = n.toString();' +
+			'var pd = [""];' +
+			'if ( totalDigits &gt; n.length ) {' +
+			  'var diff = totalDigits-n.length;' +
+			  'var i = 0;' +
+			  'nextValue( i, diff, pd )' +
+			'}' +
+			'return pd[0] + n.toString();' +
+		'}' +
+		'function nextValue( i, diff, pd ){' +
+			'if( i &lt; diff ){' +
+				'pd[0] += "0";' +
+				'i ++;' +
+				'nextValue( i, diff, pd );' +
+			'}' +
+		'}' +
+		'function initPreview(){' +
+			'var elements = [];' +
+			'elements.push( {label:"SymbolName1", value:"SymbolName1" } );' +
+			'elements.push( {label:"SymbolName2", value:"SymbolName2" } );' +
+			'elements.push( {label:"SymbolName3", value:"SymbolName3" } );' +
+			'elements.push( {label:"SymbolName4", value:"SymbolName4" } );' +
+			'elements.push( {label:"SymbolName5", value:"SymbolName5" } );' +
+			'fl.xmlui.setControlItemElements( "preview", elements ); ' +
+		'}' +
+	'</script>' +
 	'</dialog>';
+	//fl.trace( result );
 	return result;
 }

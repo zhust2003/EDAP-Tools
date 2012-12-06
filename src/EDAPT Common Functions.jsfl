@@ -51,6 +51,36 @@ createSettings = function( context ){
 	context.EDAPSettings = new Object();
 	context.EDAPSettings.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
 
+	// Find and Replace
+	context.EDAPSettings.FindAndReplace = new Object();
+	context.EDAPSettings.FindAndReplace.find = "";
+	context.EDAPSettings.FindAndReplace.replace = "";
+	context.EDAPSettings.FindAndReplace.caseSensitive = false;
+	context.EDAPSettings.FindAndReplace.firstOccurence = false;
+	context.EDAPSettings.FindAndReplace.entireLibrary = false;
+
+	// Prefix Suffix
+	context.EDAPSettings.PrefixSuffix = new Object();
+	context.EDAPSettings.PrefixSuffix.prefix = "";
+	context.EDAPSettings.PrefixSuffix.suffix = "";
+	context.EDAPSettings.PrefixSuffix.entireLibrary = false;
+
+	// Trim Characters
+	context.EDAPSettings.TrimCharacters = new Object();
+	context.EDAPSettings.TrimCharacters.left = 0;
+	context.EDAPSettings.TrimCharacters.ritght = 0;
+	context.EDAPSettings.TrimCharacters.entireLibrary = false;
+
+	// Enumeration
+	context.EDAPSettings.Enumeration = new Object();
+	context.EDAPSettings.Enumeration.pattern = "<name> <enum>";
+	context.EDAPSettings.Enumeration.useFolderNames = true;
+	context.EDAPSettings.Enumeration.resetCounterOnEachFolder = true;
+	context.EDAPSettings.Enumeration.start = 1;
+	context.EDAPSettings.Enumeration.step = 1;
+	context.EDAPSettings.Enumeration.leadingZeroes = 2;
+	context.EDAPSettings.Enumeration.entireLibrary = false;
+	
 	// Layer Colors
 	context.EDAPSettings.layerColors = new Object();
 	context.EDAPSettings.layerColors.light = new Object();

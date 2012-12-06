@@ -28,6 +28,9 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
+	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
+	initialize();
+	
 	// invoke the dialogue
 	var xmlContent = createXML();
 	var settings = displayPanel( "FindAndReplace" , xmlContent )	
@@ -59,12 +62,19 @@ function runScript( commandname ){
 				counter ++;
 			}
 		}
-		fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-		initialize();
+
 		var tail;
 		if( counter == 1 ){ tail = "";}
 		else{ tail = "s"; }
 		displayMessage( commandname + " : " + counter + " symbol" + tail + " affected.", 2 );
+		
+		// save settings
+		EDAPSettings.FindAndReplace.find = oldName;
+		EDAPSettings.FindAndReplace.replace = newName;
+		EDAPSettings.FindAndReplace.caseSensitive = sens;
+		EDAPSettings.FindAndReplace.firstOccurence = ! global;
+		EDAPSettings.FindAndReplace.entireLibrary = EntireLibrary;
+		serialize( EDAPSettings, fl.configURI + "Javascript/EDAPTsettings.txt" );		
 	}
 }
 function createNewName( str, oldstr, newstr, g, s ){
@@ -95,22 +105,22 @@ function createXML(){
 				'<rows>' +
 					'<row>' +
 						'<label value="Find:" control="fString" />' +
-						'<textbox id="Find" size="40" value="'+ EDAPSettings.smartMagnetJoint.distanceThreshold +'"/>' +
+						'<textbox id="Find" size="40" value="'+ EDAPSettings.FindAndReplace.find +'"/>' +
 					'</row>' +
 					'<row>' +
 						'<label value="Replace:" />' +
-						'<textbox id="Replace" size="40" />' +
+						'<textbox id="Replace" size="40" value="'+ EDAPSettings.FindAndReplace.replace +'"/>' +
 					'</row>' +	
 				'</rows>' +
 			'</grid>' +
 			//checks
 			'<hbox>' +
-				'<checkbox id="Sensitive" label="Case Sensitive?" checked = "false" />' +
-				'<checkbox id="FirstOnly" label="First Occurence Only?" checked = "false" />' +
+				'<checkbox id="Sensitive" label="Case Sensitive?" checked = "'+ EDAPSettings.FindAndReplace.caseSensitive +'" />' +
+				'<checkbox id="FirstOnly" label="First Occurence Only?" checked = "'+ EDAPSettings.FindAndReplace.firstOccurence +'" />' +
 			'</hbox>' +
 		'<spacer></spacer>' +
 		'<spacer></spacer>' +
-		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "false" />' +
+		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ EDAPSettings.FindAndReplace.entireLibrary +'" />' +
 		'<spacer></spacer>' +
 		'<separator></separator>' +
 		'<spacer></spacer>' +

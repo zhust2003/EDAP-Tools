@@ -26,7 +26,10 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	// invoke the dialogue	
+	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
+	initialize();
+	
+	// invoke the dialogue
 	var xmlContent = createXML();
 	var settings = displayPanel( "TrimCharacters" , xmlContent )
 	
@@ -61,6 +64,12 @@ function runScript( commandname ){
 		if( counter == 1 ){ tail = "";}
 		else{ tail = "s"; }
 		displayMessage( commandname + " : " + counter + " object" + tail + " affected.", 2 );
+		
+		// save settings
+		EDAPSettings.TrimCharacters.left = leftTrim;
+		EDAPSettings.TrimCharacters.ritght = rightTrim;
+		EDAPSettings.TrimCharacters.entireLibrary = EntireLibrary;
+		serialize( EDAPSettings, fl.configURI + "Javascript/EDAPTsettings.txt" );
 	}
 }
 function trim( astring, leftNum, rightNum ){
@@ -85,7 +94,7 @@ function rightTrim( astring, n ){
 function createXML(){
 	var ver = getProductVersion( "all" );
 	var result =
-	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
+	'<dialog title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +
 			'<grid>' +
 				'<columns>' +
@@ -99,19 +108,73 @@ function createXML(){
 					'</row>' +
 					'<row>' +
 						'<label value="Left:       " />' +
-						'<textbox id="LeftTrim" size="5" value="1" />' +
+						'<textbox id="LeftTrim" size="5" value="'+ EDAPSettings.TrimCharacters.left +'" />' +
 					'</row>' +
 					'<row>' +
 						'<label value="Right:      " />' +
-						'<textbox id="RightTrim" size="5" value="2"/>' +
+						'<textbox id="RightTrim" size="5" value="'+ EDAPSettings.TrimCharacters.ritght +'"/>' +
 					'</row>' +
 				'</rows>' +
 			'</grid>' +
-		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "false" />' +
-		'<spacer></spacer>' +
-		'<separator></separator>' +
-		'<spacer></spacer>' +
+			'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ EDAPSettings.TrimCharacters.entireLibrary +'" />' +
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
 		'</vbox>' +
+		
+		'<grid>' +
+			'<columns>' +
+				'<column/>' +
+				'<column/>' +
+			'</columns>' +
+			'<row>' +
+				'<label value="                     " />' +
+				'<hbox>' +
+					'<button label="Rename" oncommand = "confirmDialogue()"/>' +
+					'<button label="Cancel" oncommand = "fl.xmlui.cancel();"/>' +
+				'</hbox>' +
+			'</row>' +
+		'</grid>'+
+		
+		
+		'<script>' +
+		'function confirmDialogue(){' +
+			'var input = [];' +
+			'input.push( { value:fl.xmlui.get( "LeftTrim" ), validator:isPositiveNumber, message:"Left Trim must be a whole, positive number." } );' +
+			'input.push( { value:fl.xmlui.get( "RightTrim" ), validator:isPositiveNumber, message:"Right Trim must be a whole, positive number." } );' +
+			'var error = checkValue( input, 0 );' +	
+			'if( ! error ){' +
+				'fl.xmlui.accept();' +
+			'}' +
+			'else{' +
+				'alert( error.message );' +
+			'}' +
+		'}' +
+		
+		'function isNumber( value ){' +
+		  'var a = ( parseFloat( value ) == parseInt( value ) );' +
+		  'var b = ! isNaN( value );' +
+		  'return Boolean( ( a + b ) == 2 );' +
+		'}' +
+
+		'function isPositiveNumber( n ){' +
+			'var a = isNumber( n );' +
+			'var b = Boolean( n &gt; 0 );' +
+			'return ( a+b ) == 2;'+
+		'}' +
+		
+		'function checkValue( alist, n ){' +
+		  'if( n &lt; alist.length ){' +
+			'var checked = alist[ n ];' +
+			'if( checked.validator( checked.value ) == false ){' +
+			  'return { message:checked.message, value:checked.value};' +
+			'}' +
+			'n++;' +
+			'return checkValue( alist, n );' +
+		  '}' +
+		'}' +
+		
+	'</script>' +
 	'</dialog>';
 	return result;
 }
