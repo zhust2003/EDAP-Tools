@@ -40,72 +40,61 @@ function runScript( commandname ){
 		if( isElementSymbol( el ) ){
 			// For each element in the selection...
 			var parents;
+			var snaps;
 			if( el.hasPersistentData( "rigData" ) ){
-				// Remember that the object is part of a rig
-				// Create a collection of parent object matrices for the element.
 				isRig = true;
 				var inf = getRigData( el );
-				parents = filterStageElements( getParentMatrix, myTimeline, false, true, [ el ], inf ); //***
+				parents = filterStageElements( getParentMatrix, myTimeline, false, true, [ el ], inf );
+				if( parents.length > 0 ){
+					var myParent = parents[0];
+					snaps = filterStageElements( isSnapObject, myParent.element.libraryItem.timeline, true, false, [ el ] );
+					for( var i=0; i<snaps.length; i++ ){
+						var obj  = { element:snaps[i] };
+						var theX = snaps[i].matrix.tx * myParent.matrix.a + snaps[i].matrix.ty * myParent.matrix.c + myParent.matrix.tx;
+						var theY = snaps[i].matrix.ty * myParent.matrix.d + snaps[i].matrix.tx * myParent.matrix.b + myParent.matrix.ty;
+						var pos  = {x:theX, y:theY};
+						var dist = fl.Math.pointDistance( pos, {x:el.matrix.tx, y:el.matrix.ty} );
+						obj.position = pos;
+						obj.distance = dist;
+						snaps[i] = obj;
+					}
+					snaps.sort( sortOnDistance );
+				}
 			}
 			else{
+				parents = filterStageElements( getTargetMatrix, myTimeline, false, false, [ el ] );
 
-				// Create a collection with matrices of possible target objects for the element.
-				// Modify the objects, adding "distance" property, describing the distance between the element and the possible target object.
-				parents = filterStageElements( getMatrix, myTimeline, false, false, [ el ] );//***
-				for( var i=0; i<parents.length; i++ ){
-						var p = parents[i];
-						var pt = { x:p.matrix.tx, y:p.matrix.ty };
-						var pos = { x:el.matrix.tx, y:el.matrix.ty };	
-						var dist = fl.Math.pointDistance( pt, pos );
-						p.distance = dist;
-				}
-				// Sort the possible target objects on its distance. The colosest object becomes first in the collection.
-				parents.sort( sortOnDistance );
-	
-			}
-			
-			if( parents.length > 0 ){
-				// Get the first ( closest ) parent object
-				// Create a collection of snap-objects within it.
-				var myParent = parents[0];
-				var snaps = filterStageElements( isSnapObject, myParent.element.libraryItem.timeline, true, false, [ el ] );
-				// Modify the objects, adding "distance" property, describing the distance between the element and the possible snap-object.
-				for( var i=0; i<snaps.length; i++ ){
-					var obj  = { element:snaps[i] };
-					var theX = snaps[i].matrix.tx * myParent.matrix.a + snaps[i].matrix.ty * myParent.matrix.c + myParent.matrix.tx;
-					var theY = snaps[i].matrix.ty * myParent.matrix.d + snaps[i].matrix.tx * myParent.matrix.b + myParent.matrix.ty;
-					var pos  = {x:theX, y:theY};
-					var dist = fl.Math.pointDistance( pos, {x:el.matrix.tx, y:el.matrix.ty} );
-					obj.position = pos;
-					obj.distance = dist;
-					snaps[i] = obj;
-				}
-				// Sort the possible snap-objects on its distance. The colosest object becomes first in the collection.
-				snaps.sort( sortOnDistance );
-				if( snaps.length > 0 ){
-					/*	Here is our snap-object
-						If the element is not a part of a rig
-							if the distance is less than or equal to the threshold
-								snap the element to the snap-object position.
-						else
-							snap the element to the snap-object position.
-					*/
-					var closest = snaps[0];
-					if( ! isRig ){
-						if( closest.distance <= EDAPSettings.smartMagnetJoint.distanceThreshold ){
-							doc.selectNone();
-							doc.selection = [ el ];
-							doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );	
-						}
+				if( parents.length > 0 ){
+					snaps = [];
+					for( var i=0; i<parents.length; i++ ){
+							var e = parents[i];
+							for( var j=0; j<e.snaps.length; j++ ){
+								var theX = e.snaps[j].matrix.tx * e.element.matrix.a + e.snaps[j].matrix.ty *  e.element.matrix.c +  e.element.matrix.tx;
+								var theY = e.snaps[j].matrix.ty * e.element.matrix.d + e.snaps[j].matrix.tx *  e.element.matrix.b +  e.element.matrix.ty;
+								var pos  = {x:theX, y:theY};
+								var dist = fl.Math.pointDistance( pos, {x:el.matrix.tx, y:el.matrix.ty} );
+								snaps.push( { position:pos, distance:dist, parent:e.element, element:e.snaps[j] } );
+							}
 					}
-					else{
+					snaps.sort( sortOnDistance );
+				}
+			}
+
+			if( snaps.length > 0 ){
+				var closest = snaps[0];
+				if( ! isRig ){
+					if( closest.distance <= EDAPSettings.smartMagnetJoint.distanceThreshold ){
 						doc.selectNone();
 						doc.selection = [ el ];
-						doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );
+						doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );	
 					}
 				}
+				else{
+					doc.selectNone();
+					doc.selection = [ el ];
+					doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );
+				}
 			}
-			
 		}
 	}
 	doc.selection = originalSelection;
@@ -121,16 +110,16 @@ function isSnapObject( element, aTimeline, currentLayernum, cf, n ){
 		return false;
 	}
 }
-function hasSnapObject( element ){
+function getSnapObjects( element ){
 	if( isElementSymbol( element ) ){
-		var retval = filterStageElements( isSnapObject, element.libraryItem.timeline, true, true, false, [] );
-		return Boolean( retval[ 0 ] );
+		var retval = filterStageElements( isSnapObject, element.libraryItem.timeline, true, false, [] );
+		return retval;
 	}
-	return false;
+	return [];
 }
-function getMatrix( element, aTimeline, currentLayernum, cf, n ){
+function getTargetMatrix( element, aTimeline, currentLayernum, cf, n ){
 	var remove = false;
-	if( ! getRigData( element ) && hasSnapObject( element ) ){
+	if( ! getRigData( element ) ){
 		var layer = aTimeline.layers[ currentLayernum ];
 		if( layer.frames[ cf ].startFrame != cf ){
 			aTimeline.currentLayer = currentLayernum;
@@ -138,7 +127,8 @@ function getMatrix( element, aTimeline, currentLayernum, cf, n ){
 			remove = true;
 		}
 		var el = layer.frames[ cf ].elements[n];
-		var retval = { element:el, matrix:el.matrix };
+		var snaps = getSnapObjects( el );
+		var retval = { element:el, matrix:el.matrix, snaps:snaps };
 		if( remove ){
 			aTimeline.clearKeyframes( cf );
 		}
