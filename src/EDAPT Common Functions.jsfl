@@ -193,6 +193,15 @@ isElementSymbol = function( element ){
 	return false;
 }
 
+isSnap = function( element ){
+	if( isElementSymbol( element ) ){
+		return Boolean(  element.libraryItem.getData( "signature" ) == "EDAPT" && element.libraryItem.getData( "weight" ) == 1 );
+	}
+	else{
+		return false;
+	}
+}
+
 createObjectStateMap = function( objectCollection, props, afilter ){
 	var stateMap = new Array();
 	for( var i = 0; i < objectCollection.length; i++ ){
@@ -266,6 +275,15 @@ getRigData = function( element ){
 		return null;
 	}
 	return null;
+}
+
+setRigData = function( element, data ){
+	if( isElementSymbol( element ) ){
+		element.removePersistentData( "rigData" );
+		element.setPersistentData( "rigData", "string", data );
+		return true;
+	}
+	return false;
 }
 
 filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, excludeElements ){
@@ -707,7 +725,37 @@ getGlobal = function(){
 		return this;
 	}).call(null);
 }
-
+traceObject = function( obj, maxlevel, level ){
+	if( ! maxlevel ){ maxlevel = 1 };
+	if( ! level ){ level = 0 };
+	
+	var today = new Date();
+	var h = today.getHours();
+	var m = today.getMinutes();
+	var s = today.getSeconds();
+	var d = h + ":" + ( ( m < 10 ) ? "0" + m : m ) + ":" + ( ( s < 10 ) ? "0" + s : s );
+	
+	if( level == 0 ){ fl.trace( "***** " + ( ( obj.name ) ? obj.name : obj ) + " ( " + String( obj ).match(/^\[object (.*)\]$/)[1] +" ) " + d + " *****" ); }
+	if( level < maxlevel ){
+		var prefix = "";
+		for( var i=0; i<level; i++ ){
+			prefix += "\t";
+		}
+		for( var p in obj ){
+			var prop = obj[ p ];
+			var type = Object.prototype.toString.call( prop ).match(/^\[object (.*)\]$/)[1];
+			if( typeof prop == "object" ){
+				if( level == 0 ){ fl.trace( "------------------------------------------------" ); }
+				fl.trace( prefix + p + "(" + type + " )" );
+				traceObject( prop, maxlevel, level + 1 );
+			}
+			else{
+				if( level == 0 ){ fl.trace( "------------------------------------------------" ); }
+				fl.trace( prefix + p + ": " + prop + "( " + type + " )" );
+			}
+		}
+	}
+}
 getFlashVersion = function(){
 	astring = fl.version;
 	s1 = astring.split( " " )[ 1 ];
