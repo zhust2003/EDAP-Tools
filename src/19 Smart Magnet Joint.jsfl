@@ -34,6 +34,7 @@ function runScript( commandname ){
 	var myTimeline = doc.getTimeline();
 	var cnt = myElements.length;
 	myElements.sort( sortOnParent );
+
 	while( cnt -- ){
 		var el = myElements[ cnt ];
 		var isRig = false;
@@ -63,36 +64,36 @@ function runScript( commandname ){
 			}
 			else{
 				parents = filterStageElements( getTargetMatrix, myTimeline, false, false, [ el ] );
-
 				if( parents.length > 0 ){
 					snaps = [];
 					for( var i=0; i<parents.length; i++ ){
-							var e = parents[i];
-							for( var j=0; j<e.snaps.length; j++ ){
-								var theX = e.snaps[j].matrix.tx * e.element.matrix.a + e.snaps[j].matrix.ty *  e.element.matrix.c +  e.element.matrix.tx;
-								var theY = e.snaps[j].matrix.ty * e.element.matrix.d + e.snaps[j].matrix.tx *  e.element.matrix.b +  e.element.matrix.ty;
-								var pos  = {x:theX, y:theY};
-								var dist = fl.Math.pointDistance( pos, {x:el.matrix.tx, y:el.matrix.ty} );
-								snaps.push( { position:pos, distance:dist, parent:e.element, element:e.snaps[j] } );
-							}
+						var e = parents[i];
+						for( var j=0; j<e.snaps.length; j++ ){
+							var theX = e.snaps[j].matrix.tx * e.element.matrix.a + e.snaps[j].matrix.ty *  e.element.matrix.c +  e.element.matrix.tx;
+							var theY = e.snaps[j].matrix.ty * e.element.matrix.d + e.snaps[j].matrix.tx *  e.element.matrix.b +  e.element.matrix.ty;
+							var pos  = {x:theX, y:theY};
+							var dist = fl.Math.pointDistance( pos, {x:el.matrix.tx, y:el.matrix.ty} );
+							snaps.push( { position:pos, distance:dist, parent:e.element, element:e.snaps[j] } );
+						}
 					}
 					snaps.sort( sortOnDistance );
 				}
 			}
-
-			if( snaps.length > 0 ){
-				var closest = snaps[0];
-				if( ! isRig ){
-					if( closest.distance <= EDAPSettings.smartMagnetJoint.distanceThreshold ){
+			if( snaps ){ // Bug fix - 20 Dec, 2012 ( 488-HPW-UNW9 )
+				if( snaps.length > 0 ){
+					var closest = snaps[0];
+					if( ! isRig ){
+						if( closest.distance <= EDAPSettings.smartMagnetJoint.distanceThreshold ){
+							doc.selectNone();
+							doc.selection = [ el ];
+							doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );	
+						}
+					}
+					else{
 						doc.selectNone();
 						doc.selection = [ el ];
-						doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );	
+						doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );
 					}
-				}
-				else{
-					doc.selectNone();
-					doc.selection = [ el ];
-					doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );
 				}
 			}
 		}
@@ -127,6 +128,7 @@ function getTargetMatrix( element, aTimeline, currentLayernum, cf, n ){
 			remove = true;
 		}
 		var el = layer.frames[ cf ].elements[n];
+		el.libraryItem.timeline.currentFrame = el.firstFrame;  // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
 		var snaps = getSnapObjects( el );
 		var retval = { element:el, matrix:el.matrix, snaps:snaps };
 		if( remove ){
@@ -141,6 +143,7 @@ function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
 	var remove = false;
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
+			
 			var layer = aTimeline.layers[ currentLayernum ];
 			if( layer.frames[ cf ].startFrame != cf ){
 				aTimeline.currentLayer = currentLayernum;
@@ -148,8 +151,8 @@ function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
 				remove = true;
 			}
 			var el = layer.frames[ cf ].elements[n];
+			el.libraryItem.timeline.currentFrame = el.firstFrame; // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
 			var retval = { element:el, matrix:el.matrix };
-			
 			if( remove ){
 				aTimeline.clearKeyframes( cf );
 			}						
