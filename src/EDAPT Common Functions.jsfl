@@ -345,6 +345,35 @@ filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, exc
 
 
 // Messages
+displayDialogue = function( atitle, amessage ){
+	fl.trace( atitle );
+	var messageLines = "";
+	var myLines = amessage.split( "\n" );
+	for( var i=0; i<myLines.length; i++ ){
+	  messageLines += ( '<label value="'+myLines[i]+'"/>');
+	}
+	var xmlContent = '<?xml version="1.0"?>' + 
+	'<dialog buttons="accept cancel" title="' + atitle + '">' +
+		'<vbox>' + 
+			messageLines + 
+			'<spacer></spacer>' + 
+			'<spacer></spacer>' + 
+			'<spacer></spacer>' + 
+			'<spacer></spacer>' + 
+			'<separator></separator>' + 
+			'<spacer></spacer>' + 
+		'</vbox>' + 
+	'</dialog>';
+	var xmlFile = fl.configURI + "Commands/DialogueGUI.xml";
+	if ( FLfile.exists( xmlFile ) ) {
+		FLfile.remove( xmlFile );	
+	}
+	FLfile.write( xmlFile, xmlContent );
+	var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
+	FLfile.remove( xmlFile );
+	return settings;
+}
+
 displayOptionalMessageBox = function( atitle, amessage, apropToChange ){
 	var xmlContent = createOptionalMessageBox( atitle, amessage );
 	var xmlFile = fl.configURI + "Commands/OptionalMessageBoxGUI.xml";
@@ -735,7 +764,7 @@ traceObject = function( obj, maxlevel, level ){
 	var s = today.getSeconds();
 	var d = h + ":" + ( ( m < 10 ) ? "0" + m : m ) + ":" + ( ( s < 10 ) ? "0" + s : s );
 	
-	if( level == 0 ){ fl.trace( "***** " + ( ( obj.name ) ? obj.name : obj ) + " ( " + String( obj ).match(/^\[object (.*)\]$/)[1] +" ) " + d + " *****" ); }
+	if( level == 0 ){ fl.trace( "***** " + ( ( obj.name ) ? obj.name : obj ) + " ( " + Object.prototype.toString.call( obj ).match(/^\[object (.*)\]$/)[1] +" ) " + d + " *****" ); }
 	if( level < maxlevel ){
 		var prefix = "";
 		for( var i=0; i<level; i++ ){

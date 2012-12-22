@@ -170,9 +170,10 @@ retreiveRigsFromDocument	= function(){
 	return '';
 }
 getCurrentRigInfo			= function( id ){
+	
 	var doc = fl.getDocumentDOM();
 	if( doc ){
-		var tml = doc.getTimeline(); //***
+		var tml = doc.getTimeline();
 		if( tml != lastCurrentTimeline ){
 			//fl.trace( "The timeline changed to: " + tml.name );
 			lastCurrentTimeline = tml;
@@ -198,6 +199,7 @@ getCurrentRigInfo			= function( id ){
 			return '';
 		}
 	}
+	
 	return '';
 }
 getLinkedSymbolInfo 		= function( adata ){
@@ -222,6 +224,7 @@ getLinkedSymbolInfo 		= function( adata ){
 	return '';
 }
 setRigInfo					= function( rigdata ){
+	fl.trace( rigdata );
 	var doc = fl.getDocumentDOM();
 	if( doc ){
 		var sel = doc.selection;
@@ -231,15 +234,10 @@ setRigInfo					= function( rigdata ){
 				var current = getRigData( el );
 				if( ! current ){
 					var inf = JSON.parse( rigdata );
-					var nearestSnap = findSnapInParent( el, inf );
-					if( nearestSnap ){
-						setRigData( nearestSnap, createSnapInfo( inf ) );
-						setRigData( el, rigdata );
-						return "link";
-					}
-					else{
-						return "error";
-					}
+					setRigData( el, rigdata );
+					doc.rotateSelection( 45 );  // Bug Fix - To force 'Save' command in Flash
+					doc.rotateSelection( -45 );
+					return "link";
 				}
 				else{
 					removeRigData( el );
@@ -280,7 +278,11 @@ removeSelectedNodes 		= function(){
 	}
 	return JSON.stringify( retval );
 }
-
+traceObj 					= function ( obj ){
+	for( p in obj ){
+		fl.trace( p + ": " + obj[ p ] );
+	}
+}
 
 // HELPER FUNCTIONS
 findSnapInParent			= function( element, inf ){
