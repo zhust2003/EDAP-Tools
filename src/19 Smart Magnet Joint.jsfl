@@ -34,7 +34,6 @@ function runScript( commandname ){
 	var myTimeline = doc.getTimeline();
 	var cnt = myElements.length;
 	myElements.sort( sortOnParent );
-
 	while( cnt -- ){
 		var el = myElements[ cnt ];
 		var isRig = false;
@@ -48,7 +47,7 @@ function runScript( commandname ){
 				parents = filterStageElements( getParentMatrix, myTimeline, false, true, [ el ], inf );
 				if( parents.length > 0 ){
 					var myParent = parents[0];
-					snaps = filterStageElements( isSnapObject, myParent.element.libraryItem.timeline, true, false, [ el ] );
+					snaps = getSnapObjects( myParent.element );
 					for( var i=0; i<snaps.length; i++ ){
 						var obj  = { element:snaps[i] };
 						var theX = snaps[i].matrix.tx * myParent.matrix.a + snaps[i].matrix.ty * myParent.matrix.c + myParent.matrix.tx;
@@ -67,14 +66,14 @@ function runScript( commandname ){
 				if( parents.length > 0 ){
 					snaps = [];
 					for( var i=0; i<parents.length; i++ ){
-						var e = parents[i];
-						for( var j=0; j<e.snaps.length; j++ ){
-							var theX = e.snaps[j].matrix.tx * e.element.matrix.a + e.snaps[j].matrix.ty *  e.element.matrix.c +  e.element.matrix.tx;
-							var theY = e.snaps[j].matrix.ty * e.element.matrix.d + e.snaps[j].matrix.tx *  e.element.matrix.b +  e.element.matrix.ty;
-							var pos  = {x:theX, y:theY};
-							var dist = fl.Math.pointDistance( pos, {x:el.matrix.tx, y:el.matrix.ty} );
-							snaps.push( { position:pos, distance:dist, parent:e.element, element:e.snaps[j] } );
-						}
+							var e = parents[i];
+							for( var j=0; j<e.snaps.length; j++ ){
+								var theX = e.snaps[j].matrix.tx * e.element.matrix.a + e.snaps[j].matrix.ty *  e.element.matrix.c +  e.element.matrix.tx;
+								var theY = e.snaps[j].matrix.ty * e.element.matrix.d + e.snaps[j].matrix.tx *  e.element.matrix.b +  e.element.matrix.ty;
+								var pos  = {x:theX, y:theY};
+								var dist = fl.Math.pointDistance( pos, {x:el.matrix.tx, y:el.matrix.ty} );
+								snaps.push( { position:pos, distance:dist, parent:e.element, element:e.snaps[j] } );
+							}
 					}
 					snaps.sort( sortOnDistance );
 				}
@@ -105,15 +104,32 @@ function sortOnDistance( a, b ){
 }
 function isSnapObject( element, aTimeline, currentLayernum, cf, n ){
 	if( isElementSymbol( element ) ){
-		return Boolean( element.libraryItem.getData( "weight" ) == 1 );
+		if( element.libraryItem.getData( "weight" ) == 1 ){
+			var remove = false;
+			var layer = aTimeline.layers[ currentLayernum ];
+			if( layer.frames[ cf ].startFrame != cf ){
+				aTimeline.currentLayer = currentLayernum;
+				aTimeline.convertToKeyframes( cf );
+				remove = true;
+			}
+			var el = layer.frames[ cf ].elements[n];
+			var retval = { matrix:el.matrix };
+			if( remove ){
+				aTimeline.clearKeyframes( cf );
+			}
+			return retval;
+			}
+		else{
+			return null;
+		}
 	}
 	else{
-		return false;
+		return null;
 	}
 }
 function getSnapObjects( element ){
 	if( isElementSymbol( element ) ){
-		var retval = filterStageElements( isSnapObject, element.libraryItem.timeline, true, false, [] );
+		var retval = filterStageElements( isSnapObject, element.libraryItem.timeline, false, false, [] );
 		return retval;
 	}
 	return [];
@@ -150,7 +166,7 @@ function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
 				aTimeline.convertToKeyframes( cf );
 				remove = true;
 			}
-			var el = layer.frames[ cf ].elements[n];
+			var el = layer.frames[ cf ].elements[ n ];
 			el.libraryItem.timeline.currentFrame = el.firstFrame; // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
 			var retval = { element:el, matrix:el.matrix };
 			if( remove ){
