@@ -159,7 +159,7 @@ function createXML(){
 
 		'function isPositiveNumber( n ){' +
 			'var a = isNumber( n );' +
-			'var b = Boolean( n &gt; 0 );' +
+			'var b = Boolean( n &gt; 0 || n == 0 );' +
 			'return ( a+b ) == 2;'+
 		'}' +
 		
