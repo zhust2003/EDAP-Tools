@@ -322,7 +322,7 @@ getSnapObjects				= function( element, flag ){
 			while( j < elts.length ){
 				var elt = elts[j];
 				if( isElementSymbol( elt ) ){
-					if( elt.libraryItem.getData( "weight" ) != 0 ){
+					if( isMagnetTarget( elt ) ){
 						retval.push( elt );
 						if( flag ){
 							return retval;

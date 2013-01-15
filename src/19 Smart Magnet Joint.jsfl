@@ -103,26 +103,21 @@ function sortOnDistance( a, b ){
 	return a.distance - b.distance;
 }
 function isSnapObject( element, aTimeline, currentLayernum, cf, n ){
-	if( isElementSymbol( element ) ){
-		if( element.libraryItem.getData( "weight" ) == 1 ){
-			var remove = false;
-			var layer = aTimeline.layers[ currentLayernum ];
-			if( layer.frames[ cf ].startFrame != cf ){
-				aTimeline.currentLayer = currentLayernum;
-				aTimeline.convertToKeyframes( cf );
-				remove = true;
-			}
-			var el = layer.frames[ cf ].elements[n];
-			var retval = { matrix:el.matrix };
-			if( remove ){
-				aTimeline.clearKeyframes( cf );
-			}
-			return retval;
-			}
-		else{
-			return null;
+	if( isMagnetTarget( element ) ){
+		var remove = false;
+		var layer = aTimeline.layers[ currentLayernum ];
+		if( layer.frames[ cf ].startFrame != cf ){
+			aTimeline.currentLayer = currentLayernum;
+			aTimeline.convertToKeyframes( cf );
+			remove = true;
 		}
-	}
+		var el = layer.frames[ cf ].elements[n];
+		var retval = { element:el, matrix:el.matrix };
+		if( remove ){
+			aTimeline.clearKeyframes( cf );
+		}
+		return retval;
+		}
 	else{
 		return null;
 	}
@@ -159,7 +154,6 @@ function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
 	var remove = false;
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
-			
 			var layer = aTimeline.layers[ currentLayernum ];
 			if( layer.frames[ cf ].startFrame != cf ){
 				aTimeline.currentLayer = currentLayernum;

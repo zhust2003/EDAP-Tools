@@ -1,86 +1,105 @@
 try {
-	runScript( "Create Snap Object" );
+	runScript( "Create Magnet Target" );
 }catch( error ){
 	fl.trace( error );
 }
 
 function runScript( command ){
+	var theKey = fl.tools.getKeyDown();
 	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 	initialize();
-	insertSnapObjects( command, [1] );
+	if( theKey == 53 ){
+		insertSymbol( command, 1 );
+	}
+	else{
+		insertSymbol( command, 2 );
+	}
 }
-
-function insertSnapObjects( commandname, requested ){
+function insertSymbol( commandname, atype ){
 	var currentDoc = fl.getDocumentDOM();
 	var myTimeline = currentDoc.getTimeline();
 	var currentLib = currentDoc.library ;  
 	var items = currentLib.items;
 	var specialLayerNumber = -1;
 
-	// *** 1. Check whether we need to create objects. *** //
-
-	// Check for existing symbols.
+	/*
+		1. Define some variables, depening of what we want to create.
+		2. Check whether we need to create the symbol.
+		3. Check if there is a "special" layer. If it does not exist - create it.
+		4. Create the necessary symbol.
+		5. Copy the symbol, so we can paste it in the center of the visible part of the stage / regpoint of the symbol /.
+		6. Set the "special" layer as a current.
+		7. Paste the symbol in the centre of the visible area / regpoint of the symbol /.
+		8. Display messages.
+	*/
+	
+	// 1
+	var myTypeString, specialLayerName, myType, myItemName, layerMessage;
+	if( atype == 1 ){
+		myTypeString = "CenterMarker";
+		specialLayerName = EDAPSettings.createMagnetTarget.markerLayerName;
+		myType = "marker";
+		myItemName = "Center Marker";
+		layerMessage = "center markers";
+	}
+	else if( atype == 2 ){
+		myTypeString = "MagnetTarget";
+		specialLayerName = EDAPSettings.createMagnetTarget.targetLayerName;
+		myType = "target";
+		myItemName = "Magnet Target";
+		layerMessage = "magnet targets"
+	}
+	
+	// 2
 	var theSymbols = [];
 	for( var i=0; i<items.length; i++ ){
 		var item = items[i];
-		if( item.hasData( "signature" ) && item.hasData( "weight" ) ){
-			if( item.getData( "signature" ) == "EDAPT" ){
-				theSymbols.push( { weight:item.getData( "weight" ), item:item } );
+		if( item.hasData( "signature" ) ){
+			if( item.getData( "signature" ) == "EDAPT" && item.getData( "type" ) == myTypeString ){
+				theSymbols.push( item );
 			}
 		}
 	}
-	// Remove the alreday existing weights from the list of required weights.
-	weights = requested.slice(0);
-	for( var i=0; i<theSymbols.length; i++ ){
-		var w = theSymbols[i].weight;
-		if( include( weights, w ) ){
-			var idx = indexOf( weights, w );
-			if( idx != -1 ){
-				weights.splice( idx, 1 );
-			}
-		}
-	}
+	var symbolExists = ( theSymbols.length > 0 );
 
-	// *** 2. Check if there is a "special" layer. If it does not exist - create it. *** //
-
-	// Check for the "special" layer existance.
+	
+	// 3
 	var affectedLayers = myTimeline.layers;
+	var layerExists = false;
 	for( var i=0; i<affectedLayers.length; i++ ){
 		var l = affectedLayers[i];
 		if( l.layerType != "folder" ){
-			if( l.name == EDAPSettings.createMagnetTarget.layerName ){
+			if( l.name == specialLayerName ){
 				specialLayerNumber = i;
+				layerExists = true;
 				break;
 			}
 		}
 	}
 	
 	if( specialLayerNumber == -1 ){
-		var xlayer = createSpecialLayer( currentDoc );
+		var xlayer = createSpecialLayer( currentDoc, myType );
 		specialLayerNumber = indexOf( myTimeline.layers, xlayer );
 	}
 	
-	// *** 3. Create the necessary list of symbols. *** //
+	// 4
 	var originalStroke = currentDoc.getCustomStroke( "toolbar" );
-	if( weights.length > 0 ){
+	if( ! symbolExists ){
 		var tempDoc = fl.createDocument( "timeline" );
 		var tempLib = tempDoc.library;
 		var myStroke = createStroke();
 		tempDoc.setCustomStroke( myStroke );
-
-		// Create needed symbols.
-		for( var i=0; i<weights.length; i++ ){
-			var name =  "MagnetTarget" + weights[i].toString();
-			var success = tempLib.addNewItem( "graphic", name );
-			if( success ){
-				var mySymbol = tempLib.getSelectedItems()[0];
-				mySymbol.addData( "weight", "integer", weights[i] );
-				mySymbol.addData( "signature", "string", "EDAPT" );
-				tempLib.editItem();
-				drawShape( tempDoc, weights[i] );
-				tempDoc.exitEditMode();
-				theSymbols.push( { weight:weights[i], item:mySymbol } );
-			}
+		// Create needed symbol
+		var success = tempLib.addNewItem( "graphic", myItemName );
+		if( success ){
+			var mySymbol = tempLib.getSelectedItems()[0];
+			mySymbol.addData( "type", "string", myTypeString );
+			mySymbol.addData( "signature", "string", "EDAPT" );
+			tempLib.editItem();
+			drawShape( tempDoc, myType );
+			createInfo( tempDoc );
+			tempDoc.exitEditMode();
+			theSymbols.push( mySymbol );
 		}
 		// A workaround for stroke "noStroke" Flash bug.
 		if( originalStroke.style == "noStroke" ){
@@ -95,49 +114,64 @@ function insertSnapObjects( commandname, requested ){
 		}	
 	}
 
-	// *** 4. Copy the symbols, so we can paste them in the center of the visible part of the stage. *** //
-	if( weights.length == 0 ){
-		copySymbols( currentDoc, requested, theSymbols, true );
+	// 5
+	if( symbolExists ){
+		copySymbols( currentDoc, theSymbols, true );
 	}
 	else{
-		copySymbols( tempDoc, requested, theSymbols, false );
+		copySymbols( tempDoc, theSymbols, false );
 	}
-
 	if( tempDoc ){
 		tempLib = null;
 		fl.closeDocument( tempDoc, false ); 
 	}
 
-	// *** 5. Set the "special" layer as a current. *** //
+	// 6
 	myTimeline.currentLayer = specialLayerNumber;
 
-	// *** 6. Paste the symbols in the centre of the visible area. *** //
+	// 7
 	if( myTimeline.layers[ myTimeline.currentLayer ].locked == false ){
 		currentDoc.clipPaste();
+		if( atype == 1 ){
+			currentDoc.distribute( "horizontal center", true );
+			currentDoc.distribute( "vertical center", true );
+		}
 	}
 	else{
-		displayMessage( commandname + " : The '" + EDAPSettings.createMagnetTarget.layerName + "' layer is locked.", 2 );	
+		displayMessage( commandname + " : The '" + specialLayerName + "' layer is locked.", 2 );	
 	}
 
-	// *** 7. Display messages. *** //
+	// 8
 	if( EDAPSettings.createMagnetTarget.showAlert == true ){
-		var message = "A layer called &quot;" + EDAPSettings.createMagnetTarget.layerName + "&quot; was created for convenience." + "\n" +
+		var message = "A layer called &quot;" + specialLayerName + "&quot; was created for convenience." + "\n" +
 		"It is recommended to place all needed instances of" + "\n" +
-		"the snap objects onto this layer.";
-		if( specialLayerNumber == -1 ){
+		"the "+ layerMessage +" onto this layer.";
+		if( ! layerExists ){
 			displayOptionalMessageBox( commandname,  message, "createMagnetTarget" );
 		}
 	}
 }
-function createSpecialLayer( doc ){
+function createSpecialLayer( doc, atype ){
 	doc.getTimeline().currentLayer = 0;
-	doc.getTimeline().addNewLayer( EDAPSettings.createMagnetTarget.layerName );
+	var myName, myColor, myType;
+	if( atype == "target" ){
+		myName = EDAPSettings.createMagnetTarget.targetLayerName;
+		myColor = "#FF0000";
+		myType = "guide";
+	}
+	else if ( atype == "marker" ){
+		myName = EDAPSettings.createMagnetTarget.markerLayerName;
+		myColor = "#0000FF";
+		myType = "normal";
+	}
+	doc.getTimeline().addNewLayer( myName );
 	var xLayer = doc.getTimeline().layers[ doc.getTimeline().currentLayer ];
-	xLayer.color = "#FF0000";
+	xLayer.color = myColor;
 	xLayer.outline = true;
+	xLayer.layerType = myType;
 	return xLayer;
 }
-function copySymbols( theDocument, weights, theSymbols, isCurrent ){
+function copySymbols( theDocument, theSymbols, isCurrent ){
 	var timeline = theDocument.getTimeline();
 	if( isCurrent ){
 		var layerMap = createObjectStateMap( timeline.layers, [ "locked" ] );
@@ -145,15 +179,9 @@ function copySymbols( theDocument, weights, theSymbols, isCurrent ){
 		timeline.setSelectedLayers( n, true );
 		theDocument.getTimeline().currentLayer = n; 
 	}
-	for( var i=0; i<weights.length; i++ ){
-		var w = weights[i];
-		for( j=0; j<theSymbols.length; j++ ){
-			var xObject = theSymbols[j];
-			if( xObject.weight == w ){
-				theDocument.library.addItemToDocument({x:0, y:0}, xObject.item.name );
-				break;
-			}
-		}
+	for( var i=0; i<theSymbols.length; i++ ){
+		var so = theSymbols[i];
+		theDocument.library.addItemToDocument({x:0, y:0}, so.name );
 	}
 	if( isCurrent ){
 		timeline.setLayerProperty( "locked", true, "others" );
@@ -167,8 +195,14 @@ function copySymbols( theDocument, weights, theSymbols, isCurrent ){
 }
 
 // Drawing functions
-function drawShape( theDocument, w ){
-	createCircle( theDocument, w, {x:0, y:0}, 6 );
+function drawShape( theDocument, atype ){
+	if( atype == "target" ){
+		createCircle( theDocument, {x:0, y:0}, 6 );
+	}
+	else if( atype == "marker" ){
+		createSquare( theDocument, {x:0, y:0}, 6 );
+	}
+
 	// Select, ungroup and make fill and stroke invisible.
 	theDocument.selectAll();
 	var needToUngroup = false;
@@ -183,7 +217,7 @@ function drawShape( theDocument, w ){
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );
 }
-function createCircle( theDocument, anumber, acenter, radius ){
+function createCircle( theDocument, acenter, radius ){
 	var l = acenter.x - radius;
 	var t = acenter.y - radius;
 	var r = acenter.x + radius;
@@ -198,7 +232,56 @@ function createCircle( theDocument, anumber, acenter, radius ){
 	theDocument.selectAll();
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );
-	theDocument.setStrokeStyle( "hairline" );	
+	theDocument.setStrokeStyle( "hairline" );
+	theDocument.getTimeline().setLayerProperty( "locked", true );
+}
+function createSquare( theDocument, acenter, radius ){
+	var l = acenter.x - radius;
+	var t = acenter.y - radius;
+	var r = acenter.x + radius;
+	var b = acenter.y + radius;
+	var f = radius * 0.4;
+	var lx = acenter.x;
+	var ly = acenter.y;
+	
+	var data = createPolygon( 4, {x:0, y:0}, 6 );
+	var path = polygonToPath( data );
+	path.makeShape();
+	
+	theDocument.addNewLine({x:lx, y:-radius/4 + ly}, {x:lx, y:radius/4 + ly});
+	theDocument.addNewLine({x:-radius/4+lx, y:ly}, {x:radius/4+lx, y:ly});
+
+	theDocument.selectAll();
+	theDocument.setFillColor( null );
+	theDocument.setStrokeColor( "#00000001" );
+	theDocument.setStrokeStyle( "hairline" );
+	theDocument.getTimeline().setLayerProperty( "locked", true );
+}
+function createInfo( theDocument ){
+	theDocument.getTimeline().setFrameProperty( "name", 
+	"   >> http://flash-powertools.com -- this invisible object comes from EDAP Tools - extensions for Flash character animation." );
+	theDocument.getTimeline().setFrameProperty( "labelType", "comment" );
+	theDocument.getTimeline().insertKeyframe( 99 );	
+}
+function createPolygon( sides, center, radius ){
+	var out = new Array();
+	out.push( center.x +  radius * Math.cos(0) );
+	out.push( center.y +  radius *  Math.sin(0) );
+	for (var i = 1; i <= sides;i += 1) {
+		out.push( center.x + radius * Math.cos(i * 2 * Math.PI / sides ) );
+		out.push( center.y + radius * Math.sin(i * 2 * Math.PI / sides ) );	
+	}
+	return out;
+}
+function polygonToPath( thePolygon ) {
+	var path = fl.drawingLayer.newPath();
+	path.addPoint( thePolygon[0],  thePolygon[1] );
+	var index = 3;
+	while ( index < thePolygon.length ){
+		path.addPoint( thePolygon[index-1],  thePolygon[index] );
+		index += 2;
+	}
+	return path;
 }
 function createStroke(){
 	return { thickness:1, 
@@ -208,7 +291,8 @@ function createStroke(){
 			scaleType:"normal",
 			joinType:"round",
 			capType:"round",						
-			miterLimit:3, 
+		
+	miterLimit:3, 
 			style:"solid", 
 			shapeFill:{ color:"#000000", style:"solid", matrix:{ a:1, b:0, c:0, d:1, tx:0, ty:0 } } };
 }

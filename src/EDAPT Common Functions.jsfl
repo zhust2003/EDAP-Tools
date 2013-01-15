@@ -101,7 +101,8 @@ createSettings = function( context ){
 
 	//CreateSnapObject
 	context.EDAPSettings.createMagnetTarget = new Object();
-	context.EDAPSettings.createMagnetTarget.layerName = "Magnet Target(s)";
+	context.EDAPSettings.createMagnetTarget.targetLayerName = "Magnet Target(s)";
+	context.EDAPSettings.createMagnetTarget.markerLayerName = "Center Marker(s)";
 	context.EDAPSettings.createMagnetTarget.showAlert = true;
 
 	//SmartSnap
@@ -285,6 +286,28 @@ setRigData = function( element, data ){
 	}
 	return false;
 }
+
+isMagnetTarget = function( element ){
+	var retval = false;
+	if( isElementSymbol( element ) ){
+		var item = element.libraryItem;
+		if( item.hasData( "signature" ) ){
+			if( item.getData( "signature" ) == "EDAPT" && item.getData( "type" ) == "Magnet Target" ){
+				retval = true;
+			}
+		}
+	}
+	else if( element.symbolType ){
+		if( element.hasData( "signature" ) ){
+			if( element.getData( "signature" ) == "EDAPT" && element.getData( "type" ) == "Magnet Target" ){
+				retval = true;
+			}
+		}
+	}
+	return retval;
+}
+
+
 
 filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, excludeElements ){
 	/*
