@@ -292,14 +292,14 @@ isMagnetTarget = function( element ){
 	if( isElementSymbol( element ) ){
 		var item = element.libraryItem;
 		if( item.hasData( "signature" ) ){
-			if( item.getData( "signature" ) == "EDAPT" && item.getData( "type" ) == "Magnet Target" ){
+			if( item.getData( "signature" ) == "EDAPT" && item.getData( "type" ) == "MagnetTarget" ){
 				retval = true;
 			}
 		}
 	}
 	else if( element.symbolType ){
 		if( element.hasData( "signature" ) ){
-			if( element.getData( "signature" ) == "EDAPT" && element.getData( "type" ) == "Magnet Target" ){
+			if( element.getData( "signature" ) == "EDAPT" && element.getData( "type" ) == "MagnetTarget" ){
 				retval = true;
 			}
 		}
@@ -307,7 +307,25 @@ isMagnetTarget = function( element ){
 	return retval;
 }
 
-
+isCenterMarker = function( element ){
+	var retval = false;
+	if( isElementSymbol( element ) ){
+		var item = element.libraryItem;
+		if( item.hasData( "signature" ) ){
+			if( item.getData( "signature" ) == "EDAPT" && item.getData( "type" ) == "CenterMarker" ){
+				retval = true;
+			}
+		}
+	}
+	else if( element.symbolType ){
+		if( element.hasData( "signature" ) ){
+			if( element.getData( "signature" ) == "EDAPT" && element.getData( "type" ) == "CenterMarker" ){
+				retval = true;
+			}
+		}
+	}
+	return retval;
+}
 
 filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, excludeElements ){
 	/*
@@ -777,7 +795,7 @@ getGlobal = function(){
 		return this;
 	}).call(null);
 }
-traceObject = function( obj, maxlevel, level ){
+traceObject = function( obj, maxlevel, level, props ){
 	if( ! maxlevel ){ maxlevel = 1 };
 	if( ! level ){ level = 0 };
 	
@@ -786,6 +804,7 @@ traceObject = function( obj, maxlevel, level ){
 	var m = today.getMinutes();
 	var s = today.getSeconds();
 	var d = h + ":" + ( ( m < 10 ) ? "0" + m : m ) + ":" + ( ( s < 10 ) ? "0" + s : s );
+	var cnt = 0;
 	
 	if( level == 0 ){ fl.trace( "***** " + ( ( obj.name ) ? obj.name : obj ) + " ( " + Object.prototype.toString.call( obj ).match(/^\[object (.*)\]$/)[1] +" ) " + d + " *****" ); }
 	if( level < maxlevel ){
@@ -794,16 +813,32 @@ traceObject = function( obj, maxlevel, level ){
 			prefix += "\t";
 		}
 		for( var p in obj ){
+			cnt ++;
 			var prop = obj[ p ];
 			var type = Object.prototype.toString.call( prop ).match(/^\[object (.*)\]$/)[1];
 			if( typeof prop == "object" ){
 				if( level == 0 ){ fl.trace( "------------------------------------------------" ); }
-				fl.trace( prefix + p + "(" + type + " )" );
-				traceObject( prop, maxlevel, level + 1 );
+				if( props ){
+					if( include( props, p ) ){
+						fl.trace( cnt + ". " + prefix + p + "(" + type + " )" );
+						traceObject( prop, maxlevel, level + 1 );
+					}
+				}
+				else{
+					fl.trace( cnt + ". " + prefix + p + "(" + type + " )" );
+				}
+				traceObject( prop, maxlevel, level + 1, props );
 			}
 			else{
 				if( level == 0 ){ fl.trace( "------------------------------------------------" ); }
-				fl.trace( prefix + p + ": " + prop + "( " + type + " )" );
+				if( props ){
+					if( include( props, p ) ){
+						fl.trace( cnt + ". " + prefix + p + ": " + prop + "( " + type + " )" );
+					}
+				}
+				else{
+					fl.trace( cnt + ". " + prefix + p + ": " + prop + "( " + type + " )" );
+				}
 			}
 		}
 	}

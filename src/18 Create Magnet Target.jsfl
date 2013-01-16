@@ -1,3 +1,21 @@
+/*
+Electric Dog Flash Animation Power Tools
+Copyright (C) 2011  Vladin M. Mitov
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/.
+*/
+
 try {
 	runScript( "Create Magnet Target" );
 }catch( error ){
@@ -101,6 +119,7 @@ function insertSymbol( commandname, atype ){
 			tempDoc.exitEditMode();
 			theSymbols.push( mySymbol );
 		}
+
 		// A workaround for stroke "noStroke" Flash bug.
 		if( originalStroke.style == "noStroke" ){
 			currentDoc.swapStrokeAndFill();
@@ -111,7 +130,7 @@ function insertSymbol( commandname, atype ){
 		}
 		else{
 			currentDoc.setCustomStroke( originalStroke );
-		}	
+		}
 	}
 
 	// 5
@@ -200,7 +219,6 @@ function drawShape( theDocument, atype ){
 	else if( atype == "marker" ){
 		createSquare( theDocument, {x:0, y:0}, 6 );
 	}
-
 	// Select, ungroup and make fill and stroke invisible.
 	theDocument.selectAll();
 	var needToUngroup = false;
@@ -210,10 +228,13 @@ function drawShape( theDocument, atype ){
 			break;
 		}
 	}
-	if( needToUngroup ){ theDocument.unGroup(); }; 
+	if( needToUngroup ){
+		theDocument.unGroup();
+	}
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );
+	theDocument.getTimeline().setLayerProperty( "locked", true );
 }
 function createCircle( theDocument, acenter, radius ){
 	var l = acenter.x - radius;
@@ -231,7 +252,6 @@ function createCircle( theDocument, acenter, radius ){
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );
-	theDocument.getTimeline().setLayerProperty( "locked", true );
 }
 function createSquare( theDocument, acenter, radius ){
 	var l = acenter.x - radius;
@@ -253,7 +273,6 @@ function createSquare( theDocument, acenter, radius ){
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );
-	theDocument.getTimeline().setLayerProperty( "locked", true );
 }
 function createInfo( theDocument ){
 	theDocument.getTimeline().setFrameProperty( "name", 
@@ -288,9 +307,8 @@ function createStroke(){
 			strokeHinting:false,
 			scaleType:"normal",
 			joinType:"round",
-			capType:"round",						
-		
-	miterLimit:3, 
+			capType:"round",
+			miterLimit:3, 
 			style:"solid", 
 			shapeFill:{ color:"#000000", style:"solid", matrix:{ a:1, b:0, c:0, d:1, tx:0, ty:0 } } };
 }
