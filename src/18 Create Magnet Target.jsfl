@@ -153,22 +153,20 @@ function insertSymbol( commandname, atype ){
 }
 function createSpecialLayer( doc, atype ){
 	doc.getTimeline().currentLayer = 0;
-	var myName, myColor, myType;
+	var myName, myColor;
 	if( atype == "target" ){
 		myName = EDAPSettings.createMagnetTarget.targetLayerName;
 		myColor = "#FF0000";
-		myType = "guide";
 	}
 	else if ( atype == "marker" ){
 		myName = EDAPSettings.createMagnetTarget.markerLayerName;
 		myColor = "#0000FF";
-		myType = "normal";
 	}
 	doc.getTimeline().addNewLayer( myName );
 	var xLayer = doc.getTimeline().layers[ doc.getTimeline().currentLayer ];
 	xLayer.color = myColor;
 	xLayer.outline = true;
-	xLayer.layerType = myType;
+	xLayer.layerType = "guide";
 	return xLayer;
 }
 function copySymbols( theDocument, theSymbols, isCurrent ){
