@@ -139,13 +139,16 @@ function getTargetMatrix( element, aTimeline, currentLayernum, cf, n ){
 			remove = true;
 		}
 		var el = layer.frames[ cf ].elements[n];
-		el.libraryItem.timeline.currentFrame = el.firstFrame;  // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
-		var snaps = getSnapObjects( el );
-		var retval = { element:el, matrix:el.matrix, snaps:snaps };
-		if( remove ){
-			aTimeline.clearKeyframes( cf );
+		if( isElementSymbol( el ) ){
+			el.libraryItem.timeline.currentFrame = el.firstFrame;  // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
+			var snaps = getSnapObjects( el );
+			var retval = { element:el, matrix:el.matrix, snaps:snaps };
+			if( remove ){
+				aTimeline.clearKeyframes( cf );
+			}
+			return retval;		
 		}
-		return retval;
+		return null;
 	}
 	return null;
 }
@@ -161,12 +164,15 @@ function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
 				remove = true;
 			}
 			var el = layer.frames[ cf ].elements[ n ];
-			el.libraryItem.timeline.currentFrame = el.firstFrame; // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
-			var retval = { element:el, matrix:el.matrix };
-			if( remove ){
-				aTimeline.clearKeyframes( cf );
-			}						
-			return retval;
+			if( isElementSymbol( el ) ){
+				el.libraryItem.timeline.currentFrame = el.firstFrame; // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
+				var retval = { element:el, matrix:el.matrix };
+				if( remove ){
+					aTimeline.clearKeyframes( cf );
+				}						
+				return retval;
+			}
+			return null;
 		}
 		return null;
 	}
