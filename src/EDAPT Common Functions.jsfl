@@ -278,10 +278,10 @@ getRigData = function( element ){
 	return null;
 }
 
-setRigData = function( element, data ){
+setRigData = function( element, dataObj ){
 	if( isElementSymbol( element ) ){
 		element.removePersistentData( "rigData" );
-		element.setPersistentData( "rigData", "string", data );
+		element.setPersistentData( "rigData", "string", JSON.stringify( dataObj ) );
 		return true;
 	}
 	return false;
@@ -387,7 +387,6 @@ filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, exc
 
 // Messages
 displayDialogue = function( atitle, amessage ){
-	fl.trace( atitle );
 	var messageLines = "";
 	var myLines = amessage.split( "\n" );
 	for( var i=0; i<myLines.length; i++ ){
