@@ -48,6 +48,8 @@ function runScript( commandname ){
 				if( parents.length > 0 ){
 					var myParent = parents[0];
 					snaps = getSnapObjects( myParent.element );
+					
+					/* Old functionality
 					for( var i=0; i<snaps.length; i++ ){
 						var obj  = { element:snaps[i] };
 						var theX = snaps[i].matrix.tx * myParent.matrix.a + snaps[i].matrix.ty * myParent.matrix.c + myParent.matrix.tx;
@@ -59,6 +61,25 @@ function runScript( commandname ){
 						snaps[i] = obj;
 					}
 					snaps.sort( sortOnDistance );
+					*/
+
+					var t = [];
+					for( var i=0; i<snaps.length; i++ ){
+						var mInfo = getRigData( snaps[i].element );
+						if( mInfo ){
+							if( mInfo.id == inf.snapTo ){
+								var obj  = { element:snaps[i] };
+								var theX = snaps[i].matrix.tx * myParent.matrix.a + snaps[i].matrix.ty * myParent.matrix.c + myParent.matrix.tx;
+								var theY = snaps[i].matrix.ty * myParent.matrix.d + snaps[i].matrix.tx * myParent.matrix.b + myParent.matrix.ty;
+								var pos  = {x:theX, y:theY};
+								obj.position = pos;
+								t.push( obj );
+							}
+						}
+					}
+					snaps = t.slice(0);
+					
+					
 				}
 			}
 			else{

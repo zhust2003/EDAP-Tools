@@ -4,30 +4,7 @@ initialize();
 fl.showIdleMessage( false );
 lastCurrentTimeline = null;
 
-message						= function( atitle, amessage ){
-	var messageLines = "";
-	var myLines = amessage.split( "***" );
-	for( var i=0; i<myLines.length; i++ ){
-		messageLines += ( '<label value="'+ myLines[i] + '"/>');
-	}
-	var xmlContent = '<?xml version="1.0"?>' +
-	'<dialog buttons="accept" title="' + atitle + '">' +
-	'<vbox>' +
-		messageLines +
-		'<spacer></spacer>' +
-		'<spacer></spacer>' +
-		'<separator></separator>' +
-		'<spacer></spacer>' +
-	'</vbox>' +
-	'</dialog>';
-	var xmlFile = fl.configURI + "WindowSWF/SmartMagnetRig.xml";
-	if ( FLfile.exists( xmlFile ) ) {
-		FLfile.remove( xmlFile );	
-	}
-	FLfile.write( xmlFile, xmlContent );
-	var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
-	FLfile.remove( xmlFile );	
-}
+
 newRig						= function(){
 	var doc = fl.getDocumentDOM();
 	if( doc ){
@@ -56,10 +33,10 @@ newRig						= function(){
 }
 exportRigs					= function( jsonData, currentnum ){
 	/* 
-	folderName: "file:///D|/BOOKZ"
-	fileName: "koko"
-	exportAll: "false"
-	dismiss: "cancel", "accept"
+		folderName: "file:///D|/BOOKZ"
+		fileName: "koko"
+		exportAll: "false"
+		dismiss: "cancel", "accept"
 	*/
 	var doc = fl.getDocumentDOM();
 	var retval = new Object();
@@ -101,9 +78,8 @@ exportRigs					= function( jsonData, currentnum ){
 		var data = JSON.parse( jsonData );
 		var fileName;
 		
-		if( ! isValidName( settings.folderName ) ){
+		if( ! ( ( typeof( settings.folderName ) == "string" ) && ( settings.folderName.length > 0 ) && ( settings.folderName != "null" ) ) ){
 			retval.result = 'Invalid folder.';
-			//fl.trace( "[" + settings.folderName + "]" ); //***
 			return JSON.stringify( retval );
 		}
 		else{
@@ -170,7 +146,6 @@ retreiveRigsFromDocument	= function(){
 	return '';
 }
 getCurrentRigInfo			= function( id ){
-	
 	var doc = fl.getDocumentDOM();
 	if( doc ){
 		var tml = doc.getTimeline();
@@ -188,7 +163,7 @@ getCurrentRigInfo			= function( id ){
 					var obj = getRigData( el );
 					if( obj ){
 						if( obj.rig == id ){
-							obj.hasSnapObject = Boolean( getSnapObjects( el, true ).length > 0 );
+							obj.hasSnapObject =  Boolean( getSnapObjectsInElement( el ).length > 0 );
 							obj.selected = include( doc.selection, el );
 							out.push( obj );
 						}
@@ -199,60 +174,32 @@ getCurrentRigInfo			= function( id ){
 			return '';
 		}
 	}
-	
 	return '';
 }
 getLinkedSymbolInfo 		= function( adata ){
-	var args = JSON.parse( adata );
-	var elts = getAllStageElements();
-	var cnt = elts.length;
-	while( cnt-- ){
-		var el = elts[ cnt ];
-		var inf = getRigData( el );
-		var hasName = false;
-		if ( el.symbolType == "movie clip" || el.symbolType == "button" ){
-			if( el.name.length > 0 ){
-				hasName = true;
-			}
-		}
-		if( inf ){
-			if( inf.rig == args.rig && inf.id == args.id ){
-				return "Symbol: " + el.libraryItem.name + ( hasName ? ( ",      Instance: " + el.name ) : "" );	
-			}
-		}
-	}
-	return '';
-}
-setRigInfo					= function( rigdata ){
-	fl.trace( rigdata );
 	var doc = fl.getDocumentDOM();
 	if( doc ){
-		var sel = doc.selection;
-		if( sel.length == 1 ){
-			var el = sel[0];
-			if( isElementSymbol( el ) ){
-				var current = getRigData( el );
-				if( ! current ){
-					var inf = JSON.parse( rigdata );
-					setRigData( el, rigdata );
-					doc.rotateSelection( 45 );  // Bug Fix - To force 'Save' command in Flash
-					doc.rotateSelection( -45 );
-					return "link";
+		var args = JSON.parse( adata );
+		var elts = getAllStageElements();
+		var cnt = elts.length;
+		while( cnt-- ){
+			var el = elts[ cnt ];
+			var inf = getRigData( el );
+			var hasName = false;
+			if ( el.symbolType == "movie clip" || el.symbolType == "button" ){
+				if( el.name.length > 0 ){
+					hasName = true;
 				}
-				else{
-					removeRigData( el );
-					return "unlink";
+			}
+			if( inf ){
+				if( inf.rig == args.rig && inf.id == args.id ){
+					return "Symbol: " + el.libraryItem.name + ( hasName ? ( ",      Instance: " + el.name ) : "" );	
 				}
 			}
 		}
+		return '';
 	}
-}
-createSnapInfo				= function( rigdata ){
-	var args = JSON.parse( rigdata );
-	var info = new Object();
-	info.rig = args.rig;
-	info.parent = args.id;
-	return JSON.stringify( info );
+	return '';
 }
 removeSelectedNodes 		= function(){
 	var doc = fl.getDocumentDOM();
@@ -270,99 +217,245 @@ removeSelectedNodes 		= function(){
 				}
 				removeRigData( el );
 			}
-			message( 'Remove Links', cnt + " link(s) are removed." );
+			displayDialogue( "Remove Links", cnt + " link(s) are removed.", "accept" );
 		}
 		else{
-			message( 'Remove Links', 'Select some symbol instances to perform this command.' );
+			displayDialogue( "Remove Links", "Select some symbol instances to perform this command.", "accept" );
 		}
 	}
 	return JSON.stringify( retval );
 }
-traceObj 					= function ( obj ){
-	for( p in obj ){
-		fl.trace( p + ": " + obj[ p ] );
+setRigInfo					= function( infoString ){
+	var doc = fl.getDocumentDOM();
+	if( ! doc ){ return;}
+	if( doc.selection.length > 1 ){ 
+		displayDialogue( "Set Rig Information", "Please, select a single element.", "accept" );
+		return;
+	}
+	var element = getSelection( doc, true );
+	if( ! element ){ return;}
+	
+	var rigDataObj = JSON.parse( infoString );
+	var infoObj = getRigData( element );
+	
+	if( infoObj ){
+		if( infoObj.rig == rigDataObj.rig ){
+			unLink( element );
+		}
+		else{
+			var settings = displayDialogue( "Rig information", "The selected element is part of another rig.", "accept" );
+			if( settings.dismiss == "accept" ){
+				link( doc, element, rigDataObj );
+			}
+		}
+	}
+	else{
+		link( doc, element, rigDataObj );
 	}
 }
-
-// HELPER FUNCTIONS
-findSnapInParent			= function( element, inf ){
-	var radius = 4;
-	if( isElementSymbol( element ) ){
-		var parent = findParent( inf );
-		if( parent ){
-			var snaps = getSnapObjects( parent, false );
-			for( var i=0; i<snaps.length; i++ ){
-				var snap = snaps[i];
-				var p1 = {	x:snap.matrix.tx * parent.matrix.a + snap.matrix.ty * parent.matrix.c + parent.matrix.tx, 
-							y:snap.matrix.ty * parent.matrix.d + snap.matrix.tx * parent.matrix.b + parent.matrix.ty };
-				var p2 = { x:element.matrix.tx, y:element.matrix.ty };
-				var dist = fl.Math.pointDistance( p1, p2 );
-				if( dist <= radius ){
-					return snap;
+link						= function( doc, element, rigDataObject ){
+	var myTimeline = doc.getTimeline();
+	var myInfObj = getRigData( element );
+	var snapInfo = createSnapInfo( myTimeline, element, rigDataObject );
+	var myID = snapInfo.id;
+	if( rigDataObject.parent == "" ){ // ROOT
+		doc.enterEditMode();
+		for( var i=0; i<snapInfo.snaps.length; i++ ){
+			if( ! getRigData( snapInfo.snaps[i] ) ){
+				myID ++;
+				var ok1 = setRigData( snapInfo.snaps[i], { rig:rigDataObject.rig, id:String( myID ) } );
+			}
+		}
+		doc.exitEditMode();
+		var ok2 = setRigData( element, rigDataObject  );
+	}
+	else{// CHILD
+		doc.enterEditMode();
+		for( var i=0; i<snapInfo.snaps.length; i++ ){
+			if( ! getRigData( snapInfo.snaps[i] ) ){
+				myID ++;
+				var ok1 = setRigData( snapInfo.snaps[i], { rig:rigDataObject.rig, id:String( myID ) } );
+			}
+		}
+		doc.exitEditMode();		
+		var parent = getMyParent( myTimeline, rigDataObject );
+		var pSnaps = getSnapObjectsInElement( parent );
+		var xSnap = null;
+		for( var j=0; j<pSnaps.length; j++ ){
+			var d = fl.Math.pointDistance( elementToContainer( parent, pSnaps[j] ), {x:element.matrix.tx, y:element.matrix.ty} );
+			if( d <= 4 ){
+				xSnap = pSnaps[j];
+				break;
+			} 
+		}
+		if( xSnap ){
+			var id = getRigData( xSnap ).id;
+			rigDataObject.snapTo = id;
+			var ok2 = setRigData( element, rigDataObject );
+		}
+		else{
+			var settings = displayDialogue( "Rig information", "No snap object found", "accept" );
+			return;
+		}	
+	}
+	var mysiblings = filterStageElements( isMySibling, myTimeline, true, false, [], element, rigDataObject );
+	for( var sib = 0; sib < mysiblings.length; sib ++ ){
+		var children = [];
+		var xSibling = mysiblings[ sib ];
+		getMyChildren( xSibling, myTimeline, children, false );
+		var sibSnaps = getSnapObjectsInElement( xSibling );
+		var unmatched = [];
+		for( var ch = 0; ch < children.length; ch ++ ){
+			// Iterate through all snap-objects and check the distances
+			var xChild = children[ ch ];
+			var success = false;
+			for( var sn = 0; sn < sibSnaps.length; sn ++ ){
+				var xSnap = sibSnaps[ sn ];
+				var dist = fl.Math.pointDistance( elementToContainer( xSibling, xSnap ), {x:xChild.matrix.tx, y:xChild.matrix.ty} );
+				if( dist <= 4 ){
+					var snapID = getRigData( xSnap ).id;
+					if( snapID ){
+						var oldInfo = getRigData( xChild );
+						oldInfo[ "snapTo" ] = snapID;
+						setRigData( xChild, oldInfo );
+						success = true;
+					}
 				}
 			}
-			return null;
+			if( ! success ){
+				unmatched.push( xChild );
+			}
 		}
-		return null;
 	}
-	return null;
+	if( unmatched.length > 0 ){
+		doc.selection = unmatched;
+		var settings = displayDialogue( "Rig information", "Error!", "accept" );
+	}	
 }
-getSnapObjects				= function( element, flag ){
+unLink						= function( element ){
+	removeRigData( element );
+}
+
+
+// HELPER FUNCTIONS
+createSnapInfo				= function( myTimeline, element, rigDataObject ){
+	var mtID = getMaxID( myTimeline, rigDataObject ); // Find maximum existing ID number
+	var mySnaps = filterStageElements( isMagnetTarget, element.libraryItem.timeline, true, false, [] );
+	return { id:mtID, snaps:mySnaps };
+}
+getMaxID					= function( myTimeline, inf ){
+	var snaps = collectUniqueSnapObjects( myTimeline, inf );
+	var maxID;
+	if( snaps.length > 0 ){
+		snaps.sort( sortOnID );
+		maxID = Number( getRigData( snaps[ snaps.length-1 ] ).id );
+	}
+	else{
+		maxID = 0;
+	}
+	return maxID;
+}
+collectUniqueSnapObjects	= function( aTimeline, inf ){
 	var retval = [];
-	var tml = element.libraryItem.timeline;
-	var layers = tml.layers;
-	var currentframe = tml.currentFrame;
-	tml.currentFrame =  element.firstFrame; // bugfix  2011/08/31
+	var layers = aTimeline.layers;
+	var cf = aTimeline.currentFrame;
 	var i = 0;
 	while ( i < layers.length ){
-		var cf = layers[i].frames[ currentframe ];								
-		if( cf ){
-			var elts = cf.elements;
-			var j = 0;
-			while( j < elts.length ){
-				var elt = elts[j];
-				if( isElementSymbol( elt ) ){
-					if( isMagnetTarget( elt ) ){
-						retval.push( elt );
-						if( flag ){
-							return retval;
+		var layer = layers [i];
+		var frames = layer.frames;
+		if( frames[ cf ] ){
+			var elements = frames[ cf ].elements;
+			var n = 0;
+			while ( n < elements.length ){
+				var el = layer.frames[ cf ].elements[ n ];
+				var mysnaps = getSnapObjectsInElement( el );
+				for( var j=0; j<mysnaps.length; j++ ){
+					var sno = mysnaps[ j ];
+					if( ! include( retval, sno ) ){
+						var data = getRigData( sno );
+						if( data ){
+							if( data.rig == inf.rig ){
+								retval.push( sno );	
+							}
 						}
 					}
 				}
-				j++;
+				n ++;
 			}
 		}
 		i ++;
 	}
 	return retval;
 }
-findParent 					= function( args ){
-	var tml = fl.getDocumentDOM().getTimeline();
-	var currentframe = tml.currentFrame;
-	var layers = tml.layers;
-	var i = 0;
-	while ( i < layers.length ){
-		var cf = layers[i].frames[ currentframe ];
-		if( cf ){
-			var elts = cf.elements;
-			var j = 0;
-			while( j < elts.length ){
-				var elt = elts[j];
-				if( isElementSymbol( elt ) ){
-					var inf = getRigData( elt );
-					if( args.parent == inf.id ){
-						return elt;
-					}
-				}
-				j++;
-			}
-		}
-		i ++;
+getSnapObjectsInElement		= function ( element ){
+	if( isElementSymbol( element ) ){
+		return filterStageElements( isMagnetTarget, element.libraryItem.timeline, true, false, [] );
+	}
+	return [];
+}
+sortOnID					= function( a, b ){
+	return ( convertID( getRigData( a ).id ) - convertID( getRigData( b ).id ) );
+}
+convertID					= function( id ){
+	if( id.length == 0 ){ return -1; }
+	var retval = Number( id );
+	return isNaN( retval ) ? 0 : retval;
+}
+getMyParent					= function( myTimeline, rigInfObj ){
+	var parents = filterStageElements( getParent, myTimeline, false, true, [], rigInfObj );
+	if( parents.length > 0 ){
+		return parents[0];
 	}
 	return null;
 }
-isValidName					= function( aname ){
-	return ( typeof( aname ) == "string" ) && aname.length > 0 && aname != "null";
+getParent					= function( element, aTimeline, currentLayernum, cf, n, inf ){
+	var data = getRigData( element );
+	if( data ){
+		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
+			return element;
+		}
+		return null;
+	}
+	return null;
+}
+elementToContainer			= function( container, element ){
+	var theX = element.matrix.tx * container.matrix.a + element.matrix.ty *  container.matrix.c +  container.matrix.tx;
+	var theY = element.matrix.ty * container.matrix.d + element.matrix.tx *  container.matrix.b +  container.matrix.ty;
+	return { x:theX, y:theY };
+}
+isMySibling					= function( element, aTimeline, currentLayernum, cf, n, target, inf ){
+	if ( element.libraryItem ==  target.libraryItem ){
+		var data = getRigData( element );
+		if( ! data ){ return false; }
+		if( data.rig == inf.rig ){
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
+getMyChildren				= function( element, tml, children, recurs ){
+	var retval = filterStageElements( isMyChild, tml, true, false, [ element ], getRigData( element ) );
+	if( retval.length ){
+		if( recurs ){
+			for( var i=0; i<retval.length; i++ ){
+				getMyChildren( retval[i], tml, children, recurs );
+			}
+		}
+		for( var j=0; j<retval.length; j++ ){
+			children.push( retval[j] );
+		}
+	}
+}
+isMyChild					= function( element, aTimeline, currentLayernum, cf, n, inf ){
+	var data = getRigData( element );
+	if( data ){
+		if( ( data.rig == inf.rig && data.parent == inf.id ) ){
+			return true;
+		}
+		return false;
+	}
+	return false;
 }
 pad							= function( number, length ){
 	var str = '' + number;
@@ -370,13 +463,6 @@ pad							= function( number, length ){
 		str = '0' + str;
 	}
 	return str;
-}
-removeRigData				= function( element ){
-	element.removePersistentData( 'rigData' );
-}
-setRigData					= function( element, data ){
-	element.removePersistentData( 'rigData' );
-	element.setPersistentData( 'rigData', 'string', data );
 }
 getAllStageElements			= function(){
 	var tml = fl.getDocumentDOM().getTimeline();

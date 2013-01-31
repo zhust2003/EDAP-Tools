@@ -45,7 +45,6 @@ initialize = function(){
 		}
 	}	
 }
-
 createSettings = function( context ){
 	//fl.trace( "CREATE FRESH... " + getFlashVersion() ); //*****
 	context.EDAPSettings = new Object();
@@ -141,8 +140,6 @@ createSettings = function( context ){
 
 }
 
-
-
 // Timelines, Layers and Elements
 getPathToTheTimeline = function(){
 	var path = [];
@@ -160,7 +157,6 @@ getPathToTheTimeline = function(){
 	}
 	return path;
 }
-
 gotoTargetTimeline = function( apath ){
 	for( var i=apath.length-1; i>-1; i-- ){
 		el = getElementItemByName( fl.getDocumentDOM().getTimeline(), apath[ i ] );
@@ -170,7 +166,6 @@ gotoTargetTimeline = function( apath ){
 		}
 	}	
 }
-
 getElementItemByName = function( tml, aname ){
 	var cf = tml.currentFrame;
 	for( var i=0; i<tml.layers.length; i++ ){
@@ -184,7 +179,6 @@ getElementItemByName = function( tml, aname ){
 	}
 	return null;
 }
-
 isElementSymbol = function( element ){
 	if( element.elementType == "instance" ){
 		if( element.instanceType == "symbol" ){
@@ -193,7 +187,6 @@ isElementSymbol = function( element ){
 	}
 	return false;
 }
-
 isSnap = function( element ){
 	if( isElementSymbol( element ) ){
 		return Boolean(  element.libraryItem.getData( "signature" ) == "EDAPT" && element.libraryItem.getData( "weight" ) == 1 );
@@ -202,7 +195,6 @@ isSnap = function( element ){
 		return false;
 	}
 }
-
 createObjectStateMap = function( objectCollection, props, afilter ){
 	var stateMap = new Array();
 	for( var i = 0; i < objectCollection.length; i++ ){
@@ -230,7 +222,6 @@ createObjectStateMap = function( objectCollection, props, afilter ){
 	}
 	return stateMap;
 }
-
 restoreObjectStateFromMap = function( objectCollection, stateMap ){
 	if( objectCollection.length != stateMap.length ){
 		return;
@@ -242,7 +233,6 @@ restoreObjectStateFromMap = function( objectCollection, stateMap ){
 		}
 	}
 }
-
 getLayers = function(){
 	var tl = fl.getDocumentDOM().getTimeline();
 	var selFrames = tl.getSelectedFrames();
@@ -262,8 +252,7 @@ getLayers = function(){
 	}
 	return selectedLayers;
 }
-
-getRigData = function( element ){
+getRigData = function( element ){ // :Object
 	if( isElementSymbol( element ) ){
 		if( element.hasPersistentData( "rigData" ) ){
 			var data = element.getPersistentData( "rigData" );
@@ -277,7 +266,6 @@ getRigData = function( element ){
 	}
 	return null;
 }
-
 setRigData = function( element, dataObj ){
 	if( isElementSymbol( element ) ){
 		element.removePersistentData( "rigData" );
@@ -286,7 +274,16 @@ setRigData = function( element, dataObj ){
 	}
 	return false;
 }
-
+removeRigData = function( element ){
+	if( isElementSymbol( element ) ){
+		if( element.hasPersistentData( "rigData" ) ){
+			element.removePersistentData( "rigData" );
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
 isMagnetTarget = function( element ){
 	var retval = false;
 	if( isElementSymbol( element ) ){
@@ -306,7 +303,6 @@ isMagnetTarget = function( element ){
 	}
 	return retval;
 }
-
 isCenterMarker = function( element ){
 	var retval = false;
 	if( isElementSymbol( element ) ){
@@ -326,10 +322,9 @@ isCenterMarker = function( element ){
 	}
 	return retval;
 }
-
 filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, excludeElements ){
 	/*
-		Iterates through all elements in a given timeline and executes a function for each of them.
+		Iterates through all elements in a given timeline at its current frame and executes a function for each of them.
 
 		aFunction		- The function to be executed on each element in the timeline.
 		aTimeline		- the context of execution.
@@ -381,19 +376,28 @@ filterStageElements = function( aFunction, aTimeline, isFilter, returnFirst, exc
 	}
 	return retval;
 }
-
-
-
+getSelection = function( doc, single ){
+	if( single ){
+		if( doc.selection.length == 1 ){
+			return doc.selection[0];
+		}
+		return null;
+	}
+	else{
+		return doc.selection;
+	}
+}
 
 // Messages
-displayDialogue = function( atitle, amessage ){
+displayDialogue = function( atitle, amessage, abuttons ){
 	var messageLines = "";
 	var myLines = amessage.split( "\n" );
 	for( var i=0; i<myLines.length; i++ ){
 	  messageLines += ( '<label value="'+myLines[i]+'"/>');
 	}
+	var btn = ( abuttons ) ? abuttons : "accept cancel";
 	var xmlContent = '<?xml version="1.0"?>' + 
-	'<dialog buttons="accept cancel" title="' + atitle + '">' +
+	'<dialog buttons="' + btn + '" title="' + atitle + '">' +
 		'<vbox>' + 
 			messageLines + 
 			'<spacer></spacer>' + 
@@ -413,7 +417,6 @@ displayDialogue = function( atitle, amessage ){
 	FLfile.remove( xmlFile );
 	return settings;
 }
-
 displayOptionalMessageBox = function( atitle, amessage, apropToChange ){
 	var xmlContent = createOptionalMessageBox( atitle, amessage );
 	var xmlFile = fl.configURI + "Commands/OptionalMessageBoxGUI.xml";
@@ -431,7 +434,6 @@ displayOptionalMessageBox = function( atitle, amessage, apropToChange ){
 	}
 	FLfile.remove( xmlFile );	
 }
-
 createOptionalMessageBox = function( atitle, amessage ){
 	var messageLines = "";
 	var myLines = amessage.split( "\n" );
@@ -452,7 +454,6 @@ createOptionalMessageBox = function( atitle, amessage ){
 		'</vbox>' + 
 	'</dialog>';
 }
-
 displayMessage = function( msg, level ){
 	initialize();
 	switch( EDAPSettings.traceLevel ){
@@ -472,9 +473,6 @@ displayMessage = function( msg, level ){
 	}
 }
 
-
-
-
 // Array functions
 indexOf = function( array, element ){
 	for( var i=0; i<array.length; i++ ){
@@ -484,7 +482,6 @@ indexOf = function( array, element ){
 	}
 	return -1;
 }
-
 include = function( arr, obj ) {
 	var cnt = arr.length;
 	while( cnt -- ){
@@ -494,17 +491,13 @@ include = function( arr, obj ) {
 	} 
 }
 
-
-
 // UI functions
 defineDarkColors = function(){
 	return [ "#000099", "#990000", "#006600", "#333333", "#9900CC" ];
 }
-
 defineLightColors = function(){
 	return [ "#FF33FF", "#4FFF4F", "#FFFF00", "#CCCCCC", "#66FFFF" ];
 }
-
 moveCommandFiles = function(){
 	var fpath = fl.configURI + "Javascript/EDAPT Disabled Commands";
 	var created = FLfile.createFolder( fpath );
@@ -531,7 +524,6 @@ moveCommandFiles = function(){
 		}
 	}
 }
-
 displayPanel = function( commandName, xmlContent ){
 	var xmlFile = fl.configURI + "Commands/" + commandName + ".xml";
 	if ( FLfile.exists( xmlFile ) ) {
@@ -542,7 +534,6 @@ displayPanel = function( commandName, xmlContent ){
 	FLfile.remove( xmlFile );
 	return settings;
 }
-
 
 // Serialization
 serialize = function( o, filePath ){
@@ -557,14 +548,12 @@ serialize = function( o, filePath ){
 	}
 	FLfile.write( filePath, str );
 }
-
 deserialize = function( filePath ){
 	if( FLfile.exists( filePath ) ){
 		var str = FLfile.read( filePath );
 	}
 	return JSON.parse( str );
 }
-
 cloneObject = function(obj) {
 	var clone = {};
 	for( var i in obj ) {
@@ -795,6 +784,10 @@ getGlobal = function(){
 	}).call(null);
 }
 traceObject = function( obj, maxlevel, level, props ){
+	if( ! obj ){ 
+		fl.trace( "***** null *****" );
+		return;
+	}
 	if( ! maxlevel ){ maxlevel = 1 };
 	if( ! level ){ level = 0 };
 	
