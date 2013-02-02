@@ -1,4 +1,3 @@
-fl.trace( "INIT" );
 fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 initialize();
 fl.showIdleMessage( false );
@@ -208,20 +207,23 @@ removeSelectedNodes 		= function(){
 		var sel = doc.selection;
 		var cnt = 0;
 		if( sel.length > 0 ){
-			for( var i=0; i<sel.length; i++ ){
-				var el = sel[i];
-				var inf = getRigData( el );
-				if( inf ){
-					retval.push( inf );
-					cnt ++;
+			var settings = displayDialogue( "Remove Links", "Are you sure you want to remove links from the selected symbol instances ?", "accept, cancel" );
+			if( settings.dismiss == "accept" ){
+				for( var i=0; i<sel.length; i++ ){
+					var el = sel[i];
+					var inf = getRigData( el );
+					if( inf ){
+						retval.push( inf );
+						cnt ++;
+					}
+					removeRigData( el );
 				}
-				removeRigData( el );
+				displayDialogue( "Remove Links", cnt + " link(s) are removed.", "accept" );
 			}
-			displayDialogue( "Remove Links", cnt + " link(s) are removed.", "accept" );
 		}
 		else{
-			displayDialogue( "Remove Links", "Select some symbol instances to perform this command.", "accept" );
-		}
+			displayDialogue( "Remove Links", "Select at least one symbol on Stage.", "accept" );
+		}	
 	}
 	return JSON.stringify( retval );
 }
@@ -229,7 +231,7 @@ setRigInfo					= function( infoString ){
 	var doc = fl.getDocumentDOM();
 	if( ! doc ){ return;}
 	if( doc.selection.length > 1 ){ 
-		displayDialogue( "Set Rig Information", "Please, select a single element.", "accept" );
+		displayDialogue( "Set Rig Information", "Select at least one symbol on Stage.", "accept" );
 		return;
 	}
 	var element = getSelection( doc, true );
@@ -243,7 +245,7 @@ setRigInfo					= function( infoString ){
 			unLink( element );
 		}
 		else{
-			var settings = displayDialogue( "Rig information", "The selected element is part of another rig.", "accept" );
+			var settings = displayDialogue( "Rig information", "The selected element is part of another rig.***Are you sure you want to replace the old rig information with the new one?", "accept, cancel" );
 			if( settings.dismiss == "accept" ){
 				link( doc, element, rigDataObj );
 			}
@@ -283,7 +285,7 @@ link						= function( doc, element, rigDataObject ){
 		var xSnap = null;
 		for( var j=0; j<pSnaps.length; j++ ){
 			var d = fl.Math.pointDistance( elementToContainer( parent, pSnaps[j] ), {x:element.matrix.tx, y:element.matrix.ty} );
-			if( d <= 4 ){
+			if( d <= EDAPSettings.smartMagnetJoint.snapThreshold ){
 				xSnap = pSnaps[j];
 				break;
 			} 

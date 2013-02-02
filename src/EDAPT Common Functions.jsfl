@@ -108,6 +108,7 @@ createSettings = function( context ){
 	context.EDAPSettings.smartMagnetJoint = new Object();
 	context.EDAPSettings.smartMagnetJoint.distanceThreshold = 50;
 	context.EDAPSettings.smartMagnetJoint.depthLevel = 2;
+	context.EDAPSettings.smartMagnetJoint.snapThreshold = 4;
 	
 	//Commands
 	//Couples: 6,7   14,15   18,19
