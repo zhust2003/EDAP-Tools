@@ -207,7 +207,7 @@ removeSelectedNodes 		= function(){
 		var sel = doc.selection;
 		var cnt = 0;
 		if( sel.length > 0 ){
-			var settings = displayDialogue( "Remove Links", "Are you sure you want to remove links from the selected symbol instances ?", "accept, cancel" );
+			var settings = displayDialogue( "Remove Links", "Are you sure you want to remove links\nfrom the selected symbol instances?", "accept, cancel" );
 			if( settings.dismiss == "accept" ){
 				for( var i=0; i<sel.length; i++ ){
 					var el = sel[i];
@@ -245,7 +245,7 @@ setRigInfo					= function( infoString ){
 			unLink( element );
 		}
 		else{
-			var settings = displayDialogue( "Rig information", "The selected element is part of another rig.***Are you sure you want to replace the old rig information with the new one?", "accept, cancel" );
+			var settings = displayDialogue( "Rig information", "The selected element is part of another rig.\nAre you sure you want to replace the old rig information with the new one?", "accept, cancel" );
 			if( settings.dismiss == "accept" ){
 				link( doc, element, rigDataObj );
 			}
@@ -260,8 +260,11 @@ link						= function( doc, element, rigDataObject ){
 	var myInfObj = getRigData( element );
 	var snapInfo = createSnapInfo( myTimeline, element, rigDataObject );
 	var myID = snapInfo.id;
+
 	if( rigDataObject.parent == "" ){ // ROOT
-		doc.enterEditMode();
+		doc.moveSelectionBy( { x:1, y:1 } );
+		doc.moveSelectionBy( { x:-1, y:-1 } );
+		doc.enterEditMode( "inPlace" );
 		for( var i=0; i<snapInfo.snaps.length; i++ ){
 			if( ! getRigData( snapInfo.snaps[i] ) ){
 				myID ++;
@@ -272,7 +275,9 @@ link						= function( doc, element, rigDataObject ){
 		var ok2 = setRigData( element, rigDataObject  );
 	}
 	else{// CHILD
-		doc.enterEditMode();
+		doc.moveSelectionBy( { x:1, y:1 } );
+		doc.moveSelectionBy( { x:-1, y:-1 } );
+		doc.enterEditMode( "inPlace" );
 		for( var i=0; i<snapInfo.snaps.length; i++ ){
 			if( ! getRigData( snapInfo.snaps[i] ) ){
 				myID ++;
@@ -291,15 +296,27 @@ link						= function( doc, element, rigDataObject ){
 			} 
 		}
 		if( xSnap ){
-			var id = getRigData( xSnap ).id;
-			rigDataObject.snapTo = id;
-			var ok2 = setRigData( element, rigDataObject );
+			var snapInf = getRigData( xSnap );
+			if( snapInf ){
+				var id = snapInf.id;
+				rigDataObject.snapTo = id;
+				var ok2 = setRigData( element, rigDataObject );
+			}
+			else{
+				var mtID = String( getMaxID( myTimeline, rigDataObject ) + 1 );
+				rigDataObject.snapTo = mtID;
+				setRigData( xSnap, { rig:rigDataObject.rig, id:mtID } );
+				var ok2 = setRigData( element, rigDataObject );
+			}
 		}
 		else{
-			var settings = displayDialogue( "Rig information", "No snap object found", "accept" );
+			var settings = displayDialogue( "Rig information", "No magnet target found within the " + EDAPSettings.smartMagnetJoint.snapThreshold + "px. radius.", "accept" );
 			return;
 		}	
 	}
+
+	
+	
 	var mysiblings = filterStageElements( isMySibling, myTimeline, true, false, [], element, rigDataObject );
 	for( var sib = 0; sib < mysiblings.length; sib ++ ){
 		var children = [];
@@ -314,7 +331,7 @@ link						= function( doc, element, rigDataObject ){
 			for( var sn = 0; sn < sibSnaps.length; sn ++ ){
 				var xSnap = sibSnaps[ sn ];
 				var dist = fl.Math.pointDistance( elementToContainer( xSibling, xSnap ), {x:xChild.matrix.tx, y:xChild.matrix.ty} );
-				if( dist <= 4 ){
+				if( dist <= EDAPSettings.smartMagnetJoint.snapThreshold ){
 					var snapID = getRigData( xSnap ).id;
 					if( snapID ){
 						var oldInfo = getRigData( xChild );
