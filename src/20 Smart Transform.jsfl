@@ -35,7 +35,7 @@ function runScript( commandname ){
 	// Remove non-rig elements.
 	var i = myElements.length;
 	while( i-- ){
-		if( ! getRigData( myElements[i] ) ){
+		if( ! getData( myElements[i], "SMR" ) ){
 			myElements.splice( i, 1 );
 		}
 	}
@@ -44,9 +44,9 @@ function runScript( commandname ){
 	if( myElements.length == 1 ){
 		var el = myElements[ 0 ];
 		if( isElementSymbol( el ) ){
-			var inf = getRigData( el );
+			var inf = getData( el, "SMR" );
 			if( inf ){
-				var inf = getRigData( el );
+				//var inf = getData( el, "SMR" );
 				if( inf.parent == "" ){ 
 					//fl.trace( "ROOT" );
 					var children = [el];
@@ -89,8 +89,8 @@ function runScript( commandname ){
 function checkChain( elements,atimeline ){
 	var first = elements[0];
 	var last = elements[ elements.length-1 ]
-	inf1 = getRigData( first );
-	inf2 = getRigData( last );
+	inf1 = getData( first, "SMR" );
+	inf2 = getData( last, "SMR" );
 	if( inf1.parent = inf2.id ){
 		return 1;
 	}
@@ -98,7 +98,7 @@ function checkChain( elements,atimeline ){
 		var parents = [];
 		var parent = filterStageElements( getParent, atimeline, false, true, [], inf1 )[0];
 		while( parent ){
-			var rig = getRigData( parent );
+			var rig = getData( parent, "SMR" );
 			if( rig ){
 				parent = filterStageElements( getParent, atimeline, false, true, [], rig )[0];
 				if( parent ){
@@ -113,7 +113,7 @@ function checkChain( elements,atimeline ){
 	return 3;
 }
 function getParent( element, aTimeline, currentLayernum, cf, n, inf ){
-	var data = getRigData( element );
+	var data = getData( element, "SMR" );
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
 			return element;
@@ -148,7 +148,7 @@ function setSelectionAndTransformPoint( doc, atimeline, parent, children, change
 	doc.setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
 }
 function getMyChildren( element, children, tml ){
-	var retval = filterStageElements( isMyChild, tml, true, false, [ element ], getRigData( element ) ); // No keys created
+	var retval = filterStageElements( isMyChild, tml, true, false, [ element ], getData( element, "SMR" ) ); // No keys created
 	if( retval.length ){
 		for( var i=0; i<retval.length; i++ ){
 			getMyChildren( retval[i], children, tml );
@@ -159,7 +159,7 @@ function getMyChildren( element, children, tml ){
 	}
 }
 function isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
-	var data = getRigData( element );
+	var data = getData( element, "SMR" );
 	if( data ){
 		if( ( data.rig == inf.rig && data.parent == inf.id ) ){
 			return true;
@@ -171,8 +171,8 @@ function isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
 function sortOnParent( a, b ){
 	// Sorts stage elements on its "parent" id.
 	if( a.hasPersistentData( "rigData" ) && b.hasPersistentData( "rigData" ) ){
-		var obj1 = getRigData( a );
-		var obj2 = getRigData( b );
+		var obj1 = getData( a, "SMR" );
+		var obj2 = getData( b, "SMR" );
 		return ( convertID( obj2.parent ) - convertID( obj1.parent ) );
 	}
 	return -1;

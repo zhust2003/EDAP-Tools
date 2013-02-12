@@ -108,7 +108,14 @@ createSettings = function( context ){
 	context.EDAPSettings.smartMagnetJoint = new Object();
 	context.EDAPSettings.smartMagnetJoint.distanceThreshold = 50;
 	context.EDAPSettings.smartMagnetJoint.depthLevel = 2;
-	context.EDAPSettings.smartMagnetJoint.snapThreshold = 4;
+
+	// SMR panel
+	context.EDAPSettings.smartMagnetRig = new Object();
+	context.EDAPSettings.smartMagnetRig.snapThreshold = 4;
+	
+	// SGC panel
+	context.EDAPSettings.smartGraphicControl = new Object();
+
 	
 	//Commands
 	//Couples: 6,7   14,15   18,19
@@ -253,10 +260,13 @@ getLayers = function(){
 	}
 	return selectedLayers;
 }
-getRigData = function( element ){ // :Object
+
+
+getData = function( element, atype ){ // :Object
 	if( isElementSymbol( element ) ){
-		if( element.hasPersistentData( "rigData" ) ){
-			var data = element.getPersistentData( "rigData" );
+		var dataname = { SMR:"rigData", SGC:"SGC" };
+		if( element.hasPersistentData( dataname[atype] ) ){
+			var data = element.getPersistentData( dataname[atype] );
 			if( data != 0 ){
 				data = JSON.parse( data );
 				return data;
@@ -267,24 +277,28 @@ getRigData = function( element ){ // :Object
 	}
 	return null;
 }
-setRigData = function( element, dataObj ){
+setData = function( element, atype, dataObj ){
 	if( isElementSymbol( element ) ){
-		element.removePersistentData( "rigData" );
-		element.setPersistentData( "rigData", "string", JSON.stringify( dataObj ) );
+		var dataname = { SMR:"rigData", SGC:"SGC" };
+		element.removePersistentData( dataname[atype] );
+		element.setPersistentData( dataname[atype], "string", JSON.stringify( dataObj ) );
 		return true;
 	}
 	return false;
 }
-removeRigData = function( element ){
+removeData = function( element, atype ){
 	if( isElementSymbol( element ) ){
-		if( element.hasPersistentData( "rigData" ) ){
-			element.removePersistentData( "rigData" );
+		var dataname = { SMR:"rigData", SGC:"SGC" };
+		if( element.hasPersistentData( dataname[atype] ) ){
+			element.removePersistentData( dataname[atype] );
 			return true;
 		}
 		return false;
 	}
 	return false;
 }
+
+
 isMagnetTarget = function( element ){
 	var retval = false;
 	if( isElementSymbol( element ) ){
