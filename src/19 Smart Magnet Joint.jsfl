@@ -48,21 +48,6 @@ function runScript( commandname ){
 				if( parents.length > 0 ){
 					var myParent = parents[0];
 					snaps = getSnapObjects( myParent.element );
-					
-					/* Old functionality
-					for( var i=0; i<snaps.length; i++ ){
-						var obj  = { element:snaps[i] };
-						var theX = snaps[i].matrix.tx * myParent.matrix.a + snaps[i].matrix.ty * myParent.matrix.c + myParent.matrix.tx;
-						var theY = snaps[i].matrix.ty * myParent.matrix.d + snaps[i].matrix.tx * myParent.matrix.b + myParent.matrix.ty;
-						var pos  = {x:theX, y:theY};
-						var dist = fl.Math.pointDistance( pos, {x:el.matrix.tx, y:el.matrix.ty} );
-						obj.position = pos;
-						obj.distance = dist;
-						snaps[i] = obj;
-					}
-					snaps.sort( sortOnDistance );
-					*/
-
 					var t = [];
 					for( var i=0; i<snaps.length; i++ ){
 						var mInfo = getData( snaps[i].element, "SMR" );
@@ -152,24 +137,21 @@ function getSnapObjects( element ){
 }
 function getTargetMatrix( element, aTimeline, currentLayernum, cf, n ){
 	var remove = false;
-	if( ! getData( element, "SMR" ) ){
-		var layer = aTimeline.layers[ currentLayernum ];
-		if( layer.frames[ cf ].startFrame != cf ){
-			aTimeline.currentLayer = currentLayernum;
-			aTimeline.convertToKeyframes( cf );
-			remove = true;
+	var layer = aTimeline.layers[ currentLayernum ];
+	if( layer.frames[ cf ].startFrame != cf ){
+		aTimeline.currentLayer = currentLayernum;
+		aTimeline.convertToKeyframes( cf );
+		remove = true;
+	}
+	var el = layer.frames[ cf ].elements[n];
+	if( isElementSymbol( el ) ){
+		el.libraryItem.timeline.currentFrame = el.firstFrame;  // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
+		var snaps = getSnapObjects( el );
+		var retval = { element:el, matrix:el.matrix, snaps:snaps };
+		if( remove ){
+			aTimeline.clearKeyframes( cf );
 		}
-		var el = layer.frames[ cf ].elements[n];
-		if( isElementSymbol( el ) ){
-			el.libraryItem.timeline.currentFrame = el.firstFrame;  // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
-			var snaps = getSnapObjects( el );
-			var retval = { element:el, matrix:el.matrix, snaps:snaps };
-			if( remove ){
-				aTimeline.clearKeyframes( cf );
-			}
-			return retval;		
-		}
-		return null;
+		return retval;		
 	}
 	return null;
 }
