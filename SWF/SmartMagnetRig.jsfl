@@ -243,7 +243,7 @@ setRigInfo					= function( infoString ){
 	
 	if( infoObj ){
 		if( infoObj.rig == rigDataObj.rig ){
-			unLink( element );
+			unLink( element, rigDataObj );
 		}
 		else{
 			var settings = displayDialogue( "Rig information", "The selected Symbol Instance is a part of another rig.\nAre you sure you want to replace the existing rig information with new one?", "accept, cancel" );
@@ -320,20 +320,15 @@ link						= function( doc, element, rigDataObject ){
 		}	
 	}
 
-	
-	
 	var mysiblings = filterStageElements( isMySibling, myTimeline, true, false, [], element, rigDataObject );
-	var unmatched = [];
 	for( var sib = 0; sib < mysiblings.length; sib ++ ){
 		var children = [];
 		var xSibling = mysiblings[ sib ];
 		getMyChildren( xSibling, myTimeline, children, false );
 		var sibSnaps = getSnapObjectsInElement( xSibling );
-		unmatched = [];
 		for( var ch = 0; ch < children.length; ch ++ ){
 			// Iterate through all snap-objects and check the distances
 			var xChild = children[ ch ];
-			var success = false;
 			for( var sn = 0; sn < sibSnaps.length; sn ++ ){
 				var xSnap = sibSnaps[ sn ];
 				var dist = fl.Math.pointDistance( elementToContainer( xSibling, xSnap ), {x:xChild.matrix.tx, y:xChild.matrix.ty} );
@@ -343,35 +338,31 @@ link						= function( doc, element, rigDataObject ){
 						var oldInfo = getData( xChild, "SMR" );
 						oldInfo[ "snapTo" ] = snapID;
 						setData( xChild, "SMR", oldInfo );
-						success = true;
 					}
 				}
 			}
-			if( ! success ){
-				unmatched.push( xChild );
-			}
 		}
-	}
-	if( unmatched.length > 0 ){
-		doc.selection = unmatched;
-		var settings = displayDialogue( "Rig information", "Error!", "accept" );
 	}	
 }
-unLink						= function( element ){
+unLink						= function( element, dataObj ){
 	var inf = getData( element, "SMR" );
+	if( inf.rig == dataObj.rig && inf.id == dataObj.id ){
 	var ok = removeData( element, "SMR" );
-	
-	if( ok ){
-		var tail = "";
-		if( inf ){
-			tail += "\n\n\Rig: " + inf.rig + "\n";
-			tail += "ID: " + inf.id + "\n";
-			tail += "Symbol: " + element.libraryItem.name + "\n";
-			if( element.name ){
-				tail += "Instance: " + element.name;
+		if( ok ){
+			var tail = "";
+			if( inf ){
+				tail += "\n\n\Rig: " + inf.rig + "\n";
+				tail += "ID: " + inf.id + "\n";
+				tail += "Symbol: " + element.libraryItem.name + "\n";
+				if( element.name ){
+					tail += "Instance: " + element.name;
+				}
 			}
+			displayDialogue( "Remove Rig information", "One link was removed." + tail, "accept" );
 		}
-		displayDialogue( "Rig information", "One link was removed." + tail, "accept" );
+	}
+	else{
+		displayDialogue( "Remove Rig information", "Please, select the correct element on Stage.", "accept" );
 	}
 }
 
