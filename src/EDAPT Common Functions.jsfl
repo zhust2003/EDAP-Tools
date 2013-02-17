@@ -115,7 +115,8 @@ createSettings = function( context ){
 	
 	// SGC panel
 	context.EDAPSettings.smartGraphicControl = new Object();
-
+	context.EDAPSettings.smartGraphicControl.thumbnailSize = 128;
+	
 	
 	//Commands
 	//Couples: 6,7   14,15   18,19
@@ -404,8 +405,10 @@ getSelection = function( doc, single ){
 }
 
 // Messages
-displayDialogue = function( atitle, amessage, abuttons ){
+displayDialogue = function( atitle, amessage, abuttons, atail ){
 	var messageLines = "";
+	var match = new RegExp( "___", "gi" );     
+    amessage = amessage.replace( match, "\n" );
 	var myLines = amessage.split( "\n" );
 	for( var i=0; i<myLines.length; i++ ){
 	  messageLines += ( '<label value="'+myLines[i]+'"/>');

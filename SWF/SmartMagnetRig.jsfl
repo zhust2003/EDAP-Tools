@@ -362,7 +362,7 @@ unLink						= function( element, dataObj ){
 		}
 	}
 	else{
-		displayDialogue( "Remove Rig information", "Please, select the correct element on Stage.", "accept" );
+		displayDialogue( "Remove Rig information", "You can unlink only the currently selected Symbol Instance.", "accept" );
 	}
 }
 
@@ -417,7 +417,7 @@ collectUniqueSnapObjects	= function( aTimeline, inf ){
 	}
 	return retval;
 }
-getSnapObjectsInElement		= function ( element ){
+getSnapObjectsInElement		= function( element ){
 	if( isElementSymbol( element ) ){
 		return filterStageElements( isMagnetTarget, element.libraryItem.timeline, true, false, [] );
 	}
