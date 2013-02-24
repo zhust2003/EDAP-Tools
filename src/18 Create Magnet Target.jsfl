@@ -155,6 +155,15 @@ function insertSymbol( commandname, atype ){
 			currentDoc.distribute( "horizontal center", true );
 			currentDoc.distribute( "vertical center", true );
 		}
+		if( ! symbolExists ){
+			if( ! currentLib.itemExists( EDAPSettings.createMagnetTarget.folderName ) ){
+				var create = currentLib.newFolder( EDAPSettings.createMagnetTarget.folderName );
+			}
+			var theItem = getItemByData( currentLib, myTypeString );
+			if( theItem ){
+				var moved = currentLib.moveToFolder( EDAPSettings.createMagnetTarget.folderName, theItem.name, true );	
+			}
+		}
 	}
 	else{
 		displayMessage( commandname + " : The '" + specialLayerName + "' layer is locked.", 2 );	
@@ -169,6 +178,23 @@ function insertSymbol( commandname, atype ){
 			displayOptionalMessageBox( commandname,  message, "createMagnetTarget" );
 		}
 	}
+}
+function getItemByData( library, atype ){
+	var itms = library.items;
+	var i = itms.length;
+	while( i -- ){
+		var itm = itms[i];
+		var data = itm.getData( "type" );
+		if( data ){
+			var sig = itm.getData( "signature" );
+			if( sig ){
+				if( data == atype && sig == "EDAPT" ){
+					return itm;
+				}
+			}
+		}
+	}
+	return null;
 }
 function createSpecialLayer( doc, atype ){
 	doc.getTimeline().currentLayer = 0;

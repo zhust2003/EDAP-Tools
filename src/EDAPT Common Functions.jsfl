@@ -102,6 +102,7 @@ createSettings = function( context ){
 	context.EDAPSettings.createMagnetTarget = new Object();
 	context.EDAPSettings.createMagnetTarget.targetLayerName = "Magnet Target(s)";
 	context.EDAPSettings.createMagnetTarget.markerLayerName = "Center Marker(s)";
+	context.EDAPSettings.createMagnetTarget.folderName = "EDAPT objects";
 	context.EDAPSettings.createMagnetTarget.showAlert = true;
 
 	//SmartSnap
