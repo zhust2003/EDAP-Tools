@@ -50,7 +50,7 @@ function runScript( commandname ){
 					snaps = getSnapObjects( myParent.element );
 					var t = [];
 					for( var i=0; i<snaps.length; i++ ){
-						var mInfo = getData( snaps[i].element, "SMR" );
+						var mInfo = getData( snaps[i].element, "MT" );
 						if( mInfo ){
 							if( mInfo.id == inf.snapTo ){
 								var obj  = { element:snaps[i] };
