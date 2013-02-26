@@ -266,7 +266,7 @@ getLayers = function(){
 
 getData = function( element, atype ){ // :Object
 	if( isElementSymbol( element ) ){
-		var dataname = { SMR:"rigData", SGC:"SGC" };
+		var dataname = { SMR:"rigData", MT:"MT", SGC:"SGC" };
 		if( element.hasPersistentData( dataname[atype] ) ){
 			var data = element.getPersistentData( dataname[atype] );
 			if( data != 0 ){
@@ -281,7 +281,7 @@ getData = function( element, atype ){ // :Object
 }
 setData = function( element, atype, dataObj ){
 	if( isElementSymbol( element ) ){
-		var dataname = { SMR:"rigData", SGC:"SGC" };
+		var dataname = { SMR:"rigData", MT:"MT", SGC:"SGC" };
 		element.removePersistentData( dataname[atype] );
 		element.setPersistentData( dataname[atype], "string", JSON.stringify( dataObj ) );
 		return true;
@@ -290,7 +290,7 @@ setData = function( element, atype, dataObj ){
 }
 removeData = function( element, atype ){
 	if( isElementSymbol( element ) ){
-		var dataname = { SMR:"rigData", SGC:"SGC" };
+		var dataname = { SMR:"rigData", MT:"MT", SGC:"SGC" };
 		if( element.hasPersistentData( dataname[atype] ) ){
 			element.removePersistentData( dataname[atype] );
 			return true;

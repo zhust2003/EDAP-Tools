@@ -1,7 +1,7 @@
 fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 initialize();
 fl.showIdleMessage( false );
-lastCurrentTimeline = null;
+
 
 
 newRig						= function(){
@@ -148,30 +148,24 @@ getCurrentRigInfo			= function( id ){
 	var doc = fl.getDocumentDOM();
 	if( doc ){
 		var tml = doc.getTimeline();
-		if( tml != lastCurrentTimeline ){
-			//fl.trace( "The timeline changed to: " + tml.name );
-			lastCurrentTimeline = tml;
-			return '';
-		}
-		else{
-			var sel = getAllStageElements();
-			if( sel.length ){
-				var out = [];
-				for( var i=0; i<sel.length; i++ ){
-					var el = sel[i];
-					var obj = getData( el, "SMR" );
-					if( obj ){
-						if( obj.rig == id ){
-							obj.hasSnapObject =  Boolean( getSnapObjectsInElement( el ).length > 0 );
-							obj.selected = include( doc.selection, el );
-							out.push( obj );
-						}
+		var sel = getAllStageElements();
+		if( sel.length ){
+			var out = [];
+			var i = sel.length
+			while( i-- ){
+				var el = sel[i];
+				var obj = getData( el, "SMR" );
+				if( obj ){
+					if( obj.rig == id ){
+						obj.hasSnapObject = Boolean( getSnapObjectsInElement( el ).length > 0 );
+						obj.selected = include( doc.selection, el );
+						out.push( obj );
 					}
 				}
-				return JSON.stringify( out );
 			}
-			return '';
+			return JSON.stringify( out );
 		}
+		return '';
 	}
 	return '';
 }
@@ -267,9 +261,9 @@ link						= function( doc, element, rigDataObject ){
 		doc.moveSelectionBy( { x:-1, y:-1 } );
 		doc.enterEditMode( "inPlace" );
 		for( var i=0; i<snapInfo.snaps.length; i++ ){
-			if( ! getData( snapInfo.snaps[i], "SMR" ) ){
+			if( ! getData( snapInfo.snaps[i], "MT" ) ){
 				myID ++;
-				var ok1 = setData( snapInfo.snaps[i], "SMR", { rig:rigDataObject.rig, id:String( myID ) } );
+				var ok1 = setData( snapInfo.snaps[i], "MT", { rig:rigDataObject.rig, id:String( myID ) } );
 			}
 		}
 		doc.exitEditMode();
@@ -280,9 +274,9 @@ link						= function( doc, element, rigDataObject ){
 		doc.moveSelectionBy( { x:-1, y:-1 } );
 		doc.enterEditMode( "inPlace" );
 		for( var i=0; i<snapInfo.snaps.length; i++ ){
-			if( ! getData( snapInfo.snaps[i], "SMR" ) ){
+			if( ! getData( snapInfo.snaps[i], "MT" ) ){
 				myID ++;
-				var ok1 = setData( snapInfo.snaps[i], "SMR", { rig:rigDataObject.rig, id:String( myID ) } );
+				var ok1 = setData( snapInfo.snaps[i], "MT", { rig:rigDataObject.rig, id:String( myID ) } );
 			}
 		}
 		doc.exitEditMode();		
@@ -297,7 +291,7 @@ link						= function( doc, element, rigDataObject ){
 			} 
 		}
 		if( xSnap ){
-			var snapInf = getData( xSnap, "SMR" );
+			var snapInf = getData( xSnap, "MT" );
 			if( snapInf ){
 				var id = snapInf.id;
 				rigDataObject.snapTo = id;
@@ -306,7 +300,7 @@ link						= function( doc, element, rigDataObject ){
 			else{
 				var mtID = String( getMaxID( myTimeline, rigDataObject ) + 1 );
 				rigDataObject.snapTo = mtID;
-				setData( xSnap, "SMR", { rig:rigDataObject.rig, id:mtID } );
+				setData( xSnap, "MT", { rig:rigDataObject.rig, id:mtID } );
 				var ok2 = setData( element, "SMR", rigDataObject );
 			}
 		}
@@ -333,7 +327,7 @@ link						= function( doc, element, rigDataObject ){
 				var xSnap = sibSnaps[ sn ];
 				var dist = fl.Math.pointDistance( elementToContainer( xSibling, xSnap ), {x:xChild.matrix.tx, y:xChild.matrix.ty} );
 				if( dist <= EDAPSettings.smartMagnetJoint.snapThreshold ){
-					var snapID = getData( xSnap, "SMR" ).id;
+					var snapID = getData( xSnap, "MT" ).id;
 					if( snapID ){
 						var oldInfo = getData( xChild, "SMR" );
 						oldInfo[ "snapTo" ] = snapID;
@@ -499,20 +493,20 @@ getAllStageElements			= function(){
 	var layers = tml.layers;
 	var currentframe = tml.currentFrame;
 	var retval = [];
-		var i = 0;
-		while ( i < layers.length ){
+		var i = layers.length;
+		while ( i -- ){
 			var cf = layers[i].frames[ currentframe ];
 			if( cf ){
 				var elts = cf.elements;
-				var j = 0;
-				while( j < elts.length ){
+				var j = elts.length;
+				while( j -- ){
 					if( isElementSymbol( elts[j] ) ){
 						retval.push( elts[j] );
 					}
-					j++;
+					//j++;
 				}
 			}
-			i ++;
+			//i ++;
 		}
 		
 	return retval;
