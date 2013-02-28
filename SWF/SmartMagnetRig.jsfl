@@ -240,7 +240,7 @@ setRigInfo					= function( infoString ){
 			unLink( element, rigDataObj );
 		}
 		else{
-			var settings = displayDialogue( "Rig information", "The selected Symbol Instance is a part of another rig.\nAre you sure you want to replace the existing rig information with new one?", "accept, cancel" );
+			var settings = displayDialogue( "Set Rig information", "The selected Symbol Instance is a part of another rig.\nAre you sure you want to replace the existing rig information with new one?", "accept, cancel" );
 			if( settings.dismiss == "accept" ){
 				link( doc, element, rigDataObj );
 			}
@@ -305,11 +305,10 @@ link						= function( doc, element, rigDataObject ){
 			}
 		}
 		else{
-		
 			var msg = "No Magnet Target found within the "+ EDAPSettings.smartMagnetRig.snapThreshold +"px radius.\n"+
 			"Parent Symbol must contain a Magnet Target (MT) object.\n"+
 			"MT center must overlap with the Registration Point of currently selected Symbol Instance."
-			var settings = displayDialogue( "Rig information", msg, "accept" );
+			var settings = displayDialogue( "Set Rig information", msg, "accept" );
 			return;
 		}	
 	}

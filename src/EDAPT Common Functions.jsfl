@@ -113,6 +113,11 @@ createSettings = function( context ){
 	// SMR panel
 	context.EDAPSettings.smartMagnetRig = new Object();
 	context.EDAPSettings.smartMagnetRig.snapThreshold = 4;
+	context.EDAPSettings.smartMagnetRig.help = new Object();
+	context.EDAPSettings.smartMagnetRig.help.A = {show:true, value:"http://flash-powertools.com/support/A"};
+	context.EDAPSettings.smartMagnetRig.help.B = {show:true, value:"http://flash-powertools.com/support/B"};
+	context.EDAPSettings.smartMagnetRig.help.C = {show:true, value:"http://flash-powertools.com/support/C"};
+	context.EDAPSettings.smartMagnetRig.help.D = {show:true, value:"http://flash-powertools.com/support/D"};
 	
 	// SGC panel
 	context.EDAPSettings.smartGraphicControl = new Object();
@@ -406,34 +411,49 @@ getSelection = function( doc, single ){
 }
 
 // Messages
-displayDialogue = function( atitle, amessage, abuttons, atail ){
+displayDialogue = function( atitle, amessage, abuttons, url ){
 	var messageLines = "";
-	var match = new RegExp( "___", "gi" );     
-    amessage = amessage.replace( match, "\n" );
+	var match = new RegExp( "___", "gi" );
+	var myFlash = "<flash width='430' height='24' src='../XULControls/command.swf'/>";
+	amessage = amessage.replace( match, "\n" );
 	var myLines = amessage.split( "\n" );
 	for( var i=0; i<myLines.length; i++ ){
-	  messageLines += ( '<label value="'+myLines[i]+'"/>');
+	  messageLines += ( '<label value="' + myLines[i] + '"/>');
 	}
 	var btn = ( abuttons ) ? abuttons : "accept cancel";
 	var xmlContent = '<?xml version="1.0"?>' + 
 	'<dialog buttons="' + btn + '" title="' + atitle + '">' +
-		'<vbox>' + 
+		'<vbox>' +
 			messageLines + 
 			'<spacer></spacer>' + 
+			'<spacer></spacer>' + myFlash +
 			'<spacer></spacer>' + 
-			'<spacer></spacer>' + 
-			'<spacer></spacer>' + 
-			'<separator></separator>' + 
+			'<spacer></spacer>' +
+			'<separator></separator>' +
 			'<spacer></spacer>' + 
 		'</vbox>' + 
 	'</dialog>';
 	var xmlFile = fl.configURI + "Commands/DialogueGUI.xml";
+	var varFile = fl.configURI + "XULControls/vars.txt";
+	var needToRemove = false;
+	
 	if ( FLfile.exists( xmlFile ) ) {
 		FLfile.remove( xmlFile );	
 	}
+	if( url ){
+		if ( FLfile.exists( varFile ) ) {
+			FLfile.remove( varFile );	
+		}
+		FLfile.write( varFile, "url=" + url );
+		needToRemove = true;
+	}
+
 	FLfile.write( xmlFile, xmlContent );
 	var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
 	FLfile.remove( xmlFile );
+	if( needToRemove ){
+		FLfile.remove( varFile );
+	}
 	return settings;
 }
 displayOptionalMessageBox = function( atitle, amessage, apropToChange ){
@@ -491,6 +511,10 @@ displayMessage = function( msg, level ){
 		default:
 	}
 }
+getDialogueLink = function( command, name ){
+	return EDAPSettings[ command ].help[ name ].value;
+}
+
 
 // Array functions
 indexOf = function( array, element ){
