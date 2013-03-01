@@ -426,7 +426,7 @@ displayDialogue = function( atitle, amessage, abuttons, url ){
 		'<vbox>' +
 			messageLines + 
 			'<spacer></spacer>' + 
-			'<spacer></spacer>' + myFlash +
+			'<spacer></spacer>' + (( url ) ? myFlash : "") +
 			'<spacer></spacer>' + 
 			'<spacer></spacer>' +
 			'<separator></separator>' +
