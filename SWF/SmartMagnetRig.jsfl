@@ -240,13 +240,23 @@ setRigInfo					= function( infoString ){
 			unLink( element, rigDataObj );
 		}
 		else{
-			var settings = displayDialogue( "Set Rig information", "The selected Symbol Instance is a part of another rig.\nAre you sure you want to replace the existing rig information with new one?", "accept, cancel" );
+			var settings = displayDialogue( "Set Rig information",
+			"The selected Symbol Instance is a part of another rig.\nAre you sure you want to replace the existing rig information with new one?",
+			"accept, cancel" );
 			if( settings.dismiss == "accept" ){
 				link( doc, element, rigDataObj );
 			}
 		}
 	}
 	else{
+		var exists = filterStageElements( isAlreadyExists,  doc.getTimeline(), true, true, [ element ], rigDataObj );
+		if( exists.length > 0 ){
+			displayDialogue( "Set Rig information",
+			"Another Symbol instance is already linked to this node.\nFor more information about rig creation, please visit the following link:",
+			"accept",
+			getDialogueLink( "smartMagnetRig", "A" ) );
+			return;
+		}
 		link( doc, element, rigDataObj );
 	}
 }
@@ -361,6 +371,11 @@ unLink						= function( element, dataObj ){
 
 
 // HELPER FUNCTIONS
+isAlreadyExists 			= function( element, aTimeline, currentLayernum, cf, n, inf ){
+	var xinf = getData( element, "SMR" );
+	if( ! xinf ){ return false; }
+	return Boolean( xinf.rig == inf.rig &&  xinf.id == inf.id );
+}
 createSnapInfo				= function( myTimeline, element, rigDataObject ){
 	var mtID = getMaxID( myTimeline, rigDataObject ); // Find maximum existing ID number
 	var mySnaps = filterStageElements( isMagnetTarget, element.libraryItem.timeline, true, false, [] );
