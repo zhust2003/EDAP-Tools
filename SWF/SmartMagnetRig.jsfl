@@ -1,9 +1,10 @@
 fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
 initialize();
 fl.showIdleMessage( false );
+var LMU = 0;
+var LKU = 0;
 
-
-
+// HELPER FUNCTIONS
 newRig						= function(){
 	var doc = fl.getDocumentDOM();
 	if( doc ){
@@ -144,28 +145,53 @@ retreiveRigsFromDocument	= function(){
 	}
 	return '';
 }
-getCurrentRigInfo			= function( id ){
+checkForUpdates				= function( id ){
 	var doc = fl.getDocumentDOM();
-	if( doc ){
-		var tml = doc.getTimeline();
-		var sel = getAllStageElements();
-		if( sel.length ){
-			var out = [];
-			var i = sel.length
-			while( i-- ){
-				var el = sel[i];
-				var obj = getData( el, "SMR" );
-				if( obj ){
-					if( obj.rig == id ){
-						obj.hasSnapObject = Boolean( getSnapObjectsInElement( el ).length > 0 );
-						obj.selected = include( doc.selection, el );
-						out.push( obj );
-					}
+	if( ! doc ){ return ''; }
+	var myMouseUp = Edapt.lastMouseUp()[3];
+	var myKeyUp = Edapt.lastKeyUp();
+	if( ! LMU ){
+		LMU = myMouseUp;
+		return getStageInfo( id );
+	}
+	else{
+		if( myMouseUp != LMU ){
+			LMU = myMouseUp;
+			return getStageInfo( id );
+		}
+	}
+	if( ! LKU ){
+		LKU = myKeyUp;
+		return getStageInfo( id );
+
+	}
+	else{
+		if( myKeyUp[2] != LKU ){
+			LKU = myKeyUp[2];
+			return getStageInfo( id );
+		}
+	}
+	return '';
+}
+getStageInfo				= function( id ){
+	var doc = fl.getDocumentDOM();
+	var tml = doc.getTimeline();
+	var sel = getAllStageElements();
+	if( sel.length ){
+		var out = [];
+		var i = sel.length
+		while( i-- ){
+			var el = sel[i];
+			var obj = getData( el, "SMR" );
+			if( obj ){
+				if( obj.rig == id ){
+					obj.hasSnapObject = Boolean( getSnapObjectsInElement( el ).length > 0 );
+					obj.selected = include( doc.selection, el );
+					out.push( obj );
 				}
 			}
-			return JSON.stringify( out );
 		}
-		return '';
+		return JSON.stringify( out );
 	}
 	return '';
 }
@@ -252,7 +278,7 @@ setRigInfo					= function( infoString ){
 		var exists = filterStageElements( isAlreadyExists,  doc.getTimeline(), true, true, [ element ], rigDataObj );
 		if( exists.length > 0 ){
 			displayDialogue( "Set Rig information",
-			"Another Symbol instance is already linked to this node.\nFor more information about rig creation, please visit the following link:",
+			"Another Symbol Instance is already linked to this node!\nYou can only link one Symbol Instance to a given node.\nFor detailed information how to use Smart Magnet Rig click the following link:",
 			"accept",
 			getDialogueLink( "smartMagnetRig", "A" ) );
 			return;
