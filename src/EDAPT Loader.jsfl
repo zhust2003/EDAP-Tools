@@ -354,7 +354,7 @@ function Utils() {
 	this.displayDialogue			= function( atitle, amessage, abuttons, url ){
 		var messageLines = "";
 		var match = new RegExp( "___", "gi" );
-		var myFlash = "<flash width='430' height='24' src='../XULControls/command.swf'/>";
+		var myFlash = "<flash width='430' height='24' src='../XULControls/Edapt url.swf'/>";
 		amessage = amessage.replace( match, "\n" );
 		var myLines = amessage.split( "\n" );
 		for( var i=0; i<myLines.length; i++ ){
