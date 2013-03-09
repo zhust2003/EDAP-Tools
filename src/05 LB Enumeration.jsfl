@@ -26,12 +26,10 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
-		
+	
 	// invoke the dialogue
 	var xmlContent = createXML();
-	var settings = displayPanel( "Enumeration" , xmlContent )
+	var settings = Edapt.utils.displayPanel( "Enumeration" , xmlContent )
 	
 	
 	if( settings.dismiss == "accept" ){
@@ -114,17 +112,17 @@ function runScript( commandname ){
 		var tail;
 		if( counter == 1 ){ tail = "";}
 		else{ tail = "s"; }
-		displayMessage( commandname + " : " + counter + " symbol" + tail + " affected.", 2 );
+		Edapt.utils.displayMessage( commandname + " : " + counter + " symbol" + tail + " affected.", 2 );
 		
 		// save settings
-		EDAPSettings.Enumeration.pattern = pattern;
-		EDAPSettings.Enumeration.useFolderNames = useFolderNames;
-		EDAPSettings.Enumeration.resetCounterOnEachFolder = resetOnEachFolder;
-		EDAPSettings.Enumeration.start = start;
-		EDAPSettings.Enumeration.step = step;
-		EDAPSettings.Enumeration.leadingZeroes = padding;
-		EDAPSettings.Enumeration.entireLibrary = EntireLibrary;
-		serialize( EDAPSettings, fl.configURI + "Javascript/EDAPTsettings.txt" );
+		Edapt.settings.Enumeration.pattern = pattern;
+		Edapt.settings.Enumeration.useFolderNames = useFolderNames;
+		Edapt.settings.Enumeration.resetCounterOnEachFolder = resetOnEachFolder;
+		Edapt.settings.Enumeration.start = start;
+		Edapt.settings.Enumeration.step = step;
+		Edapt.settings.Enumeration.leadingZeroes = padding;
+		Edapt.settings.Enumeration.entireLibrary = EntireLibrary;
+		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPTsettings.txt" );
 	}	
 }
 function filterTags( apattern ){
@@ -167,8 +165,8 @@ function decode( astring ){
 	return parsed2;
 }
 function createXML(){
-	var ptrn = decode( EDAPSettings.Enumeration.pattern );
-	var ver = getProductVersion( "all" );
+	var ptrn = decode( Edapt.settings.Enumeration.pattern );
+	var ver = Edapt.utils.getProductVersion( "all" );
 	var result =	
 	'<dialog title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +
@@ -188,7 +186,7 @@ function createXML(){
 			'<label value="Name:" />' +
 			'<hbox>' +
 				'<textbox id="Pattern" size="37" value="'+ ptrn +'"/>' +
-				'<checkbox id="UseFolderNames" label="Use Folder Names?" checked = "'+ EDAPSettings.Enumeration.useFolderNames +'" />' +
+				'<checkbox id="UseFolderNames" label="Use Folder Names?" checked = "'+ Edapt.settings.Enumeration.useFolderNames +'" />' +
 			'</hbox>' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
@@ -209,22 +207,22 @@ function createXML(){
 					'<row>' +
 						'<hbox>' +
 							'<label value="Start:                 " />' +
-							'<textbox id="StartValue" size="5" value="'+ EDAPSettings.Enumeration.start +'" />' +
+							'<textbox id="StartValue" size="5" value="'+ Edapt.settings.Enumeration.start +'" />' +
 						'</hbox>' +
 						'<hbox>' +
 							'<label value="        Step:" />' +
-							'<textbox id="Step" size="5" value="'+ EDAPSettings.Enumeration.step +'" />' +
+							'<textbox id="Step" size="5" value="'+ Edapt.settings.Enumeration.step +'" />' +
 						'</hbox>' +
 						'<hbox>' +
 							'<label value="   " />' +
-							'<checkbox id="ResetOnEachFolder" label="Reset Counter on Each Folder ?" checked = "'+ EDAPSettings.Enumeration.resetCounterOnEachFolder +'" />' +
+							'<checkbox id="ResetOnEachFolder" label="Reset Counter on Each Folder ?" checked = "'+ Edapt.settings.Enumeration.resetCounterOnEachFolder +'" />' +
 						'</hbox>' +
 					'</row>' +
 					
 					'<row>' +
 						'<hbox>' +
 							'<label value="Leading Zeroes:" />' +
-							'<textbox id="ZeroPadding" size="5" value="'+ EDAPSettings.Enumeration.leadingZeroes +'"/>' +
+							'<textbox id="ZeroPadding" size="5" value="'+ Edapt.settings.Enumeration.leadingZeroes +'"/>' +
 						'</hbox>' +
 						'<label value="" />' +
 						'<label value="" />' +
@@ -265,7 +263,7 @@ function createXML(){
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
 			
-			'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ EDAPSettings.Enumeration.entireLibrary +'" />' +
+			'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ Edapt.settings.Enumeration.entireLibrary +'" />' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +

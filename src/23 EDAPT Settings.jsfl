@@ -15,26 +15,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-
 try {
 	runScript( "EDAPT Settings" );
 }catch( error ){
 	fl.trace( error );
 }
-
 function runScript( commandname ){
 	if( fl.getDocumentDOM() == null ){
 		fl.trace( "No document open." );
 		return;
 	}
-	// Re-assure that the settings are initialized.
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
 
 	// Construct and invoke the dialogue with the proper default values.
 	var level1 = "false", level2 = "false", level3 = "false";
 
-	switch( EDAPSettings.traceLevel ){
+	switch( Edapt.settings.traceLevel ){
 		case 0:
 			level1 = "true";
 			break;
@@ -49,65 +44,56 @@ function runScript( commandname ){
 	}
 
 	var xmlContent = createXML( level1, level2, level3 );
-	var settings = displayPanel( "EDAPTSettings", xmlContent )
+	var settings = Edapt.utils.displayPanel( "EDAPTSettings", xmlContent )
 	
 	if( settings.dismiss == "accept" ){
 		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
 		// Assign new values
-		for( var i=0; i < EDAPSettings.layerColors.light.colors.length; i++ ){
+		for( var i=0; i < Edapt.settings.layerColors.light.colors.length; i++ ){
 			var p1 = "light" + ( i + 1 );
 			var p2 = "dark" + ( i + 1 );
-			EDAPSettings.layerColors.light.colors[i] = validateHEX( settings[p1] )? settings[p1] : EDAPSettings.layerColors.light.colors;
-			EDAPSettings.layerColors.dark.colors[i] = validateHEX( settings[p2] )? settings[p2] : EDAPSettings.layerColors.dark.colors[i];
+			Edapt.settings.layerColors.light.colors[i] = validateHEX( settings[p1] )? settings[p1] : Edapt.settings.layerColors.light.colors;
+			Edapt.settings.layerColors.dark.colors[i] = validateHEX( settings[p2] )? settings[p2] : Edapt.settings.layerColors.dark.colors[i];
 		}
-		EDAPSettings.smartMagnetJoint.distanceThreshold = parseInt( settings.SmartSnapDistance );
-		EDAPSettings.layerColors.forceOutline = Boolean( settings.forceOutline === "true");
-		EDAPSettings.traceLevel = parseInt( settings.traceLevel );
+		Edapt.settings.smartMagnetJoint.distanceThreshold = parseInt( settings.SmartSnapDistance );
+		Edapt.settings.layerColors.forceOutline = Boolean( settings.forceOutline === "true");
+		Edapt.settings.traceLevel = parseInt( settings.traceLevel );
 		
 		if( settings.resetDialogs == "true" ){
-			for ( var o in EDAPSettings ){
-				if( EDAPSettings[o].hasOwnProperty( "showAlert" ) ) {
-					EDAPSettings[o].showAlert = true;
+			for ( var o in Edapt.settings ){
+				if( Edapt.settings[o].hasOwnProperty( "showAlert" ) ) {
+					Edapt.settings[o].showAlert = true;
 				}
 			}	
 		}
 
-		for( var i=0; i < EDAPSettings.commands.settings.length; i++  ){
-			var val = settings[ EDAPSettings.commands.settings[i].id ];
-			EDAPSettings.commands.settings[i].state = Boolean( val === "true");
+		for( var i=0; i < Edapt.settings.commands.settings.length; i++  ){
+			var val = settings[ Edapt.settings.commands.settings[i].id ];
+			Edapt.settings.commands.settings[i].state = Boolean( val === "true");
 		}
 
 		// Save settings
-		fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl", "serialize", EDAPSettings, fpath );
+		Edapt.utils.serialize( Edapt.settings, fpath );
 		
 		// Check for command settings
 		var states = settings.allBoxes.split( "," );
+		//fl.trace( states ); //***
 		var messageFlag = false;
-		for( var i=0; i<EDAPSettings.commands.settings.length; i++ ){
-			if( settings[ EDAPSettings.commands.settings[i].id ] != states[i] ){
+		for( var i=0; i<Edapt.settings.commands.settings.length; i++ ){
+			if( settings[ Edapt.settings.commands.settings[i].id ] != states[i] ){
 				messageFlag = true;
 				break;
 			}
 		}
 	}
-
-	
+	fl.trace( "messageFlag: " + messageFlag ); //***
 	if( messageFlag ){
-		moveCommandFiles();
-		if( EDAPSettings.commands.showAlert == true ){
-			displayOptionalMessageBox( "Restart", "Hiding or showing commands requires Flash to be restarted." + "\n" + "All command shortcuts will be functional after the next restart.", "commands" );
+		Edapt.utils.moveCommandFiles();
+		if( Edapt.settings.commands.showAlert == true ){
+			Edapt.utils.displayOptionalMessageBox( "Restart", "Hiding or showing commands requires Flash to be restarted." + "\n" + "All command shortcuts will be functional after the next restart.", "commands" );
 		}
 	}
-	
 }
-
-function traceObj(obj){
-	for ( var o in obj ){
-		fl.trace( o + ":" + obj[o] );
-	}
-}
-
-
 function validateHEX( colorcode ){
   var regColorcode = /^(#)([0-9a-fA-F]{3})([0-9a-fA-F]{3})?$/;
   if( regColorcode.test( colorcode ) == true ){
@@ -115,10 +101,9 @@ function validateHEX( colorcode ){
   }
   return false;
 } 
-
 function createXML( level1, level2, level3 ){
-	var cmd = EDAPSettings.commands.settings;
-	var ver = getProductVersion( "all" );
+	var cmd = Edapt.settings.commands.settings;
+	var ver = Edapt.utils.getProductVersion( "all" );
 	var sep = "  /  ";
 	return '<?xml version="1.0"?>' +
 	'<dialog title="Electric Dog Animation Power Tools - Settings    ' + ver + '" >' +
@@ -168,7 +153,7 @@ function createXML( level1, level2, level3 ){
 				'</columns>' +
 				'<rows>' +
 					'<row>' +
-					'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + EDAPSettings.layerColors.forceOutline + '" />' +
+					'<checkbox id="forceOutline" label="Force Outline when setting the Layer Color?" checked = "' + Edapt.settings.layerColors.forceOutline + '" />' +
 					'<label value="                                                                   " />' +
 					'<button label="Reset to default colors" oncommand = "resetToDefaultColours()"/>' +						
 				'</row>'+	
@@ -191,7 +176,7 @@ function createXML( level1, level2, level3 ){
 			'<rows>' +
 				'<row>' +
 					'<label value="Smart Magnet Range:     " />' +
-					'<textbox id="SmartSnapDistance" size="5" value="' + EDAPSettings.smartMagnetJoint.distanceThreshold + '"/>' +
+					'<textbox id="SmartSnapDistance" size="5" value="' + Edapt.settings.smartMagnetJoint.distanceThreshold + '"/>' +
 					'<label value="          This is the radius which defines the range in which &quot;19 Smart Magnet Joint&quot; will search for a Magnet Target " />' +
 				'</row>' +
 				'<row>' +
@@ -385,76 +370,23 @@ function createXML( level1, level2, level3 ){
 				
 				'function invertState(){' +
 					'state = !state;' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[0].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[1].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[2].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[3].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[4].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[5].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[6].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[7].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[8].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[9].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[10].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[11].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[12].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[13].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[14].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[15].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[16].id + '", state );' +
-					'fl.xmlui.set( "' + EDAPSettings.commands.settings[17].id + '", state );' +
+					'Edapt.utils.setCommandBoxes( state );' +
 				'}' +
-				
 				
 				'function getCommandBoxes(){'+
-					'var bstates = [];'+
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[0].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[1].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[2].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[3].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[4].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[5].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[6].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[7].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[8].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[9].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[10].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[11].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[12].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[13].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[14].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[15].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[16].id + '" ) );' +
-					'bstates.push( fl.xmlui.get( "' + EDAPSettings.commands.settings[17].id + '" ) );' +
+					'var bstates = Edapt.utils.getCommandBoxes();'+
+					'if( Edapt.utils.include( bstates, "true" ) ){'+
+						'state = true;'+
+					'}'+
 					'fl.xmlui.set( "allBoxes", bstates );'+
 				'}' +
-				
+
 				'function setDefaultColors(){'+ 
-					'fl.xmlui.set( "light1", "'+EDAPSettings.layerColors.light.colors[0]+'" );'+
-					'fl.xmlui.set( "light2", "'+EDAPSettings.layerColors.light.colors[1]+'" );'+
-					'fl.xmlui.set( "light3", "'+EDAPSettings.layerColors.light.colors[2]+'" );'+
-					'fl.xmlui.set( "light4", "'+EDAPSettings.layerColors.light.colors[3]+'" );'+
-					'fl.xmlui.set( "light5", "'+EDAPSettings.layerColors.light.colors[4]+'" );'+
-					
-					'fl.xmlui.set( "dark1",  "'+EDAPSettings.layerColors.dark.colors[0] +'" );'+
-					'fl.xmlui.set( "dark2",  "'+EDAPSettings.layerColors.dark.colors[1] +'" );'+
-					'fl.xmlui.set( "dark3",  "'+EDAPSettings.layerColors.dark.colors[2] +'" );'+
-					'fl.xmlui.set( "dark4",  "'+EDAPSettings.layerColors.dark.colors[3] +'" );'+
-					'fl.xmlui.set( "dark5",  "'+EDAPSettings.layerColors.dark.colors[4] +'" );'+
+					'Edapt.utils.loadDefaultColors();' +
 				'}' +
+				
 				'function resetToDefaultColours(){' +
-					
-					'fl.xmlui.set( "light1", "' + defineLightColors()[0] + '" );'+
-					'fl.xmlui.set( "light2", "' + defineLightColors()[1] + '" );'+
-					'fl.xmlui.set( "light3", "' + defineLightColors()[2] + '" );'+
-					'fl.xmlui.set( "light4", "' + defineLightColors()[3] + '" );'+
-					'fl.xmlui.set( "light5", "' + defineLightColors()[4] + '" );'+
-					
-					'fl.xmlui.set( "dark1",  "' + defineDarkColors()[0] + '" );'+
-					'fl.xmlui.set( "dark2",  "' + defineDarkColors()[1] + '" );'+
-					'fl.xmlui.set( "dark3",  "' + defineDarkColors()[2] + '" );'+
-					'fl.xmlui.set( "dark4",  "' + defineDarkColors()[3] + '" );'+
-					'fl.xmlui.set( "dark5",  "' + defineDarkColors()[4] + '" );'+
+					'Edapt.utils.resetColorValues();' +
 				'}' +
 
 			'</script>'+

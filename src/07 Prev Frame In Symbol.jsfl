@@ -27,16 +27,14 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
 	var sl = fl.getDocumentDOM().selection.length;
 	for( var i = 0; i < sl; i ++ ){
 		var el = fl.getDocumentDOM().selection[i];									// Get the selected element
-		if( isElementSymbol( el ) == true ){									    // If the selected element is movieclip, button or graphis..
+		if( Edapt.utils.isElementSymbol( el ) == true ){							// If the selected element is movieclip, button or graphis..
 			var selectedSymbol = el.libraryItem;									// Get the source of the instance
 			var fcount = selectedSymbol.timeline.frameCount;						// And check the frame count in the timeliene of the element
 			if( fcount <= 1 ){
-				displayMessage( commandname + " : The timeline of the selected element contains only 1 frame.", 2 );
+				Edapt.utils.displayMessage( commandname + " : The timeline of the selected element contains only 1 frame.", 2 );
 			}
 			else{
 				prevFrame = decreaseFrame( el.firstFrame, fcount );
@@ -44,7 +42,7 @@ function runScript( commandname ){
 			}
 		}
 		else{
-			displayMessage( commandname + " : There is no timeline in the selected element.", 1 );
+			Edapt.utils.displayMessage( commandname + " : There is no timeline in the selected element.", 1 );
 		}
 	}
 }

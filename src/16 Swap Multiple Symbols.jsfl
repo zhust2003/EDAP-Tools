@@ -27,15 +27,13 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
 	if( fl.getDocumentDOM().library.getSelectedItems().length != 1 ){
-		displayMessage( commandname + " : Please, select a single library item.", 1 );
+		Edapt.utils.displayMessage( commandname + " : Please, select a single library item.", 1 );
 		return;
 	}	
 	var selItem = fl.getDocumentDOM().library.getSelectedItems()[0];
 	if( selItem.itemType != "graphic" &&  selItem.itemType != "button" && selItem.itemType != "movie clip" ){
-		displayMessage( commandname + " : Please, select a single SYMBOL in the library.", 1 );
+		Edapt.utils.displayMessage( commandname + " : Please, select a single SYMBOL in the library.", 1 );
 		return;
 	}
 	var selElements = fl.getDocumentDOM().selection;
@@ -46,7 +44,7 @@ function runScript( commandname ){
 			element = selElements[i];
 			fl.getDocumentDOM().selectNone();
 			fl.getDocumentDOM().selection = [ element ];
-			if( isElementSymbol( element ) == true ){
+			if( Edapt.utils.isElementSymbol( element ) == true ){
 				fl.getDocumentDOM().swapElement( selItem.name );
 				replaced ++ ;
 			}
@@ -55,9 +53,9 @@ function runScript( commandname ){
 			}
 		}
 		fl.getDocumentDOM().selection = selElements;
-		displayMessage( commandname + " : " + replaced + " elements was replaced, " + skipped + " was skipped.", 2 );
+		Edapt.utils.displayMessage( commandname + " : " + replaced + " elements was replaced, " + skipped + " was skipped.", 2 );
 	}
 	else{
-		displayMessage( commandname + " : Please, select a single element on the stage", 1 );
+		Edapt.utils.displayMessage( commandname + " : Please, select a single element on the stage", 1 );
 	}
 }

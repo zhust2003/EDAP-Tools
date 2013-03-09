@@ -26,17 +26,13 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
-	
+
 	// invoke the dialogue
 	var xmlContent = createXML();
-	var settings = displayPanel( "TrimCharacters" , xmlContent )
+	var settings = Edapt.utils.displayPanel( "TrimCharacters" , xmlContent )
 	
 	
 	if( settings.dismiss == "accept" ){
-		fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-		initialize();
 		// Get the user input
 		var leftTrim = parseInt( settings.LeftTrim );														
 		var rightTrim = parseInt( settings.RightTrim );
@@ -63,13 +59,13 @@ function runScript( commandname ){
 		var tail;
 		if( counter == 1 ){ tail = "";}
 		else{ tail = "s"; }
-		displayMessage( commandname + " : " + counter + " object" + tail + " affected.", 2 );
+		Edapt.utils.displayMessage( commandname + " : " + counter + " object" + tail + " affected.", 2 );
 		
 		// save settings
-		EDAPSettings.TrimCharacters.left = leftTrim;
-		EDAPSettings.TrimCharacters.ritght = rightTrim;
-		EDAPSettings.TrimCharacters.entireLibrary = EntireLibrary;
-		serialize( EDAPSettings, fl.configURI + "Javascript/EDAPTsettings.txt" );
+		Edapt.settings.TrimCharacters.left = leftTrim;
+		Edapt.settings.TrimCharacters.ritght = rightTrim;
+		Edapt.settings.TrimCharacters.entireLibrary = EntireLibrary;
+		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPTsettings.txt" );
 	}
 }
 function trim( astring, leftNum, rightNum ){
@@ -92,7 +88,7 @@ function rightTrim( astring, n ){
     return astring.substring( 0, r )   
 }
 function createXML(){
-	var ver = getProductVersion( "all" );
+	var ver = Edapt.utils.getProductVersion( "all" );
 	var result =
 	'<dialog title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +
@@ -108,15 +104,15 @@ function createXML(){
 					'</row>' +
 					'<row>' +
 						'<label value="Left:       " />' +
-						'<textbox id="LeftTrim" size="5" value="'+ EDAPSettings.TrimCharacters.left +'" />' +
+						'<textbox id="LeftTrim" size="5" value="'+ Edapt.settings.TrimCharacters.left +'" />' +
 					'</row>' +
 					'<row>' +
 						'<label value="Right:      " />' +
-						'<textbox id="RightTrim" size="5" value="'+ EDAPSettings.TrimCharacters.ritght +'"/>' +
+						'<textbox id="RightTrim" size="5" value="'+ Edapt.settings.TrimCharacters.right +'"/>' +
 					'</row>' +
 				'</rows>' +
 			'</grid>' +
-			'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ EDAPSettings.TrimCharacters.entireLibrary +'" />' +
+			'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ Edapt.settings.TrimCharacters.entireLibrary +'" />' +
 			'<spacer></spacer>' +
 			'<separator></separator>' +
 			'<spacer></spacer>' +
@@ -159,7 +155,7 @@ function createXML(){
 
 		'function isPositiveNumber( n ){' +
 			'var a = isNumber( n );' +
-			'var b = Boolean( n &gt; 0 || n == 0 );' +
+			'var b = Boolean( n &gt; 0 );' +
 			'return ( a+b ) == 2;'+
 		'}' +
 		

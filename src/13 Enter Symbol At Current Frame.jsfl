@@ -27,12 +27,10 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
 	var selection = fl.getDocumentDOM().selection;
 	var check = validateSelection( selection );
 	if( check == false ){
-		displayMessage( commandname + " : Please, select a single symbol on the stage.", 1 );
+		Edapt.utils.displayMessage( commandname + " : Please, select a single symbol on the stage.", 1 );
 	}
 	else{
 		var element = selection[0];	
@@ -47,5 +45,5 @@ function validateSelection( sel ){
 	if( sel.length != 1 ){
 		return false;
 	}
-	return( isElementSymbol( sel[0] ) );
+	return( Edapt.utils.isElementSymbol( sel[0] ) );
 }

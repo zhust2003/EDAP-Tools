@@ -22,20 +22,18 @@ try {
 	fl.trace( error );
 }
 function runScript( commandname ){
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
 	var selection = fl.getDocumentDOM().selection;
 	if( selection.length == 0 ){
-		displayMessage( commandname + ": " + "No selection", 1 );
+		Edapt.utils.displayMessage( commandname + ": " + "No selection", 1 );
 		return;
 	}
 	else if( selection.length > 1 ){
-		displayMessage( commandname + ": " + "Please, select  single symbol on the stage.", 1 );
+		Edapt.utils.displayMessage( commandname + ": " + "Please, select  single symbol on the stage.", 1 );
 		return;
 	}
 	
-	if( isElementSymbol( selection[0] ) == false ){
-		displayMessage( commandname + ": " + "Please, select  single symbol on the stage.", 1 );
+	if( Edapt.utils.isElementSymbol( selection[0] ) == false ){
+		Edapt.utils.displayMessage( commandname + ": " + "Please, select  single symbol on the stage.", 1 );
 		return;
 	}
 	var mtr = currentElement = selection[0].matrix;
@@ -44,7 +42,7 @@ function runScript( commandname ){
 	fl.getDocumentDOM().enterEditMode( "inPlace" );
 	var innerTimeline = fl.getDocumentDOM().getTimeline();                      // Store a reference to the symbol's timeline
 	var innerLayers = innerTimeline.layers;
-	var layerMap = createObjectStateMap( innerLayers, [ "locked" ] );  			// Store a layer "locking" map
+	var layerMap = Edapt.utils.createObjectStateMap( innerLayers, [ "locked" ] ); // Store a layer "locking" map
 	for( var i = 0; i < innerLayers.length; i ++ ){
 		innerTimeline.setLayerProperty( "locked", false, "all" );				// Unlock all layers
 		innerTimeline.setSelectedLayers( i, true );
@@ -62,7 +60,7 @@ function runScript( commandname ){
 			}
 		}
 	}
-	restoreObjectStateFromMap( innerLayers, layerMap );                			// Restore layer states, using the previously created map.
+	Edapt.utils.restoreObjectStateFromMap( innerLayers, layerMap );             // Restore layer states, using the previously created map.
 	fl.getDocumentDOM().exitEditMode();
 	fl.getDocumentDOM().moveSelectionBy( movements.symbol );
 	fl.getDocumentDOM().setTransformationPoint( {x:0, y:0} );
@@ -71,7 +69,7 @@ function runScript( commandname ){
 function setMultipleLayerProperty( prop, state, tml, exclude ){
 	var cnt = tml.layers.length;
 	while( cnt -- ){
-		if( ! include( exclude, cnt ) ){
+		if( ! Edapt.utils.include( exclude, cnt ) ){
 			if( tml.layers[ cnt ].layerType != "folder" ){
 				tml.setSelectedLayers( cnt, true );
 				tml.setLayerProperty( prop, state );

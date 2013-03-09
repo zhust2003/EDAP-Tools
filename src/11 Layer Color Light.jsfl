@@ -27,14 +27,12 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
 	var theColor = getNextColorFromList();
 	var counter = 0;
-	var affectedLayers = getLayers();
+	var affectedLayers = Edapt.utils.getLayers();
 	for( var i=0; i < affectedLayers.length; i ++ ){
 		var currentLayer = affectedLayers[ i ];
-		if( EDAPSettings.layerColors.forceOutline == true ){ 
+		if( Edapt.settings.layerColors.forceOutline == true ){ 
 			currentLayer.outline = true;
 		}
 		currentLayer.color = theColor;
@@ -43,15 +41,15 @@ function runScript( commandname ){
 	var tail;
 	if( counter == 1 ){ tail = "";}
 	else{ tail = "s"; }
-	displayMessage( commandname + " : " + counter + " layer" + tail + " affected.", 2 );
+	Edapt.utils.displayMessage( commandname + " : " + counter + " layer" + tail + " affected.", 2 );
 }
 
 function getNextColorFromList(){
-	if( EDAPSettings.layerColors.light.index < EDAPSettings.layerColors.light.colors.length - 1 ){
-		EDAPSettings.layerColors.light.index ++;
+	if( Edapt.settings.layerColors.light.index < Edapt.settings.layerColors.light.colors.length - 1 ){
+		Edapt.settings.layerColors.light.index ++;
 	}
 	else{
-		EDAPSettings.layerColors.light.index = 0;
+		Edapt.settings.layerColors.light.index = 0;
 	}
-	return EDAPSettings.layerColors.light.colors[ EDAPSettings.layerColors.light.index ];
+	return Edapt.settings.layerColors.light.colors[ Edapt.settings.layerColors.light.index ];
 }

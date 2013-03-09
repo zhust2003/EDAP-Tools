@@ -1,5 +1,3 @@
-fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-initialize();
 fl.showIdleMessage( false );
 var LMU = 0;
 var LKU = 0;
@@ -25,7 +23,7 @@ newRig						= function(){
 		FLfile.write( xmlFile, xmlContent );
 		var settings = doc.xmlPanel( xmlFile );
 		FLfile.remove( xmlFile );
-		return this.JSON.stringify( settings );
+		return Edapt.utils.JSON.stringify( settings );
 	}
 	else{
 		return '{}';
@@ -75,12 +73,12 @@ exportRigs					= function( jsonData, currentnum ){
 		FLfile.write( xmlFile, xmlContent );
 		var settings = doc.xmlPanel( xmlFile );
 		FLfile.remove( xmlFile );
-		var data = JSON.parse( jsonData );
+		var data = Edapt.utils.JSON.parse( jsonData );
 		var fileName;
 		
 		if( ! ( ( typeof( settings.folderName ) == "string" ) && ( settings.folderName.length > 0 ) && ( settings.folderName != "null" ) ) ){
 			retval.result = 'Invalid folder.';
-			return JSON.stringify( retval );
+			return Edapt.utils.JSON.stringify( retval );
 		}
 		else{
 			if( settings.folderName.charAt( settings.folderName.length - 1 ) != "/" ){ settings.folderName += "/";} // add folder separator if needed
@@ -103,20 +101,20 @@ exportRigs					= function( jsonData, currentnum ){
 				else{
 					fn = data[ i ][ 0 ].id;
 				}
-				FLfile.write( settings.folderName + fn + '.rig', JSON.stringify( data[ i ] ) );
+				FLfile.write( settings.folderName + fn + '.rig', Edapt.utils.JSON.stringify( data[ i ] ) );
 				cnt ++;
 			}
 		}
 		else{
-			FLfile.write( settings.folderName + fileName + '.rig', JSON.stringify( data[ currentnum ] ) );
+			FLfile.write( settings.folderName + fileName + '.rig', Edapt.utils.JSON.stringify( data[ currentnum ] ) );
 			cnt = 1;
 		}
 		retval.files = cnt;
-		return JSON.stringify( retval );
+		return Edapt.utils.JSON.stringify( retval );
 	}
 	else{
 		retval.result = 'No document.';
-		return JSON.stringify( retval );
+		return Edapt.utils.JSON.stringify( retval );
 	}
  }
 importRig					= function(){
@@ -134,12 +132,12 @@ retreiveRigsFromDocument	= function(){
 		if( sel.length ){
 			out = [];
 			for( var i=0; i<sel.length; i++ ){
-				var inf = getData( sel[i], "SMR" );
+				var inf = Edapt.utils.getData( sel[i], "SMR" );
 				if( inf ){
 					out.push( inf );
 				}
 			}
-			return JSON.stringify( out );
+			return Edapt.utils.JSON.stringify( out );
 		}
 		return '';
 	}
@@ -161,14 +159,17 @@ checkForUpdates				= function( id ){
 		}
 	}
 	if( ! LKU ){
-		LKU = myKeyUp;
-		return getStageInfo( id );
-
+		if( myKeyUp[0] == 24 || myKeyUp[0] == 126 ){
+			LKU = myKeyUp[2];
+			return getStageInfo( id );
+		}
 	}
 	else{
 		if( myKeyUp[2] != LKU ){
-			LKU = myKeyUp[2];
-			return getStageInfo( id );
+			if( myKeyUp[0] == 24 || myKeyUp[0] == 126 ){
+				LKU = myKeyUp[2];
+				return getStageInfo( id );
+			}
 		}
 	}
 	return '';
@@ -182,28 +183,30 @@ getStageInfo				= function( id ){
 		var i = sel.length
 		while( i-- ){
 			var el = sel[i];
-			var obj = getData( el, "SMR" );
+			var obj = Edapt.utils.getData( el, "SMR" );
 			if( obj ){
 				if( obj.rig == id ){
 					obj.hasSnapObject = Boolean( getSnapObjectsInElement( el ).length > 0 );
-					obj.selected = include( doc.selection, el );
+					obj.selected = Edapt.utils.include( doc.selection, el );
 					out.push( obj );
 				}
 			}
 		}
-		return JSON.stringify( out );
+		return Edapt.utils.JSON.stringify( out );
 	}
-	return '';
+	else{
+		return 'empty';
+	}
 }
 getLinkedSymbolInfo 		= function( adata ){
 	var doc = fl.getDocumentDOM();
 	if( doc ){
-		var args = JSON.parse( adata );
+		var args = Edapt.utils.JSON.parse( adata );
 		var elts = getAllStageElements();
 		var cnt = elts.length;
 		while( cnt-- ){
 			var el = elts[ cnt ];
-			var inf = getData( el, "SMR" );
+			var inf = Edapt.utils.getData( el, "SMR" );
 			var hasName = false;
 			if ( el.symbolType == "movie clip" || el.symbolType == "button" ){
 				if( el.name.length > 0 ){
@@ -228,45 +231,45 @@ removeSelectedNodes 		= function(){
 		var cnt = 0;
 		if( sel.length > 0 ){
 			
-			var settings = displayDialogue( "Remove Links", "Are you sure you want to remove links from the selected Symbol Instances?", "accept, cancel" );
+			var settings = Edapt.utils.displayDialogue( "Remove Links", "Are you sure you want to remove links from the selected Symbol Instances?", "accept, cancel" );
 			if( settings.dismiss == "accept" ){
 				for( var i=0; i<sel.length; i++ ){
 					var el = sel[i];
-					var inf = getData( el, "SMR" );
+					var inf = Edapt.utils.getData( el, "SMR" );
 					if( inf ){
 						retval.push( inf );
 						cnt ++;
 					}
-					removeData( el, "SMR" );
+					Edapt.utils.removeData( el, "SMR" );
 				}
-				displayDialogue( "Remove Links", cnt + " link(s) were removed.", "accept" );
+				Edapt.utils.displayDialogue( "Remove Links", cnt + " link(s) were removed.", "accept" );
 			}
 		}
 		else{
-			displayDialogue( "Remove Links", "Select at least one already linked Symbol on Stage.", "accept" );
+			Edapt.utils.displayDialogue( "Remove Links", "Select at least one already linked Symbol on Stage.", "accept" );
 		}	
 	}
-	return JSON.stringify( retval );
+	return Edapt.utils.JSON.stringify( retval );
 }
 setRigInfo					= function( infoString ){
 	var doc = fl.getDocumentDOM();
 	if( ! doc ){ return;}
 	if( doc.selection.length > 1 || doc.selection == 0 ){ 
-		displayDialogue( "Set Rig Information", "Select one Symbol on Stage.", "accept" );
+		Edapt.utils.displayDialogue( "Set Rig Information", "Select one Symbol on Stage.", "accept" );
 		return;
 	}
-	var element = getSelection( doc, true );
+	var element = Edapt.utils.getSelection( doc, true );
 	if( ! element ){ return;}
 	
-	var rigDataObj = JSON.parse( infoString );
-	var infoObj = getData( element, "SMR" );
+	var rigDataObj = Edapt.utils.JSON.parse( infoString );
+	var infoObj = Edapt.utils.getData( element, "SMR" );
 	
 	if( infoObj ){
 		if( infoObj.rig == rigDataObj.rig ){
 			unLink( element, rigDataObj );
 		}
 		else{
-			var settings = displayDialogue( "Set Rig information",
+			var settings = Edapt.utils.displayDialogue( "Set Rig information",
 			"The selected Symbol Instance is a part of another rig.\nAre you sure you want to replace the existing rig information with new one?",
 			"accept, cancel" );
 			if( settings.dismiss == "accept" ){
@@ -275,12 +278,12 @@ setRigInfo					= function( infoString ){
 		}
 	}
 	else{
-		var exists = filterStageElements( isAlreadyExists,  doc.getTimeline(), true, true, [ element ], rigDataObj );
+		var exists = Edapt.utils.filterStageElements( isAlreadyExists,  doc.getTimeline(), true, true, [ element ], rigDataObj );
 		if( exists.length > 0 ){
-			displayDialogue( "Set Rig information",
+			Edapt.utils.displayDialogue( "Set Rig information",
 			"Another Symbol Instance is already linked to this node!\nYou can only link one Symbol Instance to a given node.\nFor detailed information how to use Smart Magnet Rig click the following link:",
 			"accept",
-			getDialogueLink( "smartMagnetRig", "A" ) );
+			Edapt.utils.getDialogueLink( "smartMagnetRig", "A" ) );
 			return;
 		}
 		link( doc, element, rigDataObj );
@@ -288,7 +291,7 @@ setRigInfo					= function( infoString ){
 }
 link						= function( doc, element, rigDataObject ){
 	var myTimeline = doc.getTimeline();
-	var myInfObj = getData( element, "SMR" );
+	var myInfObj = Edapt.utils.getData( element, "SMR" );
 	var snapInfo = createSnapInfo( myTimeline, element, rigDataObject );
 	var myID = snapInfo.id;
 
@@ -297,22 +300,22 @@ link						= function( doc, element, rigDataObject ){
 		doc.moveSelectionBy( { x:-1, y:-1 } );
 		doc.enterEditMode( "inPlace" );
 		for( var i=0; i<snapInfo.snaps.length; i++ ){
-			if( ! getData( snapInfo.snaps[i], "MT" ) ){
+			if( ! Edapt.utils.getData( snapInfo.snaps[i], "MT" ) ){
 				myID ++;
-				var ok1 = setData( snapInfo.snaps[i], "MT", { rig:rigDataObject.rig, id:String( myID ) } );
+				var ok1 = Edapt.utils.setData( snapInfo.snaps[i], "MT", { rig:rigDataObject.rig, id:String( myID ) } );
 			}
 		}
 		doc.exitEditMode();
-		var ok2 = setData( element, "SMR", rigDataObject  );
+		var ok2 = Edapt.utils.setData( element, "SMR", rigDataObject  );
 	}
 	else{// CHILD
 		doc.moveSelectionBy( { x:1, y:1 } );
 		doc.moveSelectionBy( { x:-1, y:-1 } );
 		doc.enterEditMode( "inPlace" );
 		for( var i=0; i<snapInfo.snaps.length; i++ ){
-			if( ! getData( snapInfo.snaps[i], "MT" ) ){
+			if( ! Edapt.utils.getData( snapInfo.snaps[i], "MT" ) ){
 				myID ++;
-				var ok1 = setData( snapInfo.snaps[i], "MT", { rig:rigDataObject.rig, id:String( myID ) } );
+				var ok1 = Edapt.utils.setData( snapInfo.snaps[i], "MT", { rig:rigDataObject.rig, id:String( myID ) } );
 			}
 		}
 		doc.exitEditMode();		
@@ -321,35 +324,35 @@ link						= function( doc, element, rigDataObject ){
 		var xSnap = null;
 		for( var j=0; j<pSnaps.length; j++ ){
 			var d = fl.Math.pointDistance( elementToContainer( parent, pSnaps[j] ), {x:element.matrix.tx, y:element.matrix.ty} );
-			if( d <= EDAPSettings.smartMagnetRig.snapThreshold ){
+			if( d <= Edapt.settings.smartMagnetRig.snapThreshold ){
 				xSnap = pSnaps[j];
 				break;
 			} 
 		}
 		if( xSnap ){
-			var snapInf = getData( xSnap, "MT" );
+			var snapInf = Edapt.utils.getData( xSnap, "MT" );
 			if( snapInf ){
 				var id = snapInf.id;
 				rigDataObject.snapTo = id;
-				var ok2 = setData( element, "SMR", rigDataObject );
+				var ok2 = Edapt.utils.setData( element, "SMR", rigDataObject );
 			}
 			else{
 				var mtID = String( getMaxID( myTimeline, rigDataObject ) + 1 );
 				rigDataObject.snapTo = mtID;
-				setData( xSnap, "MT", { rig:rigDataObject.rig, id:mtID } );
-				var ok2 = setData( element, "SMR", rigDataObject );
+				Edapt.utils.setData( xSnap, "MT", { rig:rigDataObject.rig, id:mtID } );
+				var ok2 = Edapt.utils.setData( element, "SMR", rigDataObject );
 			}
 		}
 		else{
-			var msg = "No Magnet Target found within the "+ EDAPSettings.smartMagnetRig.snapThreshold +"px radius.\n"+
+			var msg = "No Magnet Target found within the "+ Edapt.settings.smartMagnetRig.snapThreshold +"px radius.\n"+
 			"Parent Symbol must contain a Magnet Target (MT) object.\n"+
 			"MT center must overlap with the Registration Point of currently selected Symbol Instance."
-			var settings = displayDialogue( "Set Rig information", msg, "accept" );
+			var settings = Edapt.utils.displayDialogue( "Set Rig information", msg, "accept" );
 			return;
 		}	
 	}
 
-	var mysiblings = filterStageElements( isMySibling, myTimeline, true, false, [], element, rigDataObject );
+	var mysiblings = Edapt.utils.filterStageElements( isMySibling, myTimeline, true, false, [], element, rigDataObject );
 	for( var sib = 0; sib < mysiblings.length; sib ++ ){
 		var children = [];
 		var xSibling = mysiblings[ sib ];
@@ -361,12 +364,12 @@ link						= function( doc, element, rigDataObject ){
 			for( var sn = 0; sn < sibSnaps.length; sn ++ ){
 				var xSnap = sibSnaps[ sn ];
 				var dist = fl.Math.pointDistance( elementToContainer( xSibling, xSnap ), {x:xChild.matrix.tx, y:xChild.matrix.ty} );
-				if( dist <= EDAPSettings.smartMagnetJoint.snapThreshold ){
-					var snapID = getData( xSnap, "MT" ).id;
+				if( dist <= Edapt.settings.smartMagnetJoint.snapThreshold ){
+					var snapID = Edapt.utils.getData( xSnap, "MT" ).id;
 					if( snapID ){
-						var oldInfo = getData( xChild, "SMR" );
+						var oldInfo = Edapt.utils.getData( xChild, "SMR" );
 						oldInfo[ "snapTo" ] = snapID;
-						setData( xChild, "SMR", oldInfo );
+						Edapt.utils.setData( xChild, "SMR", oldInfo );
 					}
 				}
 			}
@@ -374,9 +377,9 @@ link						= function( doc, element, rigDataObject ){
 	}	
 }
 unLink						= function( element, dataObj ){
-	var inf = getData( element, "SMR" );
+	var inf = Edapt.utils.getData( element, "SMR" );
 	if( inf.rig == dataObj.rig && inf.id == dataObj.id ){
-	var ok = removeData( element, "SMR" );
+	var ok = Edapt.utils.removeData( element, "SMR" );
 		if( ok ){
 			var tail = "";
 			if( inf ){
@@ -387,24 +390,24 @@ unLink						= function( element, dataObj ){
 					tail += "Instance: " + element.name;
 				}
 			}
-			displayDialogue( "Remove Rig information", "One link was removed." + tail, "accept" );
+			Edapt.utils.displayDialogue( "Remove Rig information", "One link was removed." + tail, "accept" );
 		}
 	}
 	else{
-		displayDialogue( "Remove Rig information", "You can unlink only the currently selected Symbol Instance.", "accept" );
+		Edapt.utils.displayDialogue( "Remove Rig information", "You can unlink only the currently selected Symbol Instance.", "accept" );
 	}
 }
 
 
 // HELPER FUNCTIONS
 isAlreadyExists 			= function( element, aTimeline, currentLayernum, cf, n, inf ){
-	var xinf = getData( element, "SMR" );
+	var xinf = Edapt.utils.getData( element, "SMR" );
 	if( ! xinf ){ return false; }
 	return Boolean( xinf.rig == inf.rig &&  xinf.id == inf.id );
 }
 createSnapInfo				= function( myTimeline, element, rigDataObject ){
 	var mtID = getMaxID( myTimeline, rigDataObject ); // Find maximum existing ID number
-	var mySnaps = filterStageElements( isMagnetTarget, element.libraryItem.timeline, true, false, [] );
+	var mySnaps = Edapt.utils.filterStageElements( Edapt.utils.isMagnetTarget, element.libraryItem.timeline, true, false, [] );
 	return { id:mtID, snaps:mySnaps };
 }
 getMaxID					= function( myTimeline, inf ){
@@ -412,7 +415,7 @@ getMaxID					= function( myTimeline, inf ){
 	var maxID;
 	if( snaps.length > 0 ){
 		snaps.sort( sortOnID );
-		maxID = Number( getData( snaps[ snaps.length-1 ], "SMR" ).id );
+		maxID = Number( Edapt.utils.getData( snaps[ snaps.length-1 ], "SMR" ).id );
 	}
 	else{
 		maxID = 0;
@@ -435,8 +438,8 @@ collectUniqueSnapObjects	= function( aTimeline, inf ){
 				var mysnaps = getSnapObjectsInElement( el );
 				for( var j=0; j<mysnaps.length; j++ ){
 					var sno = mysnaps[ j ];
-					if( ! include( retval, sno ) ){
-						var data = getData( sno, "SMR" );
+					if( ! Edapt.utils.include( retval, sno ) ){
+						var data = Edapt.utils.getData( sno, "SMR" );
 						if( data ){
 							if( data.rig == inf.rig ){
 								retval.push( sno );	
@@ -452,13 +455,13 @@ collectUniqueSnapObjects	= function( aTimeline, inf ){
 	return retval;
 }
 getSnapObjectsInElement		= function( element ){
-	if( isElementSymbol( element ) ){
-		return filterStageElements( isMagnetTarget, element.libraryItem.timeline, true, false, [] );
+	if( Edapt.utils.isElementSymbol( element ) ){
+		return Edapt.utils.filterStageElements( Edapt.utils.isMagnetTarget, element.libraryItem.timeline, true, false, [] );
 	}
 	return [];
 }
 sortOnID					= function( a, b ){
-	return ( convertID( getData( a, "SMR" ).id ) - convertID( getData( b, "SMR" ).id ) );
+	return ( convertID( Edapt.utils.getData( a, "SMR" ).id ) - convertID( getData( b, "SMR" ).id ) );
 }
 convertID					= function( id ){
 	if( id.length == 0 ){ return -1; }
@@ -466,14 +469,14 @@ convertID					= function( id ){
 	return isNaN( retval ) ? 0 : retval;
 }
 getMyParent					= function( myTimeline, rigInfObj ){
-	var parents = filterStageElements( getParent, myTimeline, false, true, [], rigInfObj );
+	var parents = Edapt.utils.filterStageElements( getParent, myTimeline, false, true, [], rigInfObj );
 	if( parents.length > 0 ){
 		return parents[0];
 	}
 	return null;
 }
 getParent					= function( element, aTimeline, currentLayernum, cf, n, inf ){
-	var data = getData( element, "SMR" );
+	var data = Edapt.utils.getData( element, "SMR" );
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
 			return element;
@@ -489,7 +492,7 @@ elementToContainer			= function( container, element ){
 }
 isMySibling					= function( element, aTimeline, currentLayernum, cf, n, target, inf ){
 	if ( element.libraryItem ==  target.libraryItem ){
-		var data = getData( element, "SMR" );
+		var data = Edapt.utils.getData( element, "SMR" );
 		if( ! data ){ return false; }
 		if( data.rig == inf.rig ){
 			return true;
@@ -499,7 +502,7 @@ isMySibling					= function( element, aTimeline, currentLayernum, cf, n, target, 
 	return false;
 }
 getMyChildren				= function( element, tml, children, recurs ){
-	var retval = filterStageElements( isMyChild, tml, true, false, [ element ], getData( element, "SMR" ) );
+	var retval = Edapt.utils.filterStageElements( isMyChild, tml, true, false, [ element ], Edapt.utils.getData( element, "SMR" ) );
 	if( retval.length ){
 		if( recurs ){
 			for( var i=0; i<retval.length; i++ ){
@@ -512,7 +515,7 @@ getMyChildren				= function( element, tml, children, recurs ){
 	}
 }
 isMyChild					= function( element, aTimeline, currentLayernum, cf, n, inf ){
-	var data = getData( element, "SMR" );
+	var data = Edapt.utils.getData( element, "SMR" );
 	if( data ){
 		if( ( data.rig == inf.rig && data.parent == inf.id ) ){
 			return true;
@@ -533,21 +536,18 @@ getAllStageElements			= function(){
 	var layers = tml.layers;
 	var currentframe = tml.currentFrame;
 	var retval = [];
-		var i = layers.length;
-		while ( i -- ){
-			var cf = layers[i].frames[ currentframe ];
-			if( cf ){
-				var elts = cf.elements;
-				var j = elts.length;
-				while( j -- ){
-					if( isElementSymbol( elts[j] ) ){
-						retval.push( elts[j] );
-					}
-					//j++;
+	var i = layers.length;
+	while ( i -- ){
+		var cf = layers[i].frames[ currentframe ];
+		if( cf ){
+			var elts = cf.elements;
+			var j = elts.length;
+			while( j -- ){
+				if( Edapt.utils.isElementSymbol( elts[j] ) ){
+					retval.push( elts[j] );
 				}
 			}
-			//i ++;
 		}
-		
+	}
 	return retval;
 }

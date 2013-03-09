@@ -28,21 +28,19 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
-	if( typeof( EDAPSettings.recordParentRegPoint.currentElement ) == "number" ){
-	  displayMessage( commandname + " : Please, select a symbol and execute 'Record Parent Reg Point' command first.", 1 )
+	if( typeof( Edapt.settings.recordParentRegPoint.currentElement ) == "number" ){
+	  Edapt.utils.displayMessage( commandname + " : Please, select a symbol and execute 'Record Parent Reg Point' command first.", 1 )
 	} 
 	else{
-		if( fl.getDocumentDOM() == EDAPSettings.recordParentRegPoint.currentElement.document ){
-			var parent = EDAPSettings.recordParentRegPoint.currentElement.element; //June 05, 2012
+		if( fl.getDocumentDOM() == Edapt.settings.recordParentRegPoint.currentElement.document ){
+			var parent = Edapt.settings.recordParentRegPoint.currentElement.element; //June 05, 2012
 			if( parent.instanceType == "symbol" ){
 				sl = fl.getDocumentDOM().selection.length;
 				if( sl > 1 ){
 					fl.getDocumentDOM().setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
 				}
 				else{
-					if( EDAPSettings.setSelectionPivotToParentRegPoint.showAlert == true ){
+					if( Edapt.settings.setSelectionPivotToParentRegPoint.showAlert == true ){
 						var message = "&quot;" + commandname + "&quot; requires multiple objects to be selected."+"\n"+
 						"The command moves the pivot point of the selected group to a location previously recorded by"+"\n"+
 						"running &quot;Record Parent Reg Point&quot;."+"\n"+"\n"+
@@ -51,14 +49,14 @@ function runScript( commandname ){
 						"Symbols are selected, Flash positions the pivot of the group in the middle of selection&#39;s bounding box."+"\n"+
 						"Upon activation the pivot is re-located to previously recorded coordinates, in this case shoulder&#39;s "+"\n"+
 						"Registration Point. This allows the whole arm to be rotated from the shoulder.";
-						displayOptionalMessageBox( commandname, message, "setSelectionPivotToParentRegPoint" );
-						displayMessage( commandname + " : This command works with multiple selection only", 1 )
+						Edapt.utils.displayOptionalMessageBox( commandname, message, "setSelectionPivotToParentRegPoint" );
+						Edapt.utils.displayMessage( commandname + " : This command works with multiple selection only", 1 )
 						return;
 					}
 				}
 			}
 			else{
-				displayMessage( commandname + " : Please, select a symbol and execute 'Record Parent Reg Point' command first.", 1 )
+				Edapt.utils.displayMessage( commandname + " : Please, select a symbol and execute 'Record Parent Reg Point' command first.", 1 )
 			}
 		}
 		else{

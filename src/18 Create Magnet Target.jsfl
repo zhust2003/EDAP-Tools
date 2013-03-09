@@ -24,8 +24,6 @@ try {
 
 function runScript( command ){
 	var theKey = fl.tools.getKeyDown();
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
 	if( theKey == 53 ){
 		insertSymbol( command, 1 );
 	}
@@ -55,14 +53,14 @@ function insertSymbol( commandname, atype ){
 	var myTypeString, specialLayerName, myType, myItemName, layerMessage;
 	if( atype == 1 ){
 		myTypeString = "CenterMarker";
-		specialLayerName = EDAPSettings.createMagnetTarget.markerLayerName;
+		specialLayerName = Edapt.settings.createMagnetTarget.markerLayerName;
 		myType = "marker";
 		myItemName = "Center Marker";
 		layerMessage = "center markers";
 	}
 	else if( atype == 2 ){
 		myTypeString = "MagnetTarget";
-		specialLayerName = EDAPSettings.createMagnetTarget.targetLayerName;
+		specialLayerName = Edapt.settings.createMagnetTarget.targetLayerName;
 		myType = "target";
 		myItemName = "Magnet Target";
 		layerMessage = "magnet targets"
@@ -97,7 +95,7 @@ function insertSymbol( commandname, atype ){
 	
 	if( specialLayerNumber == -1 ){
 		var xlayer = createSpecialLayer( currentDoc, myType );
-		specialLayerNumber = indexOf( myTimeline.layers, xlayer );
+		specialLayerNumber = Edapt.utils.indexOf( myTimeline.layers, xlayer );
 	}
 	
 	// 4
@@ -156,26 +154,26 @@ function insertSymbol( commandname, atype ){
 			currentDoc.distribute( "vertical center", true );
 		}
 		if( ! symbolExists ){
-			if( ! currentLib.itemExists( EDAPSettings.createMagnetTarget.folderName ) ){
-				var create = currentLib.newFolder( EDAPSettings.createMagnetTarget.folderName );
+			if( ! currentLib.itemExists( Edapt.settings.createMagnetTarget.folderName ) ){
+				var create = currentLib.newFolder( Edapt.settings.createMagnetTarget.folderName );
 			}
 			var theItem = getItemByData( currentLib, myTypeString );
 			if( theItem ){
-				var moved = currentLib.moveToFolder( EDAPSettings.createMagnetTarget.folderName, theItem.name, true );	
+				var moved = currentLib.moveToFolder( Edapt.settings.createMagnetTarget.folderName, theItem.name, true );	
 			}
 		}
 	}
 	else{
-		displayMessage( commandname + " : The '" + specialLayerName + "' layer is locked.", 2 );	
+		Edapt.utils.displayMessage( commandname + " : The '" + specialLayerName + "' layer is locked.", 2 );	
 	}
 
 	// 8
-	if( EDAPSettings.createMagnetTarget.showAlert == true ){
+	if( Edapt.settings.createMagnetTarget.showAlert == true ){
 		var message = "A layer called &quot;" + specialLayerName + "&quot; was created for convenience." + "\n" +
 		"It is recommended to place all needed instances of" + "\n" +
 		"the "+ layerMessage +" onto this layer.";
 		if( ! layerExists ){
-			displayOptionalMessageBox( commandname,  message, "createMagnetTarget" );
+			Edapt.utils.displayOptionalMessageBox( commandname,  message, "createMagnetTarget" );
 		}
 	}
 }
@@ -200,12 +198,12 @@ function createSpecialLayer( doc, atype ){
 	doc.getTimeline().currentLayer = 0;
 	var myName, myColor, myType;
 	if( atype == "target" ){
-		myName = EDAPSettings.createMagnetTarget.targetLayerName;
+		myName = Edapt.settings.createMagnetTarget.targetLayerName;
 		myColor = "#FF0000";
 		myType = "guide";
 	}
 	else if ( atype == "marker" ){
-		myName = EDAPSettings.createMagnetTarget.markerLayerName;
+		myName = Edapt.settings.createMagnetTarget.markerLayerName;
 		myColor = "#0000FF";
 		myType = "normal";
 	}
@@ -219,7 +217,7 @@ function createSpecialLayer( doc, atype ){
 function copySymbols( theDocument, theSymbols, isCurrent ){
 	var timeline = theDocument.getTimeline();
 	if( isCurrent ){
-		var layerMap = createObjectStateMap( timeline.layers, [ "locked" ] );
+		var layerMap = Edapt.utils.createObjectStateMap( timeline.layers, [ "locked" ] );
 		var n = timeline.addNewLayer();
 		timeline.setSelectedLayers( n, true );
 		theDocument.getTimeline().currentLayer = n; 
@@ -235,7 +233,7 @@ function copySymbols( theDocument, theSymbols, isCurrent ){
 	theDocument.clipCut();
 	if( isCurrent ){
 		timeline.deleteLayer( n );
-		restoreObjectStateFromMap( timeline.layers, layerMap );
+		Edapt.utils.restoreObjectStateFromMap( timeline.layers, layerMap );
 	}
 }
 

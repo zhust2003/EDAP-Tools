@@ -26,16 +26,13 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
-	
 	var myElements = doc.selection.slice();
 	var myTimeline = doc.getTimeline();
 
 	// Remove non-rig elements.
 	var i = myElements.length;
 	while( i-- ){
-		if( ! getData( myElements[i], "SMR" ) ){
+		if( ! Edapt.utils.getData( myElements[i], "SMR" ) ){
 			myElements.splice( i, 1 );
 		}
 	}
@@ -43,18 +40,15 @@ function runScript( commandname ){
 
 	if( myElements.length == 1 ){
 		var el = myElements[ 0 ];
-		if( isElementSymbol( el ) ){
-			var inf = getData( el, "SMR" );
+		if( Edapt.utils.isElementSymbol( el ) ){
+			var inf = Edapt.utils.getData( el, "SMR" );
 			if( inf ){
-				//var inf = getData( el, "SMR" );
 				if( inf.parent == "" ){ 
-					//fl.trace( "ROOT" );
 					var children = [el];
 					getMyChildren( el, children, myTimeline );
 					setSelectionAndTransformPoint( doc, myTimeline, el, children, true );
 				}
 				else{
-					//fl.trace( "Select to the end of chain" );
 					var children = [el];
 					getMyChildren( el, children, myTimeline );
 					if( children.length > 1 ){
@@ -75,32 +69,32 @@ function runScript( commandname ){
 				setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false );
 				break;
 			case 3: //"multiple chains"
-				displayMessage( commandname + ": " + "Multiple chains are selected.", 2 );
+				Edapt.utils.displayMessage( commandname + ": " + "Multiple chains are selected.", 2 );
 				break;
 			default:
 		}
 
 	}
 	else{
-		displayMessage( commandname + ": " + "Please, select symbol(s) on the stage.", 1 );
+		Edapt.utils.displayMessage( commandname + ": " + "Please, select symbol(s) on the stage.", 1 );
 		return;
 	}
 }
 function checkChain( elements,atimeline ){
 	var first = elements[0];
 	var last = elements[ elements.length-1 ]
-	inf1 = getData( first, "SMR" );
-	inf2 = getData( last, "SMR" );
+	inf1 = Edapt.utils.getData( first, "SMR" );
+	inf2 = Edapt.utils.getData( last, "SMR" );
 	if( inf1.parent = inf2.id ){
 		return 1;
 	}
 	else{
 		var parents = [];
-		var parent = filterStageElements( getParent, atimeline, false, true, [], inf1 )[0];
+		var parent = Edapt.utils.filterStageElements( getParent, atimeline, false, true, [], inf1 )[0];
 		while( parent ){
-			var rig = getData( parent, "SMR" );
+			var rig = Edapt.utils.getData( parent, "SMR" );
 			if( rig ){
-				parent = filterStageElements( getParent, atimeline, false, true, [], rig )[0];
+				parent = Edapt.utils.filterStageElements( getParent, atimeline, false, true, [], rig )[0];
 				if( parent ){
 					if( parent == last ){
 						return 2;
@@ -113,7 +107,7 @@ function checkChain( elements,atimeline ){
 	return 3;
 }
 function getParent( element, aTimeline, currentLayernum, cf, n, inf ){
-	var data = getData( element, "SMR" );
+	var data = Edapt.utils.getData( element, "SMR" );
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
 			return element;
@@ -128,8 +122,8 @@ function setSelectionAndTransformPoint( doc, atimeline, parent, children, change
 		var cf = atimeline.currentFrame;
 		for( var i=1; i<children.length; i++ ){ // The parent is at position 0
 			var el = children[i];
-			var ln = indexOf( atimeline.layers, el.layer );
-			var en = indexOf( atimeline.layers[ln].frames[cf].elements, el );
+			var ln = Edapt.utils.indexOf( atimeline.layers, el.layer );
+			var en = Edapt.utils.indexOf( atimeline.layers[ln].frames[cf].elements, el );
 			map.push( [ ln, en ] );
 			if( atimeline.layers[ln].frames[cf].startFrame != cf ){
 				atimeline.currentLayer = ln;
@@ -148,7 +142,7 @@ function setSelectionAndTransformPoint( doc, atimeline, parent, children, change
 	doc.setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
 }
 function getMyChildren( element, children, tml ){
-	var retval = filterStageElements( isMyChild, tml, true, false, [ element ], getData( element, "SMR" ) ); // No keys created
+	var retval = Edapt.utils.filterStageElements( isMyChild, tml, true, false, [ element ], Edapt.utils.getData( element, "SMR" ) ); // No keys created
 	if( retval.length ){
 		for( var i=0; i<retval.length; i++ ){
 			getMyChildren( retval[i], children, tml );
@@ -159,7 +153,7 @@ function getMyChildren( element, children, tml ){
 	}
 }
 function isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
-	var data = getData( element, "SMR" );
+	var data = Edapt.utils.getData( element, "SMR" );
 	if( data ){
 		if( ( data.rig == inf.rig && data.parent == inf.id ) ){
 			return true;
@@ -171,8 +165,8 @@ function isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
 function sortOnParent( a, b ){
 	// Sorts stage elements on its "parent" id.
 	if( a.hasPersistentData( "rigData" ) && b.hasPersistentData( "rigData" ) ){
-		var obj1 = getData( a, "SMR" );
-		var obj2 = getData( b, "SMR" );
+		var obj1 = Edapt.utils.getData( a, "SMR" );
+		var obj2 = Edapt.utils.getData( b, "SMR" );
 		return ( convertID( obj2.parent ) - convertID( obj1.parent ) );
 	}
 	return -1;

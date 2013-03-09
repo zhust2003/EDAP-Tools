@@ -28,12 +28,9 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
-	
 	// invoke the dialogue
 	var xmlContent = createXML();
-	var settings = displayPanel( "FindAndReplace" , xmlContent )	
+	var settings = Edapt.utils.displayPanel( "FindAndReplace" , xmlContent )	
 
 	if( settings.dismiss == "accept" ){
 		// Get the user input
@@ -66,15 +63,15 @@ function runScript( commandname ){
 		var tail;
 		if( counter == 1 ){ tail = "";}
 		else{ tail = "s"; }
-		displayMessage( commandname + " : " + counter + " symbol" + tail + " affected.", 2 );
+		Edapt.utils.displayMessage( commandname + " : " + counter + " symbol" + tail + " affected.", 2 );
 		
 		// save settings
-		EDAPSettings.FindAndReplace.find = oldName;
-		EDAPSettings.FindAndReplace.replace = newName;
-		EDAPSettings.FindAndReplace.caseSensitive = sens;
-		EDAPSettings.FindAndReplace.firstOccurence = ! global;
-		EDAPSettings.FindAndReplace.entireLibrary = EntireLibrary;
-		serialize( EDAPSettings, fl.configURI + "Javascript/EDAPTsettings.txt" );		
+		Edapt.settings.FindAndReplace.find = oldName;
+		Edapt.settings.FindAndReplace.replace = newName;
+		Edapt.settings.FindAndReplace.caseSensitive = sens;
+		Edapt.settings.FindAndReplace.firstOccurence = ! global;
+		Edapt.settings.FindAndReplace.entireLibrary = EntireLibrary;
+		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPTsettings.txt" );		
 	}
 }
 function createNewName( str, oldstr, newstr, g, s ){
@@ -93,7 +90,7 @@ function createNewName( str, oldstr, newstr, g, s ){
 	return retval;    
 }
 function createXML(){
-	var ver = getProductVersion( "all" );
+	var ver = Edapt.utils.getProductVersion( "all" );
 	var result = 	
 	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +
@@ -105,22 +102,22 @@ function createXML(){
 				'<rows>' +
 					'<row>' +
 						'<label value="Find:" control="fString" />' +
-						'<textbox id="Find" size="40" value="'+ EDAPSettings.FindAndReplace.find +'"/>' +
+						'<textbox id="Find" size="40" value="'+ Edapt.settings.FindAndReplace.find +'"/>' +
 					'</row>' +
 					'<row>' +
 						'<label value="Replace:" />' +
-						'<textbox id="Replace" size="40" value="'+ EDAPSettings.FindAndReplace.replace +'"/>' +
+						'<textbox id="Replace" size="40" value="'+ Edapt.settings.FindAndReplace.replace +'"/>' +
 					'</row>' +	
 				'</rows>' +
 			'</grid>' +
 			//checks
 			'<hbox>' +
-				'<checkbox id="Sensitive" label="Case Sensitive?" checked = "'+ EDAPSettings.FindAndReplace.caseSensitive +'" />' +
-				'<checkbox id="FirstOnly" label="First Occurence Only?" checked = "'+ EDAPSettings.FindAndReplace.firstOccurence +'" />' +
+				'<checkbox id="Sensitive" label="Case Sensitive?" checked = "'+ Edapt.settings.FindAndReplace.caseSensitive +'" />' +
+				'<checkbox id="FirstOnly" label="First Occurence Only?" checked = "'+ Edapt.settings.FindAndReplace.firstOccurence +'" />' +
 			'</hbox>' +
 		'<spacer></spacer>' +
 		'<spacer></spacer>' +
-		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ EDAPSettings.FindAndReplace.entireLibrary +'" />' +
+		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ Edapt.settings.FindAndReplace.entireLibrary +'" />' +
 		'<spacer></spacer>' +
 		'<separator></separator>' +
 		'<spacer></spacer>' +

@@ -27,8 +27,6 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
 	// invoke the dialogue
 	var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/ConvertToSymbolPreservingLayers.xml" );
 	if( settings.dismiss == "accept" ){
@@ -37,8 +35,8 @@ function runScript( commandname ){
 		if( selectedItems.length > 0 ){
 			var symbolName = settings.name; // Get the symbol name
 			var symbolType = ( settings.SymbolType.toLowerCase().replace( /\s+$/,"" ) ) || "graphic"; // Get the symbol type
-			var layerMap = createObjectStateMap(
-							    getLayers(),
+			var layerMap = Edapt.utils.createObjectStateMap(
+							    Edapt.utils.getLayers(),
 							    [ "name", "layerType", "color", "outline", "locked" ],
 							    function( a ){ return Boolean( a.layerType != undefined && a.layerType != "folder" && a.locked == false ); } ); 
 			fl.getDocumentDOM().group();
@@ -51,14 +49,14 @@ function runScript( commandname ){
 				fl.getDocumentDOM().unGroup();			// bugfix 2011/02/28
 				var tl = fl.getDocumentDOM().getTimeline();	// Access symbol's timeline
 				tl.deleteLayer(0);				// Remove layer 1 - it is unnecessary									
-				restoreObjectStateFromMap( tl.layers, layerMap );// Recreate layer properties from the previously stored map
+				Edapt.utils.restoreObjectStateFromMap( tl.layers, layerMap );// Recreate layer properties from the previously stored map
 				fl.getDocumentDOM().selectNone();
 				fl.getDocumentDOM().exitEditMode();
 			}
 			
 		}
 		else{
-			displayMessage( commandname + " : Please, select the elements you want to convert to symbol.", 1 );
+			Edapt.utils.displayMessage( commandname + " : Please, select the elements you want to convert to symbol.", 1 );
 		}
 		
 	}

@@ -26,9 +26,6 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
-
 	var originalSelection = doc.selection;
 	var myElements = originalSelection.slice();
 	var myTimeline = doc.getTimeline();
@@ -37,20 +34,20 @@ function runScript( commandname ){
 	while( cnt -- ){
 		var el = myElements[ cnt ];
 		var isRig = false;
-		if( isElementSymbol( el ) ){
+		if( Edapt.utils.isElementSymbol( el ) ){
 			// For each element in the selection...
 			var parents;
 			var snaps;
 			if( el.hasPersistentData( "rigData" ) ){
 				isRig = true;
-				var inf = getData( el, "SMR" );
-				parents = filterStageElements( getParentMatrix, myTimeline, false, true, [ el ], inf );
+				var inf = Edapt.utils.getData( el, "SMR" );
+				parents = Edapt.utils.filterStageElements( getParentMatrix, myTimeline, false, true, [ el ], inf );
 				if( parents.length > 0 ){
 					var myParent = parents[0];
 					snaps = getSnapObjects( myParent.element );
 					var t = [];
 					for( var i=0; i<snaps.length; i++ ){
-						var mInfo = getData( snaps[i].element, "MT" );
+						var mInfo = Edapt.utils.getData( snaps[i].element, "MT" );
 						if( mInfo ){
 							if( mInfo.id == inf.snapTo ){
 								var obj  = { element:snaps[i] };
@@ -68,7 +65,7 @@ function runScript( commandname ){
 				}
 			}
 			else{
-				parents = filterStageElements( getTargetMatrix, myTimeline, false, false, [ el ] );
+				parents = Edapt.utils.filterStageElements( getTargetMatrix, myTimeline, false, false, [ el ] );
 				if( parents.length > 0 ){
 					snaps = [];
 					for( var i=0; i<parents.length; i++ ){
@@ -88,7 +85,7 @@ function runScript( commandname ){
 				if( snaps.length > 0 ){
 					var closest = snaps[0];
 					if( ! isRig ){
-						if( closest.distance <= EDAPSettings.smartMagnetJoint.distanceThreshold ){
+						if( closest.distance <= Edapt.settings.smartMagnetJoint.distanceThreshold ){
 							doc.selectNone();
 							doc.selection = [ el ];
 							doc.moveSelectionBy( { x: closest.position.x - el.matrix.tx, y: closest.position.y - el.matrix.ty } );	
@@ -109,7 +106,7 @@ function sortOnDistance( a, b ){
 	return a.distance - b.distance;
 }
 function isSnapObject( element, aTimeline, currentLayernum, cf, n ){
-	if( isMagnetTarget( element ) ){
+	if( Edapt.utils.isMagnetTarget( element ) ){
 		var remove = false;
 		var layer = aTimeline.layers[ currentLayernum ];
 		if( layer.frames[ cf ].startFrame != cf ){
@@ -129,8 +126,8 @@ function isSnapObject( element, aTimeline, currentLayernum, cf, n ){
 	}
 }
 function getSnapObjects( element ){
-	if( isElementSymbol( element ) ){
-		var retval = filterStageElements( isSnapObject, element.libraryItem.timeline, false, false, [] );
+	if( Edapt.utils.isElementSymbol( element ) ){
+		var retval = Edapt.utils.filterStageElements( isSnapObject, element.libraryItem.timeline, false, false, [] );
 		return retval;
 	}
 	return [];
@@ -144,7 +141,7 @@ function getTargetMatrix( element, aTimeline, currentLayernum, cf, n ){
 		remove = true;
 	}
 	var el = layer.frames[ cf ].elements[n];
-	if( isElementSymbol( el ) ){
+	if( Edapt.utils.isElementSymbol( el ) ){
 		el.libraryItem.timeline.currentFrame = el.firstFrame;  // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
 		var snaps = getSnapObjects( el );
 		var retval = { element:el, matrix:el.matrix, snaps:snaps };
@@ -156,7 +153,7 @@ function getTargetMatrix( element, aTimeline, currentLayernum, cf, n ){
 	return null;
 }
 function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
-	var data = getData( element, "SMR" );
+	var data = Edapt.utils.getData( element, "SMR" );
 	var remove = false;
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
@@ -167,7 +164,7 @@ function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
 				remove = true;
 			}
 			var el = layer.frames[ cf ].elements[ n ];
-			if( isElementSymbol( el ) ){
+			if( Edapt.utils.isElementSymbol( el ) ){
 				el.libraryItem.timeline.currentFrame = el.firstFrame; // Bug fix - 20 Dec, 2012 ( T7D-7AZ-NJXH )
 				var retval = { element:el, matrix:el.matrix };
 				if( remove ){
@@ -185,8 +182,8 @@ function getParentMatrix( element, aTimeline, currentLayernum, cf, n, inf ){
 function sortOnParent( a, b ){
 	// Sorts stage elements on its "parent" id.
 	if( a.hasPersistentData( "rigData" ) && b.hasPersistentData( "rigData" ) ){
-		var obj1 = getData( a, "SMR" );
-		var obj2 = getData( b, "SMR" );
+		var obj1 = Edapt.utils.getData( a, "SMR" );
+		var obj2 = Edapt.utils.getData( b, "SMR" );
 		return ( convertID( obj2.parent ) - convertID( obj1.parent ) );
 	}
 	return -1;

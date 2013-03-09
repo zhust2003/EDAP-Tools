@@ -26,12 +26,9 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	fl.runScript( fl.configURI + "Javascript/EDAPT Common Functions.jsfl" );
-	initialize();
-	
 	// invoke the dialogue
 	var xmlContent = createXML();
-	var settings = displayPanel( "PrefixSuffix" , xmlContent )
+	var settings = Edapt.utils.displayPanel( "PrefixSuffix" , xmlContent )
 	
 	if( settings.dismiss == "accept" ){
 		// Get the user input
@@ -59,13 +56,13 @@ function runScript( commandname ){
 		var tail;
 		if( counter == 1 ){ tail = "";}
 		else{ tail = "s"; }
-		displayMessage( commandname + " : " + counter + " object" + tail + " affected.", 2 );
+		Edapt.utils.displayMessage( commandname + " : " + counter + " object" + tail + " affected.", 2 );
 		
 		// save settings
-		EDAPSettings.PrefixSuffix.prefix = Prefix;
-		EDAPSettings.PrefixSuffix.suffix = Suffix;
-		EDAPSettings.PrefixSuffix.entireLibrary = EntireLibrary;
-		serialize( EDAPSettings, fl.configURI + "Javascript/EDAPTsettings.txt" );
+		Edapt.settings.PrefixSuffix.prefix = Prefix;
+		Edapt.settings.PrefixSuffix.suffix = Suffix;
+		Edapt.settings.PrefixSuffix.entireLibrary = EntireLibrary;
+		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPTsettings.txt" );
 	}
 }
 function prefixSuffix( astring, pref, suff ){
@@ -73,7 +70,7 @@ function prefixSuffix( astring, pref, suff ){
 	return pref + itm + suff;
 }
 function createXML(){
-	var ver = getProductVersion( "all" );
+	var ver = Edapt.utils.getProductVersion( "all" );
 	var result =
 	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +
@@ -89,15 +86,15 @@ function createXML(){
 					'</row>' +
 					'<row>' +
 						'<label value="Prefix:      " />' +
-						'<textbox id="Prefix" size="40" value="'+ EDAPSettings.PrefixSuffix.prefix +'"/>' +
+						'<textbox id="Prefix" size="40" value="'+ Edapt.settings.PrefixSuffix.prefix +'"/>' +
 					'</row>' +
 					'<row>' +
 						'<label value="Suffix:      " />' +
-						'<textbox id="Suffix" size="40" value="'+ EDAPSettings.PrefixSuffix.suffix +'"/>' +
+						'<textbox id="Suffix" size="40" value="'+ Edapt.settings.PrefixSuffix.suffix +'"/>' +
 					'</row>' +
 				'</rows>' +
 			'</grid>' +
-		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ EDAPSettings.PrefixSuffix.entireLibrary +'" />' +
+		'<checkbox id="EntireLibrary" label="Work in Entire Library ( Ignore selection ) ?" checked = "'+ Edapt.settings.PrefixSuffix.entireLibrary +'" />' +
 		'<spacer></spacer>' +
 		'<separator></separator>' +
 		'<spacer></spacer>' +
