@@ -172,19 +172,15 @@ function createXML( level1, level2, level3 ){
 				'<column/>' +
 				'<column/>' +
 				'<column/>' +
+				'<column/>' +
 			'</columns>' +
 			'<rows>' +
 				'<row>' +
 					'<label value="Smart Magnet Range:     " />' +
 					'<textbox id="SmartSnapDistance" size="5" value="' + Edapt.settings.smartMagnetJoint.distanceThreshold + '"/>' +
-					'<label value="          This is the radius which defines the range in which &quot;19 Smart Magnet Joint&quot; will search for a Magnet Target " />' +
-				'</row>' +
-				'<row>' +
-					'<label value="" />' +
-					'<label value="" />' +
-					'<label value="          in case when symbols were not linked using &quot;Smart Magnet Rig&quot; panel." />' +
-				'</row>' +
-				
+					'<label value="          " />' +
+					'<label value="This is the radius which defines the range in which &quot;19 Smart Magnet Joint&quot; will search for a Magnet Target in case when symbols were not linked using &quot;Smart Magnet Rig&quot; panel." width="450"/>' +
+				'</row>' +				
 			'</rows>' +
 			'</grid>' +
 			// ------------------------------------------

@@ -42,7 +42,6 @@ function Utils() {
 		}
 	};
 	this.createSettings				= function( context ){
-		fl.trace( "create fresh settings..." );
 		context.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
 
 		// Find and Replace
@@ -486,14 +485,12 @@ function Utils() {
 				var disabledPath = fl.configURI + "Javascript/EDAPT Disabled Commands/" + command.name[j] + ext;
 				if( command.state == false ){
 					if( ! FLfile.exists( disabledPath ) ){
-						fl.trace( "Disabling " + workingPath ); //***
 						FLfile.copy( workingPath, disabledPath  );
 						FLfile.remove( workingPath );	
 					}		
 				}
 				else if( command.state == true ){
 					if( ! FLfile.exists( workingPath ) ){
-						fl.trace( "Enabling " + workingPath ); //***
 						FLfile.copy( disabledPath,  workingPath );
 						FLfile.remove( disabledPath );
 					}
@@ -578,7 +575,6 @@ function Utils() {
 	this.serialize					= function( o, filePath ){
 		/*Before we try to serialize the settings object,
 		  we clone it and remove the unnecessary data */
-		fl.trace( "save settings..." );
 		var obj = this.cloneObject( o );
 		delete obj.recordParentRegPoint.currentElement;
 		var str = this.JSON.stringify( obj );
@@ -588,7 +584,6 @@ function Utils() {
 		FLfile.write( filePath, str );
 	};
 	this.deserialize				= function( filePath ){
-		fl.trace( "load settings..." );
 		if( FLfile.exists( filePath ) ){
 			var str = FLfile.read( filePath );
 		}
