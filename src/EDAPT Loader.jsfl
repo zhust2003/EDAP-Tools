@@ -96,9 +96,12 @@ function Utils() {
 		context.createMagnetTarget = new Object();
 		context.createMagnetTarget.targetLayerName = "Magnet Target(s)";
 		context.createMagnetTarget.markerLayerName = "Center Marker(s)";
+		context.createMagnetTarget.guideTargets = true;
+		context.createMagnetTarget.guideMarkers = false;
 		context.createMagnetTarget.folderName = "EDAPT objects";
 		context.createMagnetTarget.showAlert = true;
-
+ 
+		
 		//SmartSnap
 		context.smartMagnetJoint = new Object();
 		context.smartMagnetJoint.distanceThreshold = 50;

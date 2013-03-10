@@ -22,9 +22,11 @@ try {
 	fl.trace( error );
 }
 
+
+
 function runScript( command ){
 	var theKey = fl.tools.getKeyDown();
-	if( theKey == 53 ){
+	if( theKey == 53 ){ // 5
 		insertSymbol( command, 1 );
 	}
 	else{
@@ -200,19 +202,19 @@ function createSpecialLayer( doc, atype ){
 	if( atype == "target" ){
 		myName = Edapt.settings.createMagnetTarget.targetLayerName;
 		myColor = "#FF0000";
-		myType = "guide";
+		myType = ( Edapt.settings.createMagnetTarget.guideTargets ) ? "guide" : "normal";
 	}
 	else if ( atype == "marker" ){
 		myName = Edapt.settings.createMagnetTarget.markerLayerName;
 		myColor = "#0000FF";
-		myType = "normal";
+		myType = ( Edapt.settings.createMagnetTarget.guideMarkers ) ? "guide" : "normal";
 	}
 	doc.getTimeline().addNewLayer( myName );
 	var xLayer = doc.getTimeline().layers[ doc.getTimeline().currentLayer ];
 	xLayer.color = myColor;
 	xLayer.outline = true;
 	xLayer.layerType = myType;
-	return xLayer;
+	return xLayer;	
 }
 function copySymbols( theDocument, theSymbols, isCurrent ){
 	var timeline = theDocument.getTimeline();

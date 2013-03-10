@@ -45,7 +45,7 @@ function runScript( commandname ){
 
 	var xmlContent = createXML( level1, level2, level3 );
 	var settings = Edapt.utils.displayPanel( "EDAPTSettings", xmlContent )
-	
+
 	if( settings.dismiss == "accept" ){
 		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
 		// Assign new values
@@ -55,8 +55,13 @@ function runScript( commandname ){
 			Edapt.settings.layerColors.light.colors[i] = validateHEX( settings[p1] )? settings[p1] : Edapt.settings.layerColors.light.colors;
 			Edapt.settings.layerColors.dark.colors[i] = validateHEX( settings[p2] )? settings[p2] : Edapt.settings.layerColors.dark.colors[i];
 		}
-		Edapt.settings.smartMagnetJoint.distanceThreshold = parseInt( settings.SmartSnapDistance );
 		Edapt.settings.layerColors.forceOutline = Boolean( settings.forceOutline === "true");
+		
+		Edapt.settings.smartMagnetJoint.distanceThreshold = parseInt( settings.SmartSnapDistance );
+		Edapt.settings.createMagnetTarget.guideTargets = Boolean( settings.guideTargets === "true");
+		Edapt.settings.createMagnetTarget.guideMarkers = Boolean( settings.guideMarkers === "true");
+		
+		
 		Edapt.settings.traceLevel = parseInt( settings.traceLevel );
 		
 		if( settings.resetDialogs == "true" ){
@@ -77,7 +82,6 @@ function runScript( commandname ){
 		
 		// Check for command settings
 		var states = settings.allBoxes.split( "," );
-		//fl.trace( states ); //***
 		var messageFlag = false;
 		for( var i=0; i<Edapt.settings.commands.settings.length; i++ ){
 			if( settings[ Edapt.settings.commands.settings[i].id ] != states[i] ){
@@ -86,7 +90,6 @@ function runScript( commandname ){
 			}
 		}
 	}
-	fl.trace( "messageFlag: " + messageFlag ); //***
 	if( messageFlag ){
 		Edapt.utils.moveCommandFiles();
 		if( Edapt.settings.commands.showAlert == true ){
@@ -107,7 +110,6 @@ function createXML( level1, level2, level3 ){
 	var sep = "  /  ";
 	return '<?xml version="1.0"?>' +
 	'<dialog title="Electric Dog Animation Power Tools - Settings    ' + ver + '" >' +
-
 		'<vbox>' +
 			// LAYER COLORS---------------------------
 			'<label value="Layer Outline Colors" />' +
@@ -176,13 +178,23 @@ function createXML( level1, level2, level3 ){
 			'</columns>' +
 			'<rows>' +
 				'<row>' +
+					'<spacer></spacer>' +
+					'<spacer></spacer>' +
+					'<spacer></spacer>' +
+					'<hbox>' +
+						'<checkbox class="control" id="guideTargets" label="Invisible Magnet Targets" checked = "' + Edapt.settings.createMagnetTarget.guideTargets + '" />' +
+						'<checkbox class="control" id="guideMarkers" label="Invisible Center Markers" checked = "' + Edapt.settings.createMagnetTarget.guideMarkers  + '" />' +
+					'</hbox>' +
+				'</row>' +
+				'<row>' +
 					'<label value="Smart Magnet Range:     " />' +
 					'<textbox id="SmartSnapDistance" size="5" value="' + Edapt.settings.smartMagnetJoint.distanceThreshold + '"/>' +
-					'<label value="          " />' +
+					'<label value="      " />' +
 					'<label value="This is the radius which defines the range in which &quot;19 Smart Magnet Joint&quot; will search for a Magnet Target in case when symbols were not linked using &quot;Smart Magnet Rig&quot; panel." width="450"/>' +
-				'</row>' +				
+				'</row>' +
 			'</rows>' +
 			'</grid>' +
+
 			// ------------------------------------------
 			'<spacer></spacer>' +
 			'<separator></separator>' +
