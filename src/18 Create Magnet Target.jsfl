@@ -21,9 +21,6 @@ try {
 }catch( error ){
 	fl.trace( error );
 }
-
-
-
 function runScript( command ){
 	var theKey = fl.tools.getKeyDown();
 	if( theKey == 53 ){ // 5
@@ -202,12 +199,12 @@ function createSpecialLayer( doc, atype ){
 	if( atype == "target" ){
 		myName = Edapt.settings.createMagnetTarget.targetLayerName;
 		myColor = "#FF0000";
-		myType = ( Edapt.settings.createMagnetTarget.guideTargets ) ? "guide" : "normal";
+		myType = ( Edapt.settings.createMagnetTarget.visibleTargets ) ? "normal" : "guide";
 	}
 	else if ( atype == "marker" ){
 		myName = Edapt.settings.createMagnetTarget.markerLayerName;
 		myColor = "#0000FF";
-		myType = ( Edapt.settings.createMagnetTarget.guideMarkers ) ? "guide" : "normal";
+		myType = ( Edapt.settings.createMagnetTarget.visibleMarkers ) ? "normal" : "guide";
 	}
 	doc.getTimeline().addNewLayer( myName );
 	var xLayer = doc.getTimeline().layers[ doc.getTimeline().currentLayer ];

@@ -95,9 +95,9 @@ function Utils() {
 		//CreateSnapObject
 		context.createMagnetTarget = new Object();
 		context.createMagnetTarget.targetLayerName = "Magnet Target(s)";
-		context.createMagnetTarget.markerLayerName = "Center Marker(s)";
-		context.createMagnetTarget.guideTargets = true;
-		context.createMagnetTarget.guideMarkers = false;
+		context.createMagnetTarget.markerLayerName = "Center Marker";
+		context.createMagnetTarget.visibleTargets = false;
+		context.createMagnetTarget.visibleMarkers = true;
 		context.createMagnetTarget.folderName = "EDAPT objects";
 		context.createMagnetTarget.showAlert = true;
  

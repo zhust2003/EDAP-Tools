@@ -25,10 +25,8 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-
 	// Construct and invoke the dialogue with the proper default values.
 	var level1 = "false", level2 = "false", level3 = "false";
-
 	switch( Edapt.settings.traceLevel ){
 		case 0:
 			level1 = "true";
@@ -42,10 +40,8 @@ function runScript( commandname ){
 		default:
 			level2 = "true";
 	}
-
 	var xmlContent = createXML( level1, level2, level3 );
 	var settings = Edapt.utils.displayPanel( "EDAPTSettings", xmlContent )
-
 	if( settings.dismiss == "accept" ){
 		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
 		// Assign new values
@@ -56,14 +52,10 @@ function runScript( commandname ){
 			Edapt.settings.layerColors.dark.colors[i] = validateHEX( settings[p2] )? settings[p2] : Edapt.settings.layerColors.dark.colors[i];
 		}
 		Edapt.settings.layerColors.forceOutline = Boolean( settings.forceOutline === "true");
-		
 		Edapt.settings.smartMagnetJoint.distanceThreshold = parseInt( settings.SmartSnapDistance );
-		Edapt.settings.createMagnetTarget.guideTargets = Boolean( settings.guideTargets === "true");
-		Edapt.settings.createMagnetTarget.guideMarkers = Boolean( settings.guideMarkers === "true");
-		
-		
+		Edapt.settings.createMagnetTarget.visibleTargets = Boolean( settings.visibleTargets === "true");
+		Edapt.settings.createMagnetTarget.visibleMarkers = Boolean( settings.visibleMarkers === "true");
 		Edapt.settings.traceLevel = parseInt( settings.traceLevel );
-		
 		if( settings.resetDialogs == "true" ){
 			for ( var o in Edapt.settings ){
 				if( Edapt.settings[o].hasOwnProperty( "showAlert" ) ) {
@@ -71,15 +63,12 @@ function runScript( commandname ){
 				}
 			}	
 		}
-
 		for( var i=0; i < Edapt.settings.commands.settings.length; i++  ){
 			var val = settings[ Edapt.settings.commands.settings[i].id ];
 			Edapt.settings.commands.settings[i].state = Boolean( val === "true");
 		}
-
 		// Save settings
 		Edapt.utils.serialize( Edapt.settings, fpath );
-		
 		// Check for command settings
 		var states = settings.allBoxes.split( "," );
 		var messageFlag = false;
@@ -182,8 +171,8 @@ function createXML( level1, level2, level3 ){
 					'<spacer></spacer>' +
 					'<spacer></spacer>' +
 					'<hbox>' +
-						'<checkbox class="control" id="guideTargets" label="Invisible Magnet Targets" checked = "' + Edapt.settings.createMagnetTarget.guideTargets + '" />' +
-						'<checkbox class="control" id="guideMarkers" label="Invisible Center Markers" checked = "' + Edapt.settings.createMagnetTarget.guideMarkers  + '" />' +
+		'<checkbox class="control" id="visibleTargets" label="Magnet Target(s) layer visible upon creation" checked = "' + Edapt.settings.createMagnetTarget.visibleTargets + '" />' +
+		'<checkbox class="control" id="visibleMarkers" label="Center Marker layer visible upon creation" checked = "' + Edapt.settings.createMagnetTarget.visibleMarkers  + '" />' +
 					'</hbox>' +
 				'</row>' +
 				'<row>' +
