@@ -121,9 +121,12 @@ importRig					= function(){
 	var path = fl.browseForFileURL( 'open', 'Import Structure' );
 	if( path ){
 		var string = FLfile.read( path );
-		return string;
+		if( Edapt.utils.JSON.parse( string ) ){
+			return string;
+		}
+		return 'corrupted';
 	}
-	return '';
+	return 'canceled';
 }
 retreiveRigsFromDocument	= function(){
 	var doc = fl.getDocumentDOM();
