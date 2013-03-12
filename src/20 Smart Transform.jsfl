@@ -85,7 +85,7 @@ function checkChain( elements,atimeline ){
 	var last = elements[ elements.length-1 ]
 	inf1 = Edapt.utils.getData( first, "SMR" );
 	inf2 = Edapt.utils.getData( last, "SMR" );
-	if( inf1.parent = inf2.id ){
+	if( inf1.parent == inf2.id ){
 		return 1;
 	}
 	else{
