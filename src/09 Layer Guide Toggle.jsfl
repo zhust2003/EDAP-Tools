@@ -28,15 +28,19 @@ function runScript( commandname ){
 		return;
 	}
 	var counter = 0;
-	var affectedLayers = getLayers();
+	var affectedLayers = Edapt.utils.getLayers();
 	for( var i=0; i < affectedLayers.length; i ++ ){
 		var currentLayer = affectedLayers[ i ];
 		forceModeToGuide( currentLayer );
 		counter ++ ;
 	}
 	var tail;
-	if( counter == 1 ){ tail = "";}
-	else{ tail = "s"; }
+	if( counter == 1 ){
+		tail = "";
+	}
+	else{
+		tail = "s";
+	}
 	Edapt.utils.displayMessage( commandname + " : " + counter + " layer" + tail + " affected.", 2 );	
 }
 
