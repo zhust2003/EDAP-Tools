@@ -136,8 +136,8 @@ function createXML(){
 		'<script>' +
 		'function confirmDialogue(){' +
 			'var input = [];' +
-			'input.push( { value:fl.xmlui.get( "LeftTrim" ), validator:isPositiveNumber, message:"Left Trim must be a whole, positive number." } );' +
-			'input.push( { value:fl.xmlui.get( "RightTrim" ), validator:isPositiveNumber, message:"Right Trim must be a whole, positive number." } );' +
+			'input.push( { value:fl.xmlui.get( "LeftTrim" ), validator:isPositiveNumber, message:"Left Trim must be a whole, positive number or zero." } );' +
+			'input.push( { value:fl.xmlui.get( "RightTrim" ), validator:isPositiveNumber, message:"Right Trim must be a whole, positive number or zero." } );' +
 			'var error = checkValue( input, 0 );' +	
 			'if( ! error ){' +
 				'fl.xmlui.accept();' +
@@ -155,7 +155,7 @@ function createXML(){
 
 		'function isPositiveNumber( n ){' +
 			'var a = isNumber( n );' +
-			'var b = Boolean( n &gt; 0 );' +
+			'var b = Boolean( n == 0 || n &gt; 0 );' +
 			'return ( a+b ) == 2;'+
 		'}' +
 		
