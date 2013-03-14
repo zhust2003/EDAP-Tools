@@ -291,7 +291,6 @@ function Utils() {
 	this.filterStageElements		= function( aFunction, aTimeline, isFilter, returnFirst, excludedElements ){
 		/*
 			Iterates through all elements in a given timeline at its current frame and executes a function for each of them.
-
 			aFunction		- The function to be executed on each element in the timeline.
 			aTimeline		- the context of execution.
 			isFilter		- If true, the function result evaluates to boolean.
@@ -709,15 +708,15 @@ function Utils() {
 		};
 	}();
 	
-	// TEST FUNCTIONS
-	this.getCommandBoxes = function(){
+	// SETTINGS GUI
+	this.loadCommandStates			= function(){
 		var bstates = [];
 		for( var i=0; i< Edapt.settings.commands.settings.length; i++ ){
 			bstates.push( fl.xmlui.get( Edapt.settings.commands.settings[i].id ) );
 		}
 		return bstates;
 	};
-	this.loadDefaultColors = function(){
+	this.loadDefaultSettingsColors	= function(){
 		var lights = Edapt.settings.layerColors.light.colors;
 		var darks = Edapt.settings.layerColors.dark.colors;
 		for( var i=0; i<lights.length; i++ ){
@@ -727,7 +726,7 @@ function Utils() {
 			fl.xmlui.set( "dark"+(i+1), darks[i] );
 		}
 	};	
-	this.resetColorValues = function(){
+	this.resetToDefaultSettingsColors = function(){
 		var lights = Edapt.utils.defineLightColors();
 		var darks = Edapt.utils.defineDarkColors();
 		for( var i=0; i<lights.length; i++ ){
@@ -737,8 +736,156 @@ function Utils() {
 			fl.xmlui.set( "dark"+(i+1), darks[i] );
 		}
 	};					
+	this.createCommandsPanel		= function(){
+		var cmd = Edapt.settings.commands.settings;
+		var sep = "  /  ";
+		var xmlPanel = '<?xml version="1.0"?>' +
+		'<dialog title="Manage Commands" >' +
+			'<vbox>' +
+				'<spacer></spacer>' +
+				'<label value="Show / Hide selected commands from the &quot;Commands&quot; menu. Enabling or disabling commands requires Flash to be restarted." />' +
+				'<spacer></spacer>' +
+				'<spacer></spacer>' +
+				'<spacer></spacer>' +
+				'<spacer></spacer>' +
+				'<grid>' +
+					'<columns>' +
+						'<column/>' +
+						'<column/>' +
+						'<column/>' +
+					'</columns>' +
+					'<rows>' +
+						'<row>' +
+							'<checkbox id="'+ cmd[0].id +'" label="'+ cmd[0].name.join( sep ) +'" checked="'+ cmd[0].state +'"/>' +  	// 01 Convert To Symbol Preserving Layers
+							'<checkbox id="'+ cmd[5].id +'" label="'+ cmd[5].name.join( sep ) +'" checked="'+ cmd[5].state +'" />' + 	// 08 Layer Outlines Toggle
+							'<checkbox id="'+ cmd[10].id +'" label="'+ cmd[10].name.join( sep ) +'" checked="'+ cmd[10].state +'" />' + // 13 Enter Symbol At Current Frame
+						'</row>' +
+						
+						'<row>' +
+							'<checkbox id="'+cmd[1].id+'" label="'+cmd[1].name.join( sep ) +'" checked="'+cmd[1].state+'" />' +			// 02 LB Find And Replace
+							'<checkbox id="'+cmd[6].id+'" label="'+cmd[6].name.join( sep ) +'" checked="'+cmd[6].state+'" />' +			// 09 Layer Guide Toggle
+							'<checkbox id="'+cmd[11].id+'" label="'+cmd[11].name.join( sep ) +'" checked="'+cmd[11].state+'" />' +		// 16 Swap Multiple Symbols
+						'</row>' +
+						
+						'<row>' +
+							'<checkbox id="'+cmd[2].id+'" label="'+cmd[2].name.join( sep ) +'" checked="'+cmd[2].state+'" />' +			// 03 LB Prefix Suffix
+							'<checkbox id="'+cmd[7].id+'" label="'+cmd[7].name.join( sep ) +'" checked="'+cmd[7].state+'" />' +			// 10 Layer Color Dark
+							'<checkbox id="'+cmd[12].id+'" label="'+cmd[12].name.join( sep ) +'" checked="'+cmd[12].state+'" />' +		// 17 Sync Symbols to Timeline
+						'</row>' +
+						
+						'<row>' +
+							'<checkbox id="'+cmd[3].id+'" label="'+cmd[3].name.join( sep ) +'" checked="'+cmd[3].state+'" />' +			// 04 LB Trim Characters
+							'<checkbox id="'+cmd[8].id+'" label="'+cmd[8].name.join( sep ) +'" checked="'+cmd[8].state+'" />' +			// 11 Layer Color Light
+							'<checkbox id="'+cmd[13].id+'" label="'+cmd[13].name.join( sep ) +'" checked="'+cmd[13].state+'" />' +		// 20 Smart Transform
+						'</row>' +
+						
+						'<row>' +
+							'<checkbox id="'+cmd[4].id+'" label="'+cmd[4].name.join( sep ) +'" checked="'+cmd[4].state+'" />' +			// 05 LB Enumeration
+							'<checkbox id="'+cmd[9].id+'" label="'+cmd[9].name.join( sep ) +'" checked="'+cmd[9].state+'" />' +			// 12 Set Reg Point To Transform Point
+							'<checkbox id="'+cmd[14].id+'" label="'+cmd[14].name.join( sep ) +'" checked="'+cmd[14].state+'" />' +		// 21 EDAPT Shortcuts Map
+						'</row>' +
 
-	this.setCommandBoxes = function( astate ){
+					'</rows>' +
+				'</grid>' +
+				
+				'<spacer></spacer>' +
+				'<spacer></spacer>' +
+				'<spacer></spacer>' +
+				'<grid>' +
+					'<columns>' +
+						'<column/>' +
+						'<column/>' +
+					'</columns>' +
+					'<rows>' +
+						'<row>' +
+							'<label value="" />'+
+							'<checkbox id="'+cmd[15].id+'" label="'+cmd[15].name.join( sep ) +'" checked="'+cmd[15].state+'" />' +		// 06 Next Frame In Symbol and 07 Prev Frame In Symbol
+						'</row>' +
+						'<row>' +
+							'<label value="These commands work in pairs                                      " />' +
+							'<checkbox id="'+cmd[16].id+'" label="'+cmd[16].name.join( sep ) +'" checked="'+cmd[16].state+'" />' +		// 14 Record Parent Reg Pointand 15 Set Selection Pivot To Parent Reg Point
+						'</row>' +
+						'<row>' +
+							'<label value="" />' +
+							'<checkbox id="'+cmd[17].id+'" label="'+cmd[17].name.join( sep ) +'" checked="'+cmd[17].state+'" />' +		// 18 Create Snap Object and 19 Smart Snap
+						'</row>' +
+					'</rows>' +
+				'</grid>' +
+				'<property id="allBoxes" value="false" ></property>' +
+				'<button label="Check / Uncheck all Commands" oncreate="loadCommandStates()" oncommand="invertCommandsState()" />' +
+			'</vbox>' +
+			
+			// ------------------------------------------
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+			'<grid>' +
+				'<columns>' +
+					'<column/>' +
+					'<column/>' +
+					'<column/>' +
+				'</columns>' +
+				'<row>' +
+					'<label value="                                                                               " />' +
+					'<label value="                                                                               " />' +
+					'<hbox>' +
+						'<button label="Save and Close" oncommand = "loadCommandStates( true );"/>' +		
+						'<button label="Cancel" oncommand = "fl.xmlui.cancel();"/>' +
+					'</hbox>' +
+				'</row>' +
+			'</grid>'+
+
+			'<script>' +
+				'var state = false;' +
+				'function loadCommandStates( aclose ){'+
+					'var bstates = Edapt.utils.loadCommandStates();'+
+					'if( Edapt.utils.include( bstates, "true" ) ){'+
+						'state = true;'+
+					'}'+
+					'fl.xmlui.set( "allBoxes", bstates );'+
+					'if( aclose ){'+
+						'fl.xmlui.accept();' +
+					'}'+
+				'}' +
+				'function invertCommandsState(){' +
+					'state = !state;' +
+					'Edapt.utils.setCommandBoxes( state );' +
+				'}' +
+				'function confirmCommandsDialogue(){' +
+					'fl.trace( "confirmCommandsDialogue" );' +
+				'}' +
+			'</script>'+
+		'</dialog>';
+		var settings = this.displayPanel( "ManageCommands", xmlPanel );
+		if( settings.dismiss == "accept" ){
+			var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
+			var needToMove = null;
+			// Check for command states
+			var states = settings.allBoxes.split( "," );
+			for( var i=0; i<states.length; i++ ){
+				var comm = Edapt.settings.commands.settings[i];
+				if( comm.state != Boolean( states[i] == "true" ) ){
+					needToMove = true;
+					break;
+				}
+			}
+			for( var i=0; i < Edapt.settings.commands.settings.length; i++  ){
+				var val = settings[ Edapt.settings.commands.settings[i].id ];
+				Edapt.settings.commands.settings[i].state = Boolean( val === "true");
+			}
+			if( needToMove ){
+				this.moveCommandFiles();
+				this.serialize( Edapt.settings, fpath );	
+				if( Edapt.settings.commands.showAlert == true ){
+					this.displayOptionalMessageBox( "Restart", "Hiding or showing commands requires Flash to be restarted." + "\n" + "All command shortcuts will be functional after the next restart.", "commands" );
+				}
+			}
+		}
+	};
+	this.setCommandBoxes			= function( astate ){
 		var cnt = Edapt.settings.commands.settings.length;
 		while( cnt -- ){
 			fl.xmlui.set( Edapt.settings.commands.settings[cnt].id, astate );
