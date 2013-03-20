@@ -576,7 +576,7 @@ function Utils() {
 		if ( FLfile.exists( fpath ) ) {
 			var versionObj = this.deserialize( fpath );
 			if( versionObj ){
-				if( versionObj.main && versionObj.sub && versionObj.build ){
+				if( versionObj.hasOwnProperty( "main" ) && versionObj.hasOwnProperty( "sub" ) && versionObj.hasOwnProperty( "build" ) ){
 					return versionObj.main + "." + versionObj.sub + "." + versionObj.build;
 				}
 				return "0.0.0";
