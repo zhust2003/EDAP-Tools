@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see http://www.gnu.org/licenses/.
 */
+
 Edapt.utils = new Utils();
 Edapt.utils.initialize();
 
@@ -101,8 +102,7 @@ function Utils() {
 		context.createMagnetTarget.visibleMarkers = true;
 		context.createMagnetTarget.folderName = "EDAPT objects";
 		context.createMagnetTarget.showAlert = true;
- 
-		
+
 		//Smart Magnet Joint
 		context.smartMagnetJoint = new Object();
 		context.smartMagnetJoint.distanceThreshold = 50;
@@ -148,8 +148,7 @@ function Utils() {
 		context.commands.settings.push( { id:"comm17", name:["17 Sync Symbols to Timeline"], state:true } );					//12
 		context.commands.settings.push( { id:"comm18", name:["20 Smart Transform"], state:true } );								//13
 		context.commands.settings.push( { id:"comm19", name:["22 EDAPT Shortcuts Map"], state:true } );							//14
-		
-		
+
 		context.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );						//15
 		context.commands.settings.push( { id:"pair2",  name:["14 Record Parent Reg Point", "15 Set Selection Pivot To Parent Reg Point"], state:true } );	//16
 		context.commands.settings.push( { id:"pair3",  name:["18 Create Magnet Target", "19 Smart Magnet Joint"], state:true } );							//17	
