@@ -75,7 +75,7 @@ function validateHEX( colorcode ){
   return false;
 }
 function createSettingsPanel( level1, level2, level3 ){
-	var ver = Edapt.utils.getProductVersion( "all" );
+	var ver = Edapt.settings.version;
 	return '<?xml version="1.0"?>' +
 	'<dialog title="Electric Dog Animation Power Tools - Settings    ' + ver + '" >' +
 		'<vbox>' +

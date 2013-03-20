@@ -70,7 +70,7 @@ function prefixSuffix( astring, pref, suff ){
 	return pref + itm + suff;
 }
 function createXML(){
-	var ver = Edapt.utils.getProductVersion( "all" );
+	var ver = Edapt.settings.version;
 	var result =
 	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +

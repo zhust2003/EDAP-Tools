@@ -90,7 +90,7 @@ function createNewName( str, oldstr, newstr, g, s ){
 	return retval;    
 }
 function createXML(){
-	var ver = Edapt.utils.getProductVersion( "all" );
+	var ver = Edapt.settings.version;
 	var result = 	
 	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +

@@ -88,7 +88,7 @@ function rightTrim( astring, n ){
     return astring.substring( 0, r )   
 }
 function createXML(){
-	var ver = Edapt.utils.getProductVersion( "all" );
+	var ver = Edapt.settings.version;
 	var result =
 	'<dialog title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +

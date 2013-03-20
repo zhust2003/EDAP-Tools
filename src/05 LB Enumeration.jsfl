@@ -166,7 +166,7 @@ function decode( astring ){
 }
 function createXML(){
 	var ptrn = decode( Edapt.settings.Enumeration.pattern );
-	var ver = Edapt.utils.getProductVersion( "all" );
+	var ver = Edapt.settings.version;
 	var result =	
 	'<dialog title="Rename Library Items    ' + ver + '">' +
 		'<vbox>' +

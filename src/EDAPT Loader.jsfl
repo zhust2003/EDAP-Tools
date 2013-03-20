@@ -40,6 +40,7 @@ function Utils() {
 			this.createSettings( Edapt.settings );
 			this.serialize( Edapt.settings, fpath );
 		}
+		Edapt.settings.version = this.getProductVersion();
 	};
 	this.createSettings				= function( context ){
 		context.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
@@ -102,7 +103,7 @@ function Utils() {
 		context.createMagnetTarget.showAlert = true;
  
 		
-		//SmartSnap
+		//Smart Magnet Joint
 		context.smartMagnetJoint = new Object();
 		context.smartMagnetJoint.distanceThreshold = 50;
 		context.smartMagnetJoint.depthLevel = 2;
@@ -110,6 +111,7 @@ function Utils() {
 		// SMR panel
 		context.smartMagnetRig = new Object();
 		context.smartMagnetRig.snapThreshold = 4;
+		context.smartMagnetRig.folderPath = "EDAPT Disabled Commands";
 		context.smartMagnetRig.help = new Object();
 		context.smartMagnetRig.help.A = {show:true, value:"http://flash-powertools.com/support/A"};
 		context.smartMagnetRig.help.B = {show:true, value:"http://flash-powertools.com/support/B"};
@@ -118,8 +120,10 @@ function Utils() {
 		
 		// SGC panel
 		context.smartGraphicControl = new Object();
-		context.smartGraphicControl.thumbnailSize = 128;
-		
+		context.smartGraphicControl.imageSize = 128;
+		context.smartGraphicControl.defaultThumbnailSize = 64;
+		context.smartGraphicControl.folderPath = "EDAPT Smart Graphic Control";
+		context.smartGraphicControl.panels = {};
 		
 		//Commands
 		//Couples: 6,7   14,15   18,19
@@ -128,7 +132,7 @@ function Utils() {
 		
 		context.commands.settings = new Array();
 		context.commands.settings.push( { id:"comm01", name:["01 Convert To Symbol Preserving Layers"], state:true } ); 		//0
-		context.commands.settings.push( { id:"comm02", name:["02 LB Find And Replace"], state:true } );						//1
+		context.commands.settings.push( { id:"comm02", name:["02 LB Find And Replace"], state:true } );							//1
 		context.commands.settings.push( { id:"comm03", name:["03 LB Prefix Suffix"], state:true } );							//2
 		context.commands.settings.push( { id:"comm04", name:["04 LB Trim Characters"], state:true } );							//3
 		context.commands.settings.push( { id:"comm05", name:["05 LB Enumeration"], state:true } );								//4
@@ -142,8 +146,8 @@ function Utils() {
 		context.commands.settings.push( { id:"comm13", name:["13 Enter Symbol At Current Frame"], state:true } );				//10
 		context.commands.settings.push( { id:"comm16", name:["16 Swap Multiple Symbols"], state:true } );						//11
 		context.commands.settings.push( { id:"comm17", name:["17 Sync Symbols to Timeline"], state:true } );					//12
-		context.commands.settings.push( { id:"comm18", name:["20 Smart Transform"], state:true } );							//13
-		context.commands.settings.push( { id:"comm19", name:["22 EDAPT Shortcuts Map"], state:true } );						//14
+		context.commands.settings.push( { id:"comm18", name:["20 Smart Transform"], state:true } );								//13
+		context.commands.settings.push( { id:"comm19", name:["22 EDAPT Shortcuts Map"], state:true } );							//14
 		
 		
 		context.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );						//15
@@ -567,17 +571,25 @@ function Utils() {
 		s1 = astring.split( " " )[ 1 ];
 		return parseInt( s1.split( "," )[0] );
 	};
-	this.getProductVersion			= function( aprop ){
-		var version = { main:2, sub:1, build:0 };
-		if( aprop == "all" ){
-			return version.main + "." + version.sub + "." + version.build;
+	this.getProductVersion			= function(){
+		var fpath = fl.configURI + "Javascript/EDAPTversion.txt";
+		if ( FLfile.exists( fpath ) ) {
+			var versionObj = this.deserialize( fpath );
+			if( versionObj ){
+				if( versionObj.main && versionObj.sub && versionObj.build ){
+					return versionObj.main + "." + versionObj.sub + "." + versionObj.build;
+				}
+				return "0.0.0";
+			}
+			return "0.0.0";
 		}
-		return version[ aprop ];
+		return "0.0.0";
 	};
 	this.serialize					= function( o, filePath ){
 		/*Before we try to serialize the settings object,
 		  we clone it and remove the unnecessary data */
 		var obj = this.cloneObject( o );
+		delete obj.version;
 		delete obj.recordParentRegPoint.currentElement;
 		var str = this.JSON.stringify( obj );
 		if( FLfile.exists( filePath ) ){
