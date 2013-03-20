@@ -367,7 +367,7 @@ function Utils() {
 		}
 		var btn = ( abuttons ) ? abuttons : "accept cancel";
 		var xmlContent = '<?xml version="1.0"?>' + 
-		'<dialog buttons="' + btn + '" title="' + atitle + '">' +
+		'<dialog buttons="' + btn + '" title="' + atitle + '    ' + Edapt.settings.version + '">' +
 			'<vbox>' +
 				messageLines + 
 				'<spacer></spacer>' + 
@@ -425,7 +425,7 @@ function Utils() {
 		  messageLines += ( '<label value="'+myLines[i]+'"/>');
 		}
 		return '<?xml version="1.0"?>' + 
-		'<dialog buttons="accept" title="' + atitle + '">' +
+		'<dialog buttons="accept" title="' + atitle + '    ' + Edapt.settings.version + '">' +
 			'<vbox>' + 
 				messageLines + 
 				'<spacer></spacer>' + 

@@ -2,12 +2,12 @@ fl.showIdleMessage( false );
 var LMU = 0;
 var LKU = 0;
 
-// HELPER FUNCTIONS
+// PANEL
 newRig						= function(){
 	var doc = fl.getDocumentDOM();
-	if( doc ){
+	if( doc ){		
 		var xmlContent = '<?xml version="1.0"?>' +
-		'<dialog title="New Rig" buttons="accept, cancel">' +
+		'<dialog title="Create New Rig    ' + Edapt.settings.version + '" buttons="accept, cancel">' +
 		'<vbox>' +
 			'<textbox id="name" size="40" value=""/>' +
 			'<spacer></spacer>' +
@@ -42,7 +42,7 @@ exportRigs					= function( jsonData, currentnum ){
 	retval.files = 0;
 	if( doc ){
 		var xmlContent = '<?xml version="1.0"?>' +
-		'<dialog title="Export Rig" buttons="accept, cancel">' +
+		'<dialog title="Export Rig(s)    ' + Edapt.settings.version + '" buttons="accept, cancel">' +
 			'<property id="folderName" value="" ></property>' +
 			'<vbox>' +
 				'<button label="Choose folder to export in..." oncommand = "showBrowseFolder()" />' +
@@ -118,7 +118,7 @@ exportRigs					= function( jsonData, currentnum ){
 	}
  }
 importRig					= function(){
-	var path = fl.browseForFileURL( 'open', 'Import Structure' );
+	var path = fl.browseForFileURL( 'open', 'Import Rig From File    ' + Edapt.settings.version );
 	if( path ){
 		var string = FLfile.read( path );
 		if( Edapt.utils.JSON.parse( string ) ){
@@ -176,30 +176,6 @@ checkForUpdates				= function( id ){
 		}
 	}
 	return '';
-}
-getStageInfo				= function( id ){
-	var doc = fl.getDocumentDOM();
-	var tml = doc.getTimeline();
-	var sel = getAllStageElements();
-	if( sel.length ){
-		var out = [];
-		var i = sel.length
-		while( i-- ){
-			var el = sel[i];
-			var obj = Edapt.utils.getData( el, "SMR" );
-			if( obj ){
-				if( obj.rig == id ){
-					obj.hasSnapObject = Boolean( getSnapObjectsInElement( el ).length > 0 );
-					obj.selected = Edapt.utils.include( doc.selection, el );
-					out.push( obj );
-				}
-			}
-		}
-		return Edapt.utils.JSON.stringify( out );
-	}
-	else{
-		return 'empty';
-	}
 }
 getLinkedSymbolInfo 		= function( adata ){
 	var doc = fl.getDocumentDOM();
@@ -292,6 +268,8 @@ setRigInfo					= function( infoString ){
 		link( doc, element, rigDataObj );
 	}
 }
+
+// HELPER FUNCTIONS
 link						= function( doc, element, rigDataObject ){
 	var myTimeline = doc.getTimeline();
 	var myInfObj = Edapt.utils.getData( element, "SMR" );
@@ -400,9 +378,30 @@ unLink						= function( element, dataObj ){
 		Edapt.utils.displayDialogue( "Remove Rig information", "You can unlink only the currently selected Symbol Instance.", "accept" );
 	}
 }
-
-
-// HELPER FUNCTIONS
+getStageInfo				= function( id ){
+	var doc = fl.getDocumentDOM();
+	var tml = doc.getTimeline();
+	var sel = getAllStageElements();
+	if( sel.length ){
+		var out = [];
+		var i = sel.length
+		while( i-- ){
+			var el = sel[i];
+			var obj = Edapt.utils.getData( el, "SMR" );
+			if( obj ){
+				if( obj.rig == id ){
+					obj.hasSnapObject = Boolean( getSnapObjectsInElement( el ).length > 0 );
+					obj.selected = Edapt.utils.include( doc.selection, el );
+					out.push( obj );
+				}
+			}
+		}
+		return Edapt.utils.JSON.stringify( out );
+	}
+	else{
+		return 'empty';
+	}
+}
 isAlreadyExists 			= function( element, aTimeline, currentLayernum, cf, n, inf ){
 	var xinf = Edapt.utils.getData( element, "SMR" );
 	if( ! xinf ){ return false; }
