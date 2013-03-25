@@ -574,7 +574,7 @@ function Utils() {
 		return parseInt( s1.split( "," )[0] );
 	};
 	this.getProductVersion			= function(){
-		var fpath = fl.configURI + "Javascript/EDAPTversion.txt";
+		var fpath = fl.configURI + "Tools/EDAPTversion.txt";
 		if ( FLfile.exists( fpath ) ) {
 			var versionObj = this.deserialize( fpath );
 			if( versionObj ){
