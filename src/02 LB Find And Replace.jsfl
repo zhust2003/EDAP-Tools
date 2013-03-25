@@ -71,7 +71,7 @@ function runScript( commandname ){
 		Edapt.settings.FindAndReplace.caseSensitive = sens;
 		Edapt.settings.FindAndReplace.firstOccurence = ! global;
 		Edapt.settings.FindAndReplace.entireLibrary = EntireLibrary;
-		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPTsettings.txt" );		
+		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt" );
 	}
 }
 function createNewName( str, oldstr, newstr, g, s ){
@@ -92,7 +92,7 @@ function createNewName( str, oldstr, newstr, g, s ){
 function createXML(){
 	var ver = Edapt.settings.version;
 	var result = 	
-	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
+	'<dialog buttons="accept, cancel" title="Rename Library Items  -  ' + ver + '">' +
 		'<vbox>' +
 			'<grid>' +
 				'<columns>' +

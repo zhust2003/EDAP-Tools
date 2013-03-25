@@ -65,7 +65,7 @@ function runScript( commandname ){
 }
 function createXML(){
 	var ver = Edapt.settings.version;
-	var result = '<dialog buttons="accept, cancel" title="Convert to Symbol ( Preserving Layers )  ' + ver + '">' +
+	var result = '<dialog buttons="accept, cancel" title="Convert to Symbol ( Preserving Layers )  -  ' + ver + '">' +
 	 	'<content>' +
 		 	'<grid>' +
 			 	'<columns id="columns">' +

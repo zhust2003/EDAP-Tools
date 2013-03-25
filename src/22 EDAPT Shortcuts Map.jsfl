@@ -27,5 +27,19 @@ function runScript( commandname ){
 		fl.trace( "No document open." );
 		return;
 	}
-	var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/EDAPT Shortcuts Map.xml" );
+	var xmlContent = createXML();
+	var settings = Edapt.utils.displayPanel( "EdaptShortcuts" , xmlContent )	
+}
+function createXML(){
+	var ver = Edapt.settings.version;
+	var result = 
+	'<dialog buttons="accept" title="EDAPT Shortcuts Map  -  ' + ver + '">' +
+		'<vbox>' +
+			'<flash width="920" height="480" src="../XULControls/EDAPT Shortcuts Map.swf"/>' +
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+		'</vbox>' +
+	'</dialog>';
+	return result;
 }

@@ -122,7 +122,7 @@ function runScript( commandname ){
 		Edapt.settings.Enumeration.step = step;
 		Edapt.settings.Enumeration.leadingZeroes = padding;
 		Edapt.settings.Enumeration.entireLibrary = EntireLibrary;
-		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPTsettings.txt" );
+		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt" );
 	}	
 }
 function filterTags( apattern ){
@@ -168,7 +168,7 @@ function createXML(){
 	var ptrn = decode( Edapt.settings.Enumeration.pattern );
 	var ver = Edapt.settings.version;
 	var result =	
-	'<dialog title="Rename Library Items    ' + ver + '">' +
+	'<dialog title="Rename Library Items  -  ' + ver + '">' +
 		'<vbox>' +
 			'<label value="Use &lt;name&gt; and &lt;enum&gt; tags or combine them with free" />' +
 			'<label value="text to create enumeration format. Example:" />' +

@@ -23,11 +23,21 @@ try {
 }
 function runScript( command ){
 	var theKey = fl.tools.getKeyDown();
-	if( theKey == 53 ){ // 5
+	if( alternativeKey( theKey ) ){
 		insertSymbol( command, 1 );
 	}
 	else{
 		insertSymbol( command, 2 );
+	}
+}
+function alternativeKey( k ){
+	// 192 = Key ~
+	// 53  = Key #5   
+	if( k == 53 ){  
+		return true;
+	}
+	else{
+		return false;
 	}
 }
 function insertSymbol( commandname, atype ){
@@ -291,8 +301,8 @@ function createSquare( theDocument, acenter, radius ){
 	var path = polygonToPath( data );
 	path.makeShape();
 	
-	theDocument.addNewLine({x:lx, y:-radius/4 + ly}, {x:lx, y:radius/4 + ly});
-	theDocument.addNewLine({x:-radius/4+lx, y:ly}, {x:radius/4+lx, y:ly});
+	theDocument.addNewLine( { x:lx, y:-radius/4 + ly }, { x:lx, y:radius/4 + ly } );
+	theDocument.addNewLine( { x:-radius/4+lx, y:ly }, { x:radius/4+lx, y:ly } );
 
 	theDocument.selectAll();
 	theDocument.setFillColor( null );

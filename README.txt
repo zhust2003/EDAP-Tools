@@ -1,9 +1,8 @@
 In order to get the commands to function, the files have to be organized in the following way:
 
-All commands (#1 to #22) have to be in the 'Commands' folder.
+All commands (#1 to #23) have to be in the 'Commands' folder.
 All files with .xml extension, as well as EDAPT Help.swf and EDAPT Shortcuts Map.swf have to be in 'XULControls' folder.
-EDAPT Common Functions.jsfl has to be in the 'Javascript' folder.
-_SnapObject.swf has to be in WindowSWF\EDAPT Helper Objects\
+EDAPT Loader.jsfl has to be in the 'Tools' folder.
 
 All the above mentioned folders (Commands, Javascript, WindowSWF and XULControls) are located in Flash Configuration directory – called 'flashConfig' for convenience.
 
@@ -26,27 +25,23 @@ flashConfig\
 		15 Set Selection Pivot To Parent Reg Point.jsfl
 		16 Swap Multiple Symbols.jsfl
 		17 Sync Symbols to Timeline.jsfl
-		18 Create Snap Object.jsfl
-		19 Smart Snap.jsfl
-		20 EDAPT Help.jsfl
-		21 EDAPT Shortcuts Map.jsfl
-		22 EDAPT Settings.jsfl
+		18 Create Magnet Target.jsfl
+		19 Smart Magnet Joint.jsfl
+		20 Smart Transform.jsfl
+		21 EDAPT Help.jsfl
+		22 EDAPT Shortcuts Map.jsfl
+		23 EDAPT Settings.jsfl
 		
-	Javascript\
-		EDAPT Common Functions.jsfl
+	Tools\
+		EDAPT Loader.jsfl
 		
 	WindowSWF\
-		EDAPT Helper Objects\
-				_SnapObject.swf
-
+		Smart Magnet Rig.swf
+		SmartMagnetRig.jsfl
+		
 	XULControls\
-		ConvertToSymbolPreservingLayers.xml
 		EDAPT Help.xml
 		EDAPT Shortcuts Map.xml
-		Enumeration.xml
-		FindAndReplace.xml
-		PrefixSuffix.xml
-		TrimCharacters.xml
 		EDAPT Help.swf
 		EDAPT Shortcuts Map.swf
 

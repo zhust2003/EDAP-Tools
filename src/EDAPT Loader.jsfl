@@ -19,9 +19,12 @@ along with this program.  If not, see http://www.gnu.org/licenses/.
 Edapt.utils = new Utils();
 Edapt.utils.initialize();
 
+
+
 function Utils() {
 	this.initialize					= function(){
-		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
+		var ver = this.getProductVersion();
+		var fpath = fl.configURI + "Javascript/EDAPT." + ver + "/settings.txt";
 		if ( FLfile.exists( fpath ) ) {
 			Edapt.settings = this.deserialize( fpath );
 			if( ! Edapt.settings ){
@@ -409,7 +412,7 @@ function Utils() {
 		FLfile.write( xmlFile, xmlContent );
 		var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
 		if( settings.dismiss == "accept" ){
-			var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
+			var fpath = fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt";
 			if( settings.DontShowAgain == "true" ){
 				Edapt.settings[apropToChange].showAlert = false;
 				this.serialize( Edapt.settings, fpath );	
@@ -480,14 +483,14 @@ function Utils() {
 		return [ "#FF33FF", "#4FFF4F", "#FFFF00", "#CCCCCC", "#66FFFF" ];
 	};
 	this.moveCommandFiles			= function(){
-		var fpath = fl.configURI + "Javascript/EDAPT Disabled Commands";
+		var fpath = fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/Disabled Commands";
 		var created = FLfile.createFolder( fpath );
 		var ext = ".jsfl";
 		for( var i=0; i < Edapt.settings.commands.settings.length; i++ ){
 			var command = Edapt.settings.commands.settings[i];
 			for( j=0; j< command.name.length; j++){
 				var workingPath = fl.configURI + "Commands/" + command.name[j] + ext;
-				var disabledPath = fl.configURI + "Javascript/EDAPT Disabled Commands/" + command.name[j] + ext;
+				var disabledPath = fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/Disabled Commands/" + command.name[j] + ext;
 				if( command.state == false ){
 					if( ! FLfile.exists( disabledPath ) ){
 						FLfile.copy( workingPath, disabledPath  );
@@ -872,7 +875,7 @@ function Utils() {
 		'</dialog>';
 		var settings = this.displayPanel( "ManageCommands", xmlPanel );
 		if( settings.dismiss == "accept" ){
-			var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
+			var fpath = fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt";
 			var needToMove = null;
 			// Check for command states
 			var states = settings.allBoxes.split( "," );

@@ -43,7 +43,7 @@ function runScript( commandname ){
 	var xmlPanel = createSettingsPanel( level1, level2, level3 );
 	var settings = Edapt.utils.displayPanel( "EDAPTSettings", xmlPanel );
 	if( settings.dismiss == "accept" ){
-		var fpath = fl.configURI + "Javascript/EDAPTsettings.txt";
+		var fpath = fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt";
 		// Assign new values
 		for( var i=0; i < Edapt.settings.layerColors.light.colors.length; i++ ){
 			var p1 = "light" + ( i + 1 );

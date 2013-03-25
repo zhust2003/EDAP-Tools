@@ -21,11 +21,26 @@ try {
 }catch( error ){
 	fl.trace( error );
 }
-
 function runScript( commandname ){
 	if( fl.getDocumentDOM() == null ){
 		fl.trace( "No document open." );
 		return;
 	}
-	var settings = fl.getDocumentDOM().xmlPanel( fl.configURI + "XULControls/EDAPT Help.xml" );
+	var xmlContent = createXML();
+	var settings = Edapt.utils.displayPanel( "EdaptHelp" , xmlContent )	
 }
+function createXML(){
+	var ver = Edapt.settings.version;
+	var result = 
+	'<dialog buttons="accept" title="EDAPT Help  -  ' + ver + '">' +
+		'<vbox>' +
+			'<flash width="360" height="480" src="../XULControls/EDAPT Help.swf"/>' +
+		'<spacer></spacer>' +
+		'<separator></separator>' +
+		'<spacer></spacer>' +
+		'</vbox>' +
+	'</dialog>';
+	return result;
+}
+
+

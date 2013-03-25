@@ -65,7 +65,7 @@ function runScript( commandname ){
 		Edapt.settings.TrimCharacters.left = leftTrim;
 		Edapt.settings.TrimCharacters.ritght = rightTrim;
 		Edapt.settings.TrimCharacters.entireLibrary = EntireLibrary;
-		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPTsettings.txt" );
+		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPT."+ Edapt.settings.version +"/settings.txt" );
 	}
 }
 function trim( astring, leftNum, rightNum ){
@@ -90,7 +90,7 @@ function rightTrim( astring, n ){
 function createXML(){
 	var ver = Edapt.settings.version;
 	var result =
-	'<dialog title="Rename Library Items    ' + ver + '">' +
+	'<dialog title="Rename Library Items  -  ' + ver + '">' +
 		'<vbox>' +
 			'<grid>' +
 				'<columns>' +

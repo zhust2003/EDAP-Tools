@@ -62,7 +62,7 @@ function runScript( commandname ){
 		Edapt.settings.PrefixSuffix.prefix = Prefix;
 		Edapt.settings.PrefixSuffix.suffix = Suffix;
 		Edapt.settings.PrefixSuffix.entireLibrary = EntireLibrary;
-		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPTsettings.txt" );
+		Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt" );
 	}
 }
 function prefixSuffix( astring, pref, suff ){
@@ -72,7 +72,7 @@ function prefixSuffix( astring, pref, suff ){
 function createXML(){
 	var ver = Edapt.settings.version;
 	var result =
-	'<dialog buttons="accept, cancel" title="Rename Library Items    ' + ver + '">' +
+	'<dialog buttons="accept, cancel" title="Rename Library Items  -  ' + ver + '">' +
 		'<vbox>' +
 			'<grid>' +
 				'<columns>' +

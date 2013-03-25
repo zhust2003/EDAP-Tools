@@ -5,7 +5,8 @@ var LKU = 0;
 // PANEL
 newRig						= function(){
 	var doc = fl.getDocumentDOM();
-	if( doc ){		
+	if( doc ){
+		
 		var xmlContent = '<?xml version="1.0"?>' +
 		'<dialog title="Create New Rig    ' + Edapt.settings.version + '" buttons="accept, cancel">' +
 		'<vbox>' +
