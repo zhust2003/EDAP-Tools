@@ -114,7 +114,7 @@ function Utils() {
 		// SMR panel
 		context.smartMagnetRig = new Object();
 		context.smartMagnetRig.snapThreshold = 4;
-		context.smartMagnetRig.folderPath = "EDAPT Disabled Commands";
+		context.smartMagnetRig.folderPath = "";
 		context.smartMagnetRig.help = new Object();
 		context.smartMagnetRig.help.A = {show:true, value:"http://flash-powertools.com/support/A"};
 		context.smartMagnetRig.help.B = {show:true, value:"http://flash-powertools.com/support/B"};
@@ -125,7 +125,7 @@ function Utils() {
 		context.smartGraphicControl = new Object();
 		context.smartGraphicControl.imageSize = 128;
 		context.smartGraphicControl.defaultThumbnailSize = 64;
-		context.smartGraphicControl.folderPath = "EDAPT Smart Graphic Control";
+		context.smartGraphicControl.folderPath = "Smart Graphic Control";
 		context.smartGraphicControl.panels = {};
 		
 		//Commands
@@ -301,7 +301,7 @@ function Utils() {
 			aTimeline		- the context of execution.
 			isFilter		- If true, the function result evaluates to boolean.
 			returnFirst		- If true, returns the first finded/processed element.
-			excludedElements	- Array of elements to exclude from search.
+			excludedElements	- Array of elements to exclude from processing.
 		*/
 		
 		// Arguments to pass when the function is call
