@@ -30,10 +30,8 @@ function runScript( command ){
 		insertSymbol( command, 2 );
 	}
 }
-function alternativeKey( k ){
-	// 192 = Key ~
-	// 53  = Key #5   
-	if( k == 53 ){  
+function alternativeKey( k ){ 
+	if( k == 53|| ( k == 192 && ! fl.tools.shiftIsDown ) ){  // 53  = Key #5   192 = Key ~
 		return true;
 	}
 	else{
