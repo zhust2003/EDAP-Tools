@@ -48,7 +48,8 @@ function Utils() {
 	};
 	this.createSettings				= function( context ){
 		context.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
-
+		context.bgColor = "0x156FC3"; // web-site accent colour
+		
 		// Find and Replace
 		context.FindAndReplace = new Object();
 		context.FindAndReplace.find = "";
@@ -391,7 +392,8 @@ function Utils() {
 			if ( FLfile.exists( varFile ) ) {
 				FLfile.remove( varFile );	
 			}
-			FLfile.write( varFile, "url=" + url );
+			xvars = "url=" + url + "&" + "color=" + Edapt.settings.bgColor;
+			FLfile.write( varFile, xvars ); //0x156FC3
 			needToRemove = true;
 		}
 
