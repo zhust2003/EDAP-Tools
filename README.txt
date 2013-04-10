@@ -1,7 +1,7 @@
 In order to get the commands to function, the files have to be organized in the following way:
 
 All commands (#1 to #23) have to be in the 'Commands' folder.
-All files with .xml extension, as well as EDAPT Help.swf and EDAPT Shortcuts Map.swf have to be in 'XULControls' folder.
+All files with .swf extension have to be in 'XULControls' folder.
 EDAPT Loader.jsfl has to be in the 'Tools' folder.
 
 All the above mentioned folders (Commands, Javascript, WindowSWF and XULControls) are located in Flash Configuration directory – called 'flashConfig' for convenience.
@@ -34,17 +34,16 @@ flashConfig\
 		
 	Tools\
 		EDAPT Loader.jsfl
+		EDAPTversion.txt
 		
 	WindowSWF\
 		Smart Magnet Rig.swf
 		SmartMagnetRig.jsfl
 		
 	XULControls\
-		EDAPT Help.xml
-		EDAPT Shortcuts Map.xml
 		EDAPT Help.swf
 		EDAPT Shortcuts Map.swf
-
+		EDAPT url.swf
 
 For questions, suggestions or bug reports, please, use the EDAP Tools ticket system
 http://www.flash-powertools.com/hesk/
