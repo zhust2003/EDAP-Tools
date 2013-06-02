@@ -73,7 +73,7 @@ function Utils() {
 		// Enumeration
 		context.Enumeration = new Object();
 		context.Enumeration.pattern = "<name> <enum>";
-		context.Enumeration.useFolderNames = true;
+		context.Enumeration.useFolderNames = false;
 		context.Enumeration.resetCounterOnEachFolder = true;
 		context.Enumeration.start = 1;
 		context.Enumeration.step = 1;
@@ -107,6 +107,10 @@ function Utils() {
 		context.createMagnetTarget.folderName = "EDAPT objects";
 		context.createMagnetTarget.showAlert = true;
 
+		// Convert to Keyframes
+		context.ConvertToKeyframes = new Object();
+		context.ConvertToKeyframes.recursive = true;
+		
 		//Smart Magnet Joint
 		context.smartMagnetJoint = new Object();
 		context.smartMagnetJoint.distanceThreshold = 50;
@@ -158,6 +162,7 @@ function Utils() {
 		context.commands.settings.push( { id:"pair3",  name:["18 Create Magnet Target", "19 Smart Magnet Joint"], state:true } );							//17	
 	};
 	this.isElementSymbol			= function( element ){
+		if( ! element ){ return false; }
 		if( element.elementType == "instance" ){
 			if( element.instanceType == "symbol" ){
 				return true;
@@ -908,5 +913,3 @@ function Utils() {
 		}
 	};	
 }
-
-

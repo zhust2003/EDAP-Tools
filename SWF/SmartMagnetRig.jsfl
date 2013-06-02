@@ -210,7 +210,8 @@ removeSelectedNodes 		= function(){
 		var sel = doc.selection;
 		var cnt = 0;
 		if( sel.length > 0 ){
-			
+			doc.moveSelectionBy( { x:1, y:1 } );
+			doc.moveSelectionBy( { x:-1, y:-1 } );
 			var settings = Edapt.utils.displayDialogue( "Remove Links", "Are you sure you want to remove links from the selected Symbol Instances?", "accept, cancel" );
 			if( settings.dismiss == "accept" ){
 				for( var i=0; i<sel.length; i++ ){
@@ -221,7 +222,9 @@ removeSelectedNodes 		= function(){
 						cnt ++;
 					}
 					Edapt.utils.removeData( el, "SMR" );
+					removeMagnetTargetInfo( doc, el ); //02 June, 2013 
 				}
+				doc.selection = sel; //02 June, 2013 
 				Edapt.utils.displayDialogue( "Remove Links", cnt + " link(s) were removed.", "accept" );
 			}
 		}
@@ -246,7 +249,7 @@ setRigInfo					= function( infoString ){
 	
 	if( infoObj ){
 		if( infoObj.rig == rigDataObj.rig ){
-			unLink( element, rigDataObj );
+			unLink( doc, element, rigDataObj );
 		}
 		else{
 			var settings = Edapt.utils.displayDialogue( "Set Rig information",
@@ -358,11 +361,15 @@ link						= function( doc, element, rigDataObject ){
 		}
 	}	
 }
-unLink						= function( element, dataObj ){
+unLink						= function( doc, element, dataObj ){
 	var inf = Edapt.utils.getData( element, "SMR" );
 	if( inf.rig == dataObj.rig && inf.id == dataObj.id ){
-	var ok = Edapt.utils.removeData( element, "SMR" );
-		if( ok ){
+		var ok1 = Edapt.utils.removeData( element, "SMR" );
+		var ok2 = removeMagnetTargetInfo();
+		if( ok && ok2 ){
+			doc.moveSelectionBy( { x:1, y:1 } );	//02 June, 2013 
+			doc.moveSelectionBy( { x:-1, y:-1 } );	//02 June, 2013 
+			fl.trace("moveSelectionBy");
 			var tail = "";
 			if( inf ){
 				tail += "\n\n\Rig: " + inf.rig + "\n";
@@ -378,6 +385,15 @@ unLink						= function( element, dataObj ){
 	else{
 		Edapt.utils.displayDialogue( "Remove Rig information", "You can unlink only the currently selected Symbol Instance.", "accept" );
 	}
+}
+removeMagnetTargetInfo		= function( doc, element ){
+	var mySnaps = getSnapObjectsInElement( element );
+	var cnt = 0;
+	for( var s=0; s<mySnaps.length; s++ ){
+		Edapt.utils.removeData( mySnaps[s], "MT" );
+		cnt++;
+	}
+	return Boolean( cnt == mySnaps.length );
 }
 getStageInfo				= function( id ){
 	var doc = fl.getDocumentDOM();

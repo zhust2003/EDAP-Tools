@@ -288,7 +288,7 @@ function createXML(){
 			'</row>' +
 		'</grid>'+
 	'<script>' +
-	
+
 		'function confirmDialogue(){' +
 			'var input = [];' +
 			'input.push( { value:fl.xmlui.get( "StartValue" ), validator:isNumber, message:"\'Start Value\' must be a whole number." } );' +
@@ -395,15 +395,7 @@ function createXML(){
 				'nextValue( i, diff, pd );' +
 			'}' +
 		'}' +
-		'function initPreview(){' +
-			'var elements = [];' +
-			'elements.push( {label:"SymbolName1", value:"SymbolName1" } );' +
-			'elements.push( {label:"SymbolName2", value:"SymbolName2" } );' +
-			'elements.push( {label:"SymbolName3", value:"SymbolName3" } );' +
-			'elements.push( {label:"SymbolName4", value:"SymbolName4" } );' +
-			'elements.push( {label:"SymbolName5", value:"SymbolName5" } );' +
-			'fl.xmlui.setControlItemElements( "preview", elements ); ' +
-		'}' +
+
 	'</script>' +
 	'</dialog>';
 	//fl.trace( result );
