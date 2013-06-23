@@ -156,7 +156,7 @@ function Utils() {
 		context.commands.settings.push( { id:"comm16", name:["16 Swap Multiple Symbols"], state:true } );						//11
 		context.commands.settings.push( { id:"comm17", name:["17 Sync Symbols to Timeline"], state:true } );					//12
 		context.commands.settings.push( { id:"comm18", name:["20 Smart Transform"], state:true } );								//13
-		context.commands.settings.push( { id:"comm19", name:["22 EDAPT Shortcuts Map"], state:true } );							//14
+		context.commands.settings.push( { id:"comm19", name:["21 Convert To Keyframe Advanced"], state:true } );				//14
 
 		context.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );						//15
 		context.commands.settings.push( { id:"pair2",  name:["14 Record Parent Reg Point", "15 Set Selection Pivot To Parent Reg Point"], state:true } );	//16
@@ -805,7 +805,7 @@ function Utils() {
 						'<row>' +
 							'<checkbox id="'+cmd[4].id+'" label="'+cmd[4].name.join( sep ) +'" checked="'+cmd[4].state+'" />' +			// 05 LB Enumeration
 							'<checkbox id="'+cmd[9].id+'" label="'+cmd[9].name.join( sep ) +'" checked="'+cmd[9].state+'" />' +			// 12 Set Reg Point To Transform Point
-							'<checkbox id="'+cmd[14].id+'" label="'+cmd[14].name.join( sep ) +'" checked="'+cmd[14].state+'" />' +		// 21 EDAPT Shortcuts Map
+							'<checkbox id="'+cmd[14].id+'" label="'+cmd[14].name.join( sep ) +'" checked="'+cmd[14].state+'" />' +		// 21 Convert To Keyframe Advanced.jsfl
 						'</row>' +
 
 					'</rows>' +
