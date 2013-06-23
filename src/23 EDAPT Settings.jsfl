@@ -55,6 +55,10 @@ function runScript( commandname ){
 		Edapt.settings.smartMagnetJoint.distanceThreshold = parseInt( settings.SmartSnapDistance );
 		Edapt.settings.createMagnetTarget.visibleTargets = Boolean( settings.visibleTargets === "true");
 		Edapt.settings.createMagnetTarget.visibleMarkers = Boolean( settings.visibleMarkers === "true");
+		
+		Edapt.settings.ConvertToKeyframes.recursive = Boolean( settings.recursiveFolders === "true");
+		Edapt.settings.ConvertToKeyframes.restore = Boolean( settings.restoreSelection === "true");
+		
 		Edapt.settings.traceLevel = parseInt( settings.traceLevel );
 		if( settings.resetDialogs == "true" ){
 			for ( var o in Edapt.settings ){
@@ -136,7 +140,33 @@ function createSettingsPanel( level1, level2, level3 ){
 			'<separator></separator>' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
-			// SMART SNAP DISTANCE----------------------
+			
+			// CONVERT TO KEYFRAMES----------------------
+			'<grid>' +
+			'<columns>' +
+				'<column/>' +
+				'<column/>' +
+				'<column/>' +
+			'</columns>' +
+			'<rows>' +
+				'<row>' +
+					'<label value="Convert To Keyframes" />' +
+					'<label value="                       " />' +
+					'<vbox>' +
+						'<checkbox id="recursiveFolders" label="Recursive" checked = "' + Edapt.settings.ConvertToKeyframes.recursive + '"/>' +
+						'<checkbox id="restoreSelection" label="Restore selection and active layer." checked = "' + Edapt.settings.ConvertToKeyframes.restore + '" />' +
+					'</vbox>' +
+				'</row>' +
+			'</rows>' +
+			'</grid>' +
+			// ------------------------------------------
+			'<spacer></spacer>' +
+			'<separator></separator>' +
+			'<spacer></spacer>' +
+			'<spacer></spacer>' +
+
+			
+			// SMART MAGNET RANGE----------------------
 			'<grid>' +
 			'<columns>' +
 				'<column/>' +
@@ -168,8 +198,8 @@ function createSettingsPanel( level1, level2, level3 ){
 			'<separator></separator>' +
 			'<spacer></spacer>' +
 			'<spacer></spacer>' +
+
 			// OUTPUT SETTINGS---------------------------
-			
 			'<grid>' +
 				'<columns>' +
 					'<column/>' +

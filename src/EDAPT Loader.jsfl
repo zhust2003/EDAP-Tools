@@ -110,6 +110,7 @@ function Utils() {
 		// Convert to Keyframes
 		context.ConvertToKeyframes = new Object();
 		context.ConvertToKeyframes.recursive = true;
+		context.ConvertToKeyframes.restore = false;
 		
 		//Smart Magnet Joint
 		context.smartMagnetJoint = new Object();
@@ -758,10 +759,11 @@ function Utils() {
 		}
 	};					
 	this.createCommandsPanel		= function(){
+		var ver = Edapt.settings.version;
 		var cmd = Edapt.settings.commands.settings;
 		var sep = "  /  ";
 		var xmlPanel = '<?xml version="1.0"?>' +
-		'<dialog title="Manage Commands" >' +
+		'<dialog title="Manage Commands  -  ' + ver + '">' +
 			'<vbox>' +
 				'<spacer></spacer>' +
 				'<label value="Show / Hide selected commands from the &quot;Commands&quot; menu. Enabling or disabling commands requires Flash to be restarted." />' +
@@ -911,5 +913,18 @@ function Utils() {
 		while( cnt -- ){
 			fl.xmlui.set( Edapt.settings.commands.settings[cnt].id, astate );
 		}
+	};
+	this.viewShortcutsMap			= function(){
+		var ver = Edapt.settings.version;
+		var xmlPanel = 
+		'<dialog buttons="accept" title="EDAPT Shortcuts Map  -  ' + ver + '">' +
+			'<vbox>' +
+				'<flash width="920" height="480" src="../XULControls/EDAPT Shortcuts Map.swf"/>' +
+				'<spacer></spacer>' +
+				'<separator></separator>' +
+				'<spacer></spacer>' +
+			'</vbox>' +
+		'</dialog>';
+		var settings = this.displayPanel( "EDAPTShortcutsMap", xmlPanel );
 	};	
 }

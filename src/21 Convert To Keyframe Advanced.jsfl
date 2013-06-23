@@ -27,8 +27,8 @@ function runScript( commandname ){
 		return;
 	}
 	var myTimeline = doc.getTimeline();
-	var recursive = true; //Edapt.settings.ConvertToKeyframes.recursive;
-	var restore = false;
+	var recursive = Edapt.settings.ConvertToKeyframes.recursive;
+	var restore = Edapt.settings.ConvertToKeyframes.restore;
 	var mode = 1;
 	if( fl.tools.altIsDown ){ mode = 2; }
 	switch( mode ){
@@ -43,14 +43,8 @@ function runScript( commandname ){
 	}
 }
 function standard( atimeline, recursive, restore ){
-	/*
-		1. smart mode - извиква се с F6
-		Дублира изцяло стандартната функционалност.
-		Добавката е, че ако имаме селектиран(и) фрейм(ове) във фолдер лейър (самият фолдер), конвертира към ключ всичко принадлежащо на фолдера,
-		във фреймовете, които са селектирани - игнорира селектираните фреймове в самите нестнати леъри.
-	*/
 	var cl = atimeline.currentLayer;
-	var selFrames = atimeline.getSelectedFrames();				// Get all selected frames in the timeline
+	var selFrames = atimeline.getSelectedFrames();
 	var containsFolder = __isFolderSelected( atimeline, selFrames );
 	if( ! containsFolder ){
 		atimeline.convertToKeyframes(); // standard behaviour
@@ -59,7 +53,6 @@ function standard( atimeline, recursive, restore ){
 		}
 	}
 	else{
-		
 		var scheme = __prepareStandard( atimeline, selFrames, recursive );
 		atimeline.setSelectedFrames( scheme, true );
 		atimeline.convertToKeyframes();
@@ -70,12 +63,6 @@ function standard( atimeline, recursive, restore ){
 	}
 }
 function extreme( atimeline, recursive, restore ){
-	/*
-		2. folder / extreme mode. Извиква се с alt+F6
-		Селекцията се зачита само в рамките на "активния" леър - оцветения в палитрата.
-		- ако лейърът принадлежи на фолдер, създава ключ(ове) за всички лейъри във фолдера и рекурсивно във всички субфолдери(това може да се деактивира от settings)
-		- ако лейърът не е във фолдер създава ключ(ове) през целия текущ таймлайн, включително и за лейърите които са във фолдери и субфолдери.
-	*/
 	var cl = atimeline.currentLayer;
 	var selFrames = atimeline.getSelectedFrames();		// Get all selected frames in the timeline
 	var scheme = __prepareExtreme( atimeline, selFrames, recursive );
@@ -96,7 +83,6 @@ function __prepareExtreme( atimeline, selFrames, recursive ){
 	if( ranges.length ){
 		var folder = __getParentFolderFromSelection( atimeline, ranges );
 		var xfilter = function( alayer, folder ){ return false; };
-		
 		if( ! recursive ){
 			xfilter = function( alayer, folder ){
 				return Boolean( alayer.parentLayer == folder );
@@ -153,7 +139,6 @@ function __prepareStandard( atimeline, selFrames, recursive ){
 	var folder = __getSelectedFolderFromSelection( atimeline, selFrames );
 	var ranges = __getLayerSelection( selFrames, Edapt.utils.indexOf( atimeline.layers, folder ) );
 	var xfilter = function( alayer, folder ){ return false; };
-	
 	if( ! recursive ){
 		xfilter = function( alayer, folder ){
 			return Boolean( alayer.parentLayer == folder );

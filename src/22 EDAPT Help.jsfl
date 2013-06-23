@@ -32,13 +32,25 @@ function runScript( commandname ){
 function createXML(){
 	var ver = Edapt.settings.version;
 	var result = 
-	'<dialog buttons="accept" title="EDAPT Help  -  ' + ver + '">' +
+	'<dialog title="EDAPT Help  -  ' + ver + '">' +
 		'<vbox>' +
 			'<flash width="360" height="480" src="../XULControls/EDAPT Help.swf"/>' +
 		'<spacer></spacer>' +
 		'<separator></separator>' +
 		'<spacer></spacer>' +
 		'</vbox>' +
+		'<grid>' +
+			'<columns>' +
+				'<column/>' +
+				'<column/>' +
+				'<column/>' +
+			'</columns>' +
+			'<row>' +
+				'<button label="View Shortcuts Map" oncommand = "Edapt.utils.viewShortcutsMap();"/>' +
+				'<label value="                                    " />' +
+				'<button label="Close" oncommand = "fl.xmlui.cancel();"/>' +
+			'</row>' +
+		'</grid>'+
 	'</dialog>';
 	return result;
 }
