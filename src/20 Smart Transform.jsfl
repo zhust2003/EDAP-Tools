@@ -36,8 +36,17 @@ function runScript( commandname ){
 			myElements.splice( i, 1 );
 		}
 	}
-	myElements.sort( sortOnParent );
+	myElements.sort( __sortOnParent );
+	if( fl.tools.altIsDown ){
+		__selectInverted( commandname, doc, myTimeline, myElements ); // Alternative - Alt + 1
+	}
+	else{
+		__selectStraight( commandname, doc, myTimeline, myElements ); // Default - 1
+	}
+}
 
+// HELPER METHODS
+function __selectStraight( commandname, doc, myTimeline, myElements ){
 	if( myElements.length == 1 ){
 		var el = myElements[ 0 ];
 		if( Edapt.utils.isElementSymbol( el ) ){
@@ -45,14 +54,14 @@ function runScript( commandname ){
 			if( inf ){
 				if( inf.parent == "" ){ 
 					var children = [el];
-					getMyChildren( el, children, myTimeline );
-					setSelectionAndTransformPoint( doc, myTimeline, el, children, true );
+					__getMyChildren( el, children, myTimeline );
+					__setSelectionAndTransformPoint( doc, myTimeline, el, children, true, false );
 				}
 				else{
 					var children = [el];
-					getMyChildren( el, children, myTimeline );
+					__getMyChildren( el, children, myTimeline );
 					if( children.length > 1 ){
-						setSelectionAndTransformPoint( doc, myTimeline, el, children, true );
+						__setSelectionAndTransformPoint( doc, myTimeline, el, children, true, false );
 					}
 				}
 			}
@@ -60,13 +69,13 @@ function runScript( commandname ){
 		
 	}
 	else if( myElements.length > 1 ){
-		var result = checkChain( myElements, myTimeline );
+		var result = __checkChain( myElements, myTimeline );
 		switch( result ){
 			case 1: //"two consequtive"
-				setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false );
+				__setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false, false );
 				break;
 			case 2: //"chain - broken or not"
-				setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false );
+				__setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false, false );
 				break;
 			case 3: //"multiple chains"
 				Edapt.utils.displayMessage( commandname + ": " + "Multiple chains are selected.", 2 );
@@ -76,11 +85,11 @@ function runScript( commandname ){
 
 	}
 	else{
-		Edapt.utils.displayMessage( commandname + ": " + "Please, select symbol(s) on the stage.", 1 );
+		Edapt.utils.displayMessage( commandname + ": " + "Please, select a Symbol which is already a part of a Smart Magnet Rig!", 2 );
 		return;
 	}
 }
-function checkChain( elements,atimeline ){
+function __checkChain( elements,atimeline ){
 	var first = elements[0];
 	var last = elements[ elements.length-1 ]
 	inf1 = Edapt.utils.getData( first, "SMR" );
@@ -90,11 +99,11 @@ function checkChain( elements,atimeline ){
 	}
 	else{
 		var parents = [];
-		var parent = Edapt.utils.filterStageElements( getParent, atimeline, false, true, [], inf1 )[0];
+		var parent = Edapt.utils.filterStageElements( __getParent, atimeline, false, true, [], inf1 )[0];
 		while( parent ){
 			var rig = Edapt.utils.getData( parent, "SMR" );
 			if( rig ){
-				parent = Edapt.utils.filterStageElements( getParent, atimeline, false, true, [], rig )[0];
+				parent = Edapt.utils.filterStageElements( __getParent, atimeline, false, true, [], rig )[0];
 				if( parent ){
 					if( parent == last ){
 						return 2;
@@ -106,7 +115,7 @@ function checkChain( elements,atimeline ){
 	}
 	return 3;
 }
-function getParent( element, aTimeline, currentLayernum, cf, n, inf ){
+function __getParent( element, aTimeline, currentLayernum, cf, n, inf ){
 	var data = Edapt.utils.getData( element, "SMR" );
 	if( data ){
 		if( ( data.rig == inf.rig && data.id == inf.parent ) ){
@@ -116,11 +125,14 @@ function getParent( element, aTimeline, currentLayernum, cf, n, inf ){
 	}
 	return null;
 }
-function setSelectionAndTransformPoint( doc, atimeline, parent, children, changeSelection ){
+function __setSelectionAndTransformPoint( doc, atimeline, parent, children, changeSelection, inverted ){
+	//Decide to process the parent or not.
+	var startval = ( inverted ) ? 0 : 1;
+	
 	if( changeSelection ){
 		var map = [];
 		var cf = atimeline.currentFrame;
-		for( var i=1; i<children.length; i++ ){ // The parent is at position 0
+		for( var i = startval; i < children.length; i++ ){ // The parent is at position 0
 			var el = children[i];
 			var ln = Edapt.utils.indexOf( atimeline.layers, el.layer );
 			var en = Edapt.utils.indexOf( atimeline.layers[ln].frames[cf].elements, el );
@@ -141,18 +153,18 @@ function setSelectionAndTransformPoint( doc, atimeline, parent, children, change
 	}
 	doc.setTransformationPoint( { x:parent.matrix.tx, y:parent.matrix.ty } );
 }
-function getMyChildren( element, children, tml ){
-	var retval = Edapt.utils.filterStageElements( isMyChild, tml, true, false, [ element ], Edapt.utils.getData( element, "SMR" ) ); // No keys created
+function __getMyChildren( element, children, tml ){
+	var retval = Edapt.utils.filterStageElements( __isMyChild, tml, true, false, [ element ], Edapt.utils.getData( element, "SMR" ) ); // No keys created
 	if( retval.length ){
 		for( var i=0; i<retval.length; i++ ){
-			getMyChildren( retval[i], children, tml );
+			__getMyChildren( retval[i], children, tml );
 		}
 		for( var j=0; j<retval.length; j++ ){
 			children.push( retval[j] );
 		}
 	}
 }
-function isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
+function __isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
 	var data = Edapt.utils.getData( element, "SMR" );
 	if( data ){
 		if( ( data.rig == inf.rig && data.parent == inf.id ) ){
@@ -162,16 +174,16 @@ function isMyChild( element, aTimeline, currentLayernum, cf, n, inf ){
 	}
 	return false;
 }
-function sortOnParent( a, b ){
+function __sortOnParent( a, b ){
 	// Sorts stage elements on its "parent" id.
 	if( a.hasPersistentData( "rigData" ) && b.hasPersistentData( "rigData" ) ){
 		var obj1 = Edapt.utils.getData( a, "SMR" );
 		var obj2 = Edapt.utils.getData( b, "SMR" );
-		return ( convertID( obj2.parent ) - convertID( obj1.parent ) );
+		return ( __convertID( obj2.parent ) - __convertID( obj1.parent ) );
 	}
 	return -1;
 }
-function convertID( id ){
+function __convertID( id ){
 	/*
 	-1 = empty strings
 	 0  = non-empty strings
@@ -180,4 +192,90 @@ function convertID( id ){
 	if( id.length == 0 ){ return -1; }
 	var retval = Number( id );
 	return isNaN( retval ) ? 0 : retval;
+}
+
+function __selectInverted( commandname, doc, myTimeline, myElements ){
+	if( myElements.length == 1 ){
+		var element = myElements[ 0 ];
+		if( Edapt.utils.isElementSymbol( element ) ){
+			var inf = Edapt.utils.getData( element, "SMR" );
+			if( inf ){
+				var children = [ element ];
+				while( element ){
+					var temp = element;
+					element = __parent( myTimeline, element );
+					children.push( element );
+					if( __filter( element ) ){
+						children.pop();
+						break;
+					}
+					else if( ! __parent( myTimeline, element ) ){
+						element = __parent( myTimeline, temp );
+						break;
+					}
+				}
+				if( children.length > 1 ){
+					element = children.pop();
+					if( element ){
+						children.splice( 0, 0, element );
+						__setSelectionAndTransformPoint( doc, myTimeline, element, children, true, true );
+					}
+				}
+			}
+		}	
+	}
+	else if( myElements.length > 1 ){
+		var result = __checkChain( myElements, myTimeline );
+		switch( result ){
+			case 1: //"two consequtive"
+				__setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false, true );
+				break;
+			case 2: //"chain - broken or not"
+				__setSelectionAndTransformPoint( doc, myTimeline, myElements[ myElements.length-1 ], null, false, true );
+				break;
+			case 3: //"multiple chains"
+				Edapt.utils.displayMessage( commandname + ": " + "Multiple chains are selected.", 2 );
+				break;
+			default:
+		}
+	}
+	else{
+		Edapt.utils.displayMessage( commandname + ": " + "Please, select a Symbol which is already a part of a Smart Magnet Rig!", 2 );
+		return;
+	}
+}
+function __parent( atimeline, element ){
+	if( ! element ){ return null; }
+	inf = Edapt.utils.getData( element, "SMR" );
+	return Edapt.utils.filterStageElements( __getParent, atimeline, false, true, [], inf )[0];
+}
+function __filter( element ){
+	return Boolean( __getSnapObjects( element ).length > 1 );
+}
+function __isSnapObject( element, aTimeline, currentLayernum, cf, n ){
+	if( Edapt.utils.isMagnetTarget( element ) ){
+		var remove = false;
+		var layer = aTimeline.layers[ currentLayernum ];
+		if( layer.frames[ cf ].startFrame != cf ){
+			aTimeline.currentLayer = currentLayernum;
+			aTimeline.convertToKeyframes( cf );
+			remove = true;
+		}
+		var el = layer.frames[ cf ].elements[n];
+		var retval = { element:el, matrix:el.matrix };
+		if( remove ){
+			aTimeline.clearKeyframes( cf );
+		}
+		return retval;
+		}
+	else{
+		return null;
+	}
+}
+function __getSnapObjects( element ){
+	if( Edapt.utils.isElementSymbol( element ) ){
+		var retval = Edapt.utils.filterStageElements( __isSnapObject, element.libraryItem.timeline, false, false, [] );
+		return retval;
+	}
+	return [];
 }

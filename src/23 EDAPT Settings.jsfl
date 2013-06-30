@@ -142,23 +142,26 @@ function createSettingsPanel( level1, level2, level3 ){
 			'<spacer></spacer>' +
 			
 			// CONVERT TO KEYFRAMES----------------------
-			'<grid>' +
-			'<columns>' +
-				'<column/>' +
-				'<column/>' +
-				'<column/>' +
-			'</columns>' +
-			'<rows>' +
-				'<row>' +
-					'<label value="Convert To Keyframes" />' +
-					'<label value="                       " />' +
-					'<vbox>' +
-						'<checkbox id="recursiveFolders" label="Recursive" checked = "' + Edapt.settings.ConvertToKeyframes.recursive + '"/>' +
-						'<checkbox id="restoreSelection" label="Restore selection and active layer." checked = "' + Edapt.settings.ConvertToKeyframes.restore + '" />' +
-					'</vbox>' +
-				'</row>' +
-			'</rows>' +
-			'</grid>' +
+			'<vbox>' +
+				'<label value="Convert To Keyframes Advanced" />' +
+				'<spacer></spacer>' +
+				'<spacer></spacer>' +
+				'<spacer></spacer>' +
+				'<grid>' +
+				'<columns>' +
+					'<column/>' +
+				'</columns>' +
+				'<rows>' +
+					'<row>' +
+						'<checkbox id="recursiveFolders" label="Recursive - Keyframes will be created in all layers of all nested subfolders." checked = "' + Edapt.settings.ConvertToKeyframes.recursive + '"/>' +
+					'</row>' +
+					'<row>' +
+					'<checkbox id="restoreSelection" label="Restore selection and active layer in Extreme mode (Alt+F6) - Active Stage elements and Keyframes will be limited to the initial manual selection." checked = "' + Edapt.settings.ConvertToKeyframes.restore + '" />' +
+					'</row>' +
+				'</rows>' +
+				'</grid>' +
+			'</vbox>' +
+
 			// ------------------------------------------
 			'<spacer></spacer>' +
 			'<separator></separator>' +
@@ -212,7 +215,7 @@ function createSettingsPanel( level1, level2, level3 ){
 							'<menupop>' +
 								'<menuitem label="None" value="0" selected="' + level1 + '" />' +
 								'<menuitem label="Errors Only" value="1"  selected="' + level2 + '" />' +
-								'<menuitem label="All" value="2"  selected="' + level3 + '" />' +
+								'<menuitem label="Errors and Messages" value="2"  selected="' + level3 + '" />' +
 							'</menupop>' +
 						'</menulist>' +
 					'</row>' +

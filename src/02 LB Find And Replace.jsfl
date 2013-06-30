@@ -30,7 +30,7 @@ function runScript( commandname ){
 	}
 	// invoke the dialogue
 	var xmlContent = createXML();
-	var settings = Edapt.utils.displayPanel( "FindAndReplace" , xmlContent )	
+	var settings = Edapt.utils.displayPanel( "FindAndReplace" , xmlContent );	
 
 	if( settings.dismiss == "accept" ){
 		// Get the user input

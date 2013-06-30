@@ -33,36 +33,34 @@ function runScript( commandname ){
 	if( fl.tools.altIsDown ){ mode = 2; }
 	switch( mode ){
 		case 1: // Smart( extended flash standard )
-			standard( myTimeline, recursive, restore );
+			standard( doc, myTimeline, recursive, restore );
 			break;
 		case 2: // Extreme
-			extreme( myTimeline, recursive, restore );
+			extreme( doc, myTimeline, recursive, restore );
 			break;
 		default:
-			standard( myTimeline, recursive, restore );
+			standard( doc, myTimeline, recursive, restore );
 	}
 }
-function standard( atimeline, recursive, restore ){
+function standard( doc, atimeline, recursive, restore ){
 	var cl = atimeline.currentLayer;
 	var selFrames = atimeline.getSelectedFrames();
 	var containsFolder = __isFolderSelected( atimeline, selFrames );
 	if( ! containsFolder ){
-		atimeline.convertToKeyframes(); // standard behaviour
-		if( restore ){ 
-			atimeline.currentLayer = cl;
-		}
+		atimeline.convertToKeyframes(); 				// standard behaviour
+		atimeline.setSelectedFrames( selFrames, true );	// Force Flash to select the symbols on the Stage
 	}
 	else{
 		var scheme = __prepareStandard( atimeline, selFrames, recursive );
 		atimeline.setSelectedFrames( scheme, true );
 		atimeline.convertToKeyframes();
-		if( restore ){ 
-			atimeline.setSelectedFrames( selFrames, true );
-			atimeline.currentLayer = cl;
-		}
+		atimeline.setSelectedFrames( scheme, true );	// Force Flash to select the symbols on the Stage
+	}
+	if( restore ){ 
+		atimeline.currentLayer = cl;
 	}
 }
-function extreme( atimeline, recursive, restore ){
+function extreme( doc, atimeline, recursive, restore ){
 	var cl = atimeline.currentLayer;
 	var selFrames = atimeline.getSelectedFrames();		// Get all selected frames in the timeline
 	var scheme = __prepareExtreme( atimeline, selFrames, recursive );
@@ -74,7 +72,6 @@ function extreme( atimeline, recursive, restore ){
 	}
 }
 
-
 // HELPER METHODS
 function __prepareExtreme( atimeline, selFrames, recursive ){
 	var retval = [];
@@ -83,28 +80,12 @@ function __prepareExtreme( atimeline, selFrames, recursive ){
 	if( ranges.length ){
 		var folder = __getParentFolderFromSelection( atimeline, ranges );
 		var xfilter = function( alayer, folder ){ return false; };
-		if( ! recursive ){
-			xfilter = function( alayer, folder ){
-				return Boolean( alayer.parentLayer == folder );
-			};
-		}
-		else{
-			xfilter = function( alayer, folder ){
-				p = alayer;
-				while( p.parentLayer ){
-					p = p.parentLayer;
-					if( p == folder ){
-						break;
-					}
-				}
-				return Boolean( p == folder );
-			};
-		}
 		if( folder ){
 			for( var i=0; i<atimeline.layers.length; i++ ){
 				var alayer = atimeline.layers[i];
 				if( alayer.layerType != "folder" ){
-					if( xfilter.call( this, alayer, folder ) ){
+					var flag = ( recursive ) ? __recursiveFilter( alayer, folder ) : __singleFilter( alayer, folder );
+					if( flag ){
 						for( var j=0; j<ranges.length; j++ ){
 							retval.push( i );
 							retval.push( ranges[j].start );
@@ -139,27 +120,11 @@ function __prepareStandard( atimeline, selFrames, recursive ){
 	var folder = __getSelectedFolderFromSelection( atimeline, selFrames );
 	var ranges = __getLayerSelection( selFrames, Edapt.utils.indexOf( atimeline.layers, folder ) );
 	var xfilter = function( alayer, folder ){ return false; };
-	if( ! recursive ){
-		xfilter = function( alayer, folder ){
-			return Boolean( alayer.parentLayer == folder );
-		};
-	}
-	else{
-		xfilter = function( alayer, folder ){
-			p = alayer;
-			while( p.parentLayer ){
-				p = p.parentLayer;
-				if( p == folder ){
-					break;
-				}
-			}
-			return Boolean( p == folder );
-		};
-	}
 	for( var i=0; i<atimeline.layers.length; i++ ){
 		var alayer = atimeline.layers[i];
 		if( alayer.layerType != "folder" ){
-			if( xfilter.call( this, alayer, folder ) ){
+			var flag = ( recursive ) ? __recursiveFilter( alayer, folder ) : __singleFilter( alayer, folder );
+			if( flag ){
 				for( var j=0; j<ranges.length; j++ ){
 					retval.push( i );
 					retval.push( ranges[j].start );
@@ -169,6 +134,19 @@ function __prepareStandard( atimeline, selFrames, recursive ){
 		}
 	}
 	return retval;
+}
+function __singleFilter( alayer, folder ){
+	return Boolean( alayer.parentLayer == folder );
+}
+function __recursiveFilter( alayer, folder ){
+	p = alayer;
+	while( p.parentLayer ){
+		p = p.parentLayer;
+		if( p == folder ){
+			break;
+		}
+	}
+	return Boolean( p == folder );
 }
 function __getParentFolderFromSelection( atimeline, ranges ){
 	if( ranges.length == 0 ){ return null; }

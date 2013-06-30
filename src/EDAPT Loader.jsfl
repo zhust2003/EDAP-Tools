@@ -926,5 +926,5 @@ function Utils() {
 			'</vbox>' +
 		'</dialog>';
 		var settings = this.displayPanel( "EDAPTShortcutsMap", xmlPanel );
-	};	
+	};
 }
