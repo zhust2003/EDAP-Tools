@@ -282,6 +282,7 @@ function createCircle( theDocument, acenter, radius ){
 	theDocument.addNewLine({x:-radius/4+lx, y:ly}, {x:radius/4+lx, y:ly});
 
 	theDocument.selectAll();
+	theDocument.unGroup();
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );
