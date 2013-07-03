@@ -23,20 +23,21 @@ try {
 }
 function runScript( command ){
 	var theKey = fl.tools.getKeyDown();
-	if( alternativeKey( theKey ) ){
-		insertSymbol( command, 1 );
+	var a = fl.tools.altIsDown;
+	var s = fl.tools.shiftIsDown;
+	if( !a && !s ){
+		insertSymbol( command, 2 );  // MagnetTarget
 	}
-	else{
-		insertSymbol( command, 2 );
-	}
-}
-function alternativeKey( k ){ 
-	if( k == 53|| ( k == 192 && ! fl.tools.shiftIsDown ) ){  // 53  = Key #5   192 = Key ~
-		return true;
-	}
-	else{
-		return false;
-	}
+	else if( theKey == 192 ){
+		if( a ){
+			insertSymbol( command, 1 );  //CenterMarker
+			return;
+		}
+		else if( s ){
+			insertSymbol( command, 2 );  // MagnetTarget
+			return;			
+		}
+	}	
 }
 function insertSymbol( commandname, atype ){
 	var currentDoc = fl.getDocumentDOM();
@@ -276,16 +277,27 @@ function createCircle( theDocument, acenter, radius ){
 	var b = acenter.y + radius;
 	var f = radius * 0.4;
 	theDocument.addNewOval( {left:l, top:t, right:r, bottom:b} );
+	theDocument.selectAll();
+	if( isGroup( theDocument ) ){
+		theDocument.unGroup();
+	}
 	var lx = acenter.x;
 	var ly = acenter.y;
 	theDocument.addNewLine({x:lx, y:-radius/4 + ly}, {x:lx, y:radius/4 + ly});
 	theDocument.addNewLine({x:-radius/4+lx, y:ly}, {x:radius/4+lx, y:ly});
 
 	theDocument.selectAll();
-	theDocument.unGroup();
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );
 	theDocument.setStrokeStyle( "hairline" );
+}
+function isGroup( doc ){
+	if( doc.selection.length > 0 ){
+		var el = doc.selection[0];
+		var retval = ( el.elementType == "shape") && ( el.isGroup || el.isDrawingObject );
+		return retval;
+	}
+	return false;
 }
 function createSquare( theDocument, acenter, radius ){
 	var l = acenter.x - radius;
