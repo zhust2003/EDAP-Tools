@@ -600,7 +600,7 @@ function Utils() {
 		  we clone it and remove the unnecessary data */
 		var obj = this.cloneObject( o );
 		delete obj.version;
-		delete obj.recordParentRegPoint.currentElement;
+		obj.recordParentRegPoint.currentElement = 0;
 		var str = this.JSON.stringify( obj );
 		if( FLfile.exists( filePath ) ){
 			FLfile.remove( filePath );

@@ -37,8 +37,8 @@ function runScript( commandname ){
 		}
 	}
 	myElements.sort( __sortOnParent );
-	if( fl.tools.altIsDown ){
-		__selectInverted( commandname, doc, myTimeline, myElements ); // Alternative - Alt + 1
+	if( fl.tools.shiftIsDown ){
+		__selectInverted( commandname, doc, myTimeline, myElements ); // Alternative - Shift + 1
 	}
 	else{
 		__selectStraight( commandname, doc, myTimeline, myElements ); // Default - 1
