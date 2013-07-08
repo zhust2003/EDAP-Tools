@@ -25,18 +25,18 @@ function runScript( command ){
 	var theKey = fl.tools.getKeyDown();
 	var a = fl.tools.altIsDown;
 	var s = fl.tools.shiftIsDown;
+
 	if( !a && !s ){
 		insertSymbol( command, 2 );  // MagnetTarget
+		return;
 	}
-	else if( theKey == 192 ){
-		if( a ){
-			insertSymbol( command, 1 );  //CenterMarker
-			return;
-		}
-		else if( s ){
-			insertSymbol( command, 2 );  // MagnetTarget
-			return;			
-		}
+	if( s ){
+		insertSymbol( command, 2 );  // MagnetTarget
+		return;			
+	}
+	if( a ){
+		insertSymbol( command, 1 );  //CenterMarker
+		return;
 	}	
 }
 function insertSymbol( commandname, atype ){
