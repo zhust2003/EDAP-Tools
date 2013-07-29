@@ -919,7 +919,7 @@ function Utils() {
 		var xmlPanel = 
 		'<dialog buttons="accept" title="EDAPT Shortcuts Map  -  ' + ver + '">' +
 			'<vbox>' +
-				'<flash width="920" height="480" src="../XULControls/EDAPT Shortcuts Map.swf"/>' +
+				'<flash width="920" height="540" src="../XULControls/EDAPT Shortcuts Map.swf"/>' +
 				'<spacer></spacer>' +
 				'<separator></separator>' +
 				'<spacer></spacer>' +
