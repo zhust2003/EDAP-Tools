@@ -34,7 +34,7 @@ function createXML(){
 	var result = 
 	'<dialog title="EDAPT Help  -  ' + ver + '">' +
 		'<vbox>' +
-			'<flash width="360" height="480" src="../XULControls/EDAPT Help.swf"/>' +
+			'<flash width="400" height="580" src="../XULControls/EDAPT Help.swf"/>' +
 		'<spacer></spacer>' +
 		'<separator></separator>' +
 		'<spacer></spacer>' +
