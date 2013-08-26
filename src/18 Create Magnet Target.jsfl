@@ -25,7 +25,6 @@ function runScript( command ){
 	var theKey = fl.tools.getKeyDown();
 	var a = fl.tools.altIsDown;
 	var s = fl.tools.shiftIsDown;
-
 	if( !a && !s ){
 		insertSymbol( command, 2 );  // MagnetTarget
 		return;
@@ -86,7 +85,6 @@ function insertSymbol( commandname, atype ){
 	}
 	var symbolExists = ( theSymbols.length > 0 );
 
-	
 	// 3
 	var affectedLayers = myTimeline.layers;
 	var layerExists = false;
@@ -307,14 +305,15 @@ function createSquare( theDocument, acenter, radius ){
 	var f = radius * 0.4;
 	var lx = acenter.x;
 	var ly = acenter.y;
-	
 	var data = createPolygon( 4, {x:0, y:0}, 6 );
 	var path = polygonToPath( data );
 	path.makeShape();
-	
 	theDocument.addNewLine( { x:lx, y:-radius/4 + ly }, { x:lx, y:radius/4 + ly } );
 	theDocument.addNewLine( { x:-radius/4+lx, y:ly }, { x:radius/4+lx, y:ly } );
-
+	theDocument.selectAll();
+	if( isGroup( theDocument ) ){
+		theDocument.unGroup();
+	}
 	theDocument.selectAll();
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );
