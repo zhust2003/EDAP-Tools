@@ -2,9 +2,11 @@ In order to get the commands to function, the files have to be organized in the 
 
 All commands (#1 to #23) have to be in the 'Commands' folder.
 All files with .swf extension have to be in 'XULControls' folder.
-EDAPT Loader.jsfl has to be in the 'Tools' folder.
+EDAPT Loader.jsfl and EDAPTversion.txt have to be in the 'Tools' folder.
+Edapt.dll has to be in the 'External Libraries' folder.
 
-All the above mentioned folders (Commands, Javascript, WindowSWF and XULControls) are located in Flash Configuration directory – called 'flashConfig' for convenience.
+
+All the above mentioned folders (Commands, Javascript, WindowSWF and XULControls) are located in Flash Configuration directory â€“ called 'flashConfig' for convenience.
 
 flashConfig\
 	Commands\
@@ -28,10 +30,13 @@ flashConfig\
 		18 Create Magnet Target.jsfl
 		19 Smart Magnet Joint.jsfl
 		20 Smart Transform.jsfl
-		21 EDAPT Help.jsfl
-		22 EDAPT Shortcuts Map.jsfl
+		21 Convert To Keyframe Advanced.jsfl
+		22 EDAPT Help.jsfl
 		23 EDAPT Settings.jsfl
-		
+
+	External Libraries\
+		Edapt.dll
+	
 	Tools\
 		EDAPT Loader.jsfl
 		EDAPTversion.txt
