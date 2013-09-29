@@ -332,7 +332,7 @@ link						= function( doc, element, rigDataObject ){
 			var msg = "No Magnet Target found within the "+ Edapt.settings.smartMagnetRig.snapThreshold +"px radius.\n"+
 			"Parent Symbol must contain a Magnet Target (MT) object.\n"+
 			"MT center must overlap with the Registration Point of currently selected Symbol Instance."
-			var settings = Edapt.utils.displayDialogue( "Set Rig information", msg, "accept" );
+			var settings = Edapt.utils.displayDialogue( "Set Rig information", msg, "accept", Edapt.utils.getDialogueLink( "smartMagnetRig", "A" ) );
 			return;
 		}	
 	}

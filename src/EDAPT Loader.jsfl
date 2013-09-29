@@ -123,7 +123,7 @@ function Utils() {
 		context.smartMagnetRig.snapThreshold = 4;
 		context.smartMagnetRig.folderPath = "";
 		context.smartMagnetRig.help = new Object();
-		context.smartMagnetRig.help.A = {show:true, value:"http://flash-powertools.com/support/A"};
+		context.smartMagnetRig.help.A = {show:true, value:"http://flash-powertools.com/support/#smr"};
 		context.smartMagnetRig.help.B = {show:true, value:"http://flash-powertools.com/support/B"};
 		context.smartMagnetRig.help.C = {show:true, value:"http://flash-powertools.com/support/C"};
 		context.smartMagnetRig.help.D = {show:true, value:"http://flash-powertools.com/support/D"};

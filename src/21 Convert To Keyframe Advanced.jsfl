@@ -16,7 +16,7 @@
 	along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 try {
-	runScript( "Konvert To Keyframes" );
+	runScript( "Convert To Keyframes" );
 }catch( error ){
 	fl.trace( error );
 }
