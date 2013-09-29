@@ -41,6 +41,7 @@ function Utils() {
 		}
 		else{
 			Edapt.settings = {};
+			FLfile.createFolder( fl.configURI + "Javascript/EDAPT." + ver );	
 			this.createSettings( Edapt.settings );
 			this.serialize( Edapt.settings, fpath );
 		}
