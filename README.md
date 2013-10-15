@@ -1,4 +1,4 @@
-﻿In order to get the commands to function, the files have to be organized in the following way:
+In order to get the commands to function, the files have to be organized in the following way:
 
 All commands (#1 to #23) have to be in the 'Commands' folder.
 All files with .swf extension have to be in 'XULControls' folder.
