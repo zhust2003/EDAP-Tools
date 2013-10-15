@@ -1,6 +1,6 @@
 In order to get the commands to function, the files have to be organized in the following way:
 
-All commands (#1 to #23) have to be in the 'Commands' folder.
+All commands (1 to 23) have to be in the 'Commands' folder.
 All files with .swf extension have to be in 'XULControls' folder.
 EDAPT Loader.jsfl and EDAPTversion.txt have to be in the 'Tools' folder.
 Edapt.dll has to be in the 'External Libraries' folder.
@@ -9,7 +9,7 @@ Edapt.dll has to be in the 'External Libraries' folder.
   fl.trace( Edapt.specification() );
 
 All the above mentioned folders (Commands, Javascript, WindowSWF and XULControls) are located in Flash Configuration directory – called 'flashConfig' for convenience.
-
+```
 flashConfig\
 	Commands\
 		01 Convert To Symbol Preserving Layers.jsfl
@@ -51,6 +51,6 @@ flashConfig\
 		EDAPT Help.swf
 		EDAPT Shortcuts Map.swf
 		EDAPT url.swf
-
+```
 For questions, suggestions or bug reports, please, use the EDAP Tools ticket system
 http://www.flash-powertools.com/hesk/
