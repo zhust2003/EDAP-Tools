@@ -1,12 +1,11 @@
-In order to get the commands to function, the files have to be organized in the following way:
-
+###In order to get the commands to function, the files have to be organized in the following way:
 All commands (1 to 23) have to be in the 'Commands' folder.
 All files with .swf extension have to be in 'XULControls' folder.
 EDAPT Loader.jsfl and EDAPTversion.txt have to be in the 'Tools' folder.
 Edapt.dll has to be in the 'External Libraries' folder.
 
-* To display EDAPT functions specification in the output panel, execute the following line of JSFL code:
-  fl.trace( Edapt.specification() );
+To display EDAPT functions specification in the output panel, execute the following line of JSFL code:
+  ```fl.trace( Edapt.specification() );```
 
 All the above mentioned folders (Commands, Javascript, WindowSWF and XULControls) are located in Flash Configuration directory – called 'flashConfig' for convenience.
 ```
