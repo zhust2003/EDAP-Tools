@@ -80,15 +80,27 @@ function validateHEX( colorcode ){
 }
 function createSettingsPanel( level1, level2, level3 ){
 	var ver = Edapt.settings.version;
+	var isWindows = Boolean( fl.version.search(/win/gi) != -1 );
+	var spacer = null;
+	var distance = null;
+	if( isWindows ){
+		spacer = '<spacer></spacer>';
+		distance = "                                                                                                                   ";
+	}
+	else{
+		spacer = '';
+		distance = "                                                                                               ";
+	}
+
 	return '<?xml version="1.0"?>' +
 	'<dialog title="Electric Dog Animation Power Tools - Settings    ' + ver + '" >' +
 		'<vbox>' +
 			// LAYER COLORS---------------------------
 			'<label value="Layer Outline Colors" />' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
+			spacer +
+			spacer +
+			spacer +
+			spacer +
 			
 			'<grid>' +
 				'<columns>' +
@@ -135,18 +147,17 @@ function createSettingsPanel( level1, level2, level3 ){
 			'</grid>' +
 			
 			// ------------------------------------------
-			'<spacer>' +
-			'</spacer>' +
+			spacer +
 			'<separator></separator>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
+			spacer +
+			spacer +
 			
 			// CONVERT TO KEYFRAMES----------------------
 			'<vbox>' +
 				'<label value="Convert To Keyframes Advanced" />' +
-				'<spacer></spacer>' +
-				'<spacer></spacer>' +
-				'<spacer></spacer>' +
+				spacer +
+				spacer +
+				spacer +
 				'<grid>' +
 				'<columns>' +
 					'<column/>' +
@@ -163,10 +174,10 @@ function createSettingsPanel( level1, level2, level3 ){
 			'</vbox>' +
 
 			// ------------------------------------------
-			'<spacer></spacer>' +
+			spacer +
 			'<separator></separator>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
+			spacer +
+			spacer +
 
 			
 			// SMART MAGNET RANGE----------------------
@@ -179,9 +190,9 @@ function createSettingsPanel( level1, level2, level3 ){
 			'</columns>' +
 			'<rows>' +
 				'<row>' +
-					'<spacer></spacer>' +
-					'<spacer></spacer>' +
-					'<spacer></spacer>' +
+					'<label value="" />' +
+					'<label value="" />' +
+					'<label value="" />' +
 					'<hbox>' +
 		'<checkbox class="control" id="visibleTargets" label="Magnet Target(s) layer visible upon creation" checked = "' + Edapt.settings.createMagnetTarget.visibleTargets + '" />' +
 		'<checkbox class="control" id="visibleMarkers" label="Center Marker layer visible upon creation" checked = "' + Edapt.settings.createMagnetTarget.visibleMarkers  + '" />' +
@@ -197,10 +208,10 @@ function createSettingsPanel( level1, level2, level3 ){
 			'</grid>' +
 
 			// ------------------------------------------
-			'<spacer></spacer>' +
+			spacer +
 			'<separator></separator>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
+			spacer +
+			spacer +
 
 			// OUTPUT SETTINGS---------------------------
 			'<grid>' +
@@ -223,34 +234,32 @@ function createSettingsPanel( level1, level2, level3 ){
 			'</grid>' +
 			
 			// ------------------------------------------
-			'<spacer></spacer>' +
+			spacer +
 			'<separator></separator>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
+			spacer +
+			spacer +
 			
 			// RESET DIALOGUES---------------------------
 			'<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
 			
 			// ------------------------------------------
-			'<spacer></spacer>' +
+			spacer +
 			'<separator></separator>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
-			'<spacer></spacer>' +
+			spacer +
+			spacer +
+			spacer +
+			spacer +
 			'<grid>' +
 				'<columns>' +
-					'<column/>' +
 					'<column/>' +
 					'<column/>' +
 					'<column/>' +
 				'</columns>' +
 				'<row>' +
 					'<button label="Manage Commands..." oncommand = "Edapt.utils.createCommandsPanel();"/>' +
-					'<label value="                                                    " />' +
-					'<label value="                                                    " />' +
+					'<label value="' + distance + '" />' +
 					'<hbox>' +
-						'<button label="Save and Close" oncommand = "confirmSettingsDialogue();"/>' +		
+						'<button label="Save and Close" oncommand = "confirmSettingsDialogue();"/>' +
 						'<button label="Cancel" oncommand = "fl.xmlui.cancel();"/>' +
 					'</hbox>' +
 				'</row>' +

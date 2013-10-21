@@ -46,15 +46,25 @@ function standard( doc, atimeline, recursive, restore ){
 	var cl = atimeline.currentLayer;
 	var selFrames = atimeline.getSelectedFrames();
 	var containsFolder = __isFolderSelected( atimeline, selFrames );
+	/*  There is a bug in Flash CC - loses element's persistent data at new keyframe.
+		So, before creating the new keyframe, we create a list with element's persistent data,
+		and set the data back to elements in the newly created keyframe.
+	*/
+	var elementsDataMap = null;
+	
 	if( ! containsFolder ){
-		atimeline.convertToKeyframes(); 				// standard behaviour
+		elementsDataMap = ( Edapt.utils.getFlashVersion() >= 13 ) ? buildElementsInfoMap( atimeline, selFrames ) : null; // CC bug
+		atimeline.convertToKeyframes();
+		if( elementsDataMap ){ setElementsInfoFromMap( atimeline, selFrames, elementsDataMap ); } // CC bug
 		atimeline.setSelectedFrames( selFrames, true );	// Force Flash to select the symbols on the Stage
 	}
 	else{
 		var scheme = __prepareStandard( atimeline, selFrames, recursive );
 		atimeline.setSelectedFrames( scheme, true );
+		elementsDataMap = ( Edapt.utils.getFlashVersion() >= 13 ) ? buildElementsInfoMap( atimeline, scheme ) : null; // CC bug
 		atimeline.convertToKeyframes();
-		atimeline.setSelectedFrames( scheme, true );	// Force Flash to select the symbols on the Stage
+		if( elementsDataMap ){ setElementsInfoFromMap( atimeline, scheme, elementsDataMap ); } // CC bug
+		atimeline.setSelectedFrames( scheme, true ); // Force Flash to select the symbols on the Stage
 	}
 	if( restore ){ 
 		atimeline.currentLayer = cl;
@@ -62,10 +72,17 @@ function standard( doc, atimeline, recursive, restore ){
 }
 function extreme( doc, atimeline, recursive, restore ){
 	var cl = atimeline.currentLayer;
-	var selFrames = atimeline.getSelectedFrames();		// Get all selected frames in the timeline
+	var selFrames = atimeline.getSelectedFrames(); // Get all selected frames in the timeline
 	var scheme = __prepareExtreme( atimeline, selFrames, recursive );
+	/*  There is a bug in Flash CC - loses element's persistent data at new keyframe.
+		So, before creating the new keyframe, we create a list with element's persistent data,
+		and set the data back to elements in the newly created keyframe.
+	*/
+	var elementsDataMap = null;
 	atimeline.setSelectedFrames( scheme, true );
+	elementsDataMap = ( Edapt.utils.getFlashVersion() >= 13 ) ? buildElementsInfoMap( atimeline, scheme ) : null; // CC bug
 	atimeline.convertToKeyframes();
+	if( elementsDataMap ){ setElementsInfoFromMap( atimeline, scheme, elementsDataMap ); } // CC bug
 	if( restore ){
 		atimeline.setSelectedFrames( selFrames, true );
 		atimeline.currentLayer = cl;
@@ -179,4 +196,90 @@ function __getLayerSelection( selFrames, layernum ){
 		}
 	}
 	return retval;
+}
+
+// Flash CC bug fix
+function buildElementsInfoMap( myTimeline, selFrames ){
+	var retval = {};
+	for( var l=0; l < selFrames.length; l += 3 ){ // For each layer in the selection...
+		var ln = selFrames[ l ];
+		var layer = myTimeline.layers[ ln ];
+		if( layer.layerType != "folder" ){
+			var cf = selFrames[ l+1 ];
+			retval[ln] = buildLayerElementsInfoMap( myTimeline, layer, cf );
+		}
+	}
+	return retval;
+}
+function setElementsInfoFromMap( myTimeline, selFrames, amap ){
+	for( var l=0; l < selFrames.length; l += 3 ){
+		var ln = selFrames[ l ];
+		var layer = myTimeline.layers[ ln ];
+		if( layer.layerType != "folder" ){
+			var startFrame = selFrames[ l+1 ];
+			var endFrame = selFrames[ l+2 ];
+			
+			for( var j = startFrame; j<endFrame; j++ ){
+				var theFrame = layer.frames[ j ];
+				for( var i = 0; i < theFrame.elements.length; i++ ){
+					var objectData = amap[ln][i];
+					for( prop in objectData ){
+						theFrame.elements[ i ].setPersistentData( prop, "string", objectData[ prop ] );
+					}
+				}
+			}
+		}
+	}
+}
+function buildLayerElementsInfoMap( tl, alayer, cf ){
+	var original = cf;
+	var reverseCheck = true;
+	if( cf > alayer.frames.length-1 ){ 
+		cf = alayer.frames.length-1;
+		if( cf == alayer.frames[ cf ].startFrame ){
+			return getElementsInfo( alayer.frames[ cf ] ) ;
+		}
+		reverseCheck = false;
+	}
+	var checkprev = true;
+	while( checkprev ){
+		cf = getLayerPrevKey( alayer, cf );
+		checkprev = Boolean( ( alayer.frames[ cf ].elements.length == 0) && ( cf > 0 ) );
+	}
+	if( alayer.frames[ cf ].elements.length == 0 && reverseCheck ){
+		cf = original;
+		var checknext = true;
+		while( checknext ){
+			cf = getLayerNextKey( alayer, cf );
+			checknext = Boolean( ( alayer.frames[ cf ].elements.length == 0) && ( cf < alayer.frames.length-1 ) );
+		}
+	}
+	if( alayer.frames[ cf ].elements.length > 0 ){
+		return getElementsInfo( alayer.frames[ cf ] ) ;
+	}else{
+		return [];
+	}	
+}
+function getElementsInfo( aframe ){
+	retval = [];
+	var datanames = Edapt.settings.metadataNames;
+	for( var i=0; i<aframe.elements.length; i++ ){
+		var objectData = {};
+		for( var prop in datanames ){
+			var val = datanames[ prop ];
+			if( aframe.elements[i].hasPersistentData( val ) ){
+				objectData[ val ] = aframe.elements[i].getPersistentData( val );
+			}
+		}
+		retval.push( objectData );
+	}
+	return retval;
+}
+function getLayerNextKey( alayer, sf ){
+	var fr = alayer.frames[ sf ];
+	return fr.startFrame + fr.duration;
+}
+function getLayerPrevKey( alayer, sf ){
+	var fi = ( (sf - 1) < 0 ) ? 0 : sf - 1;
+	return alayer.frames[ fi ].startFrame;
 }

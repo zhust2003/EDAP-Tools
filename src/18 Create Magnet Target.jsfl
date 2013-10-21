@@ -57,7 +57,7 @@ function insertSymbol( commandname, atype ){
 		8. Display messages.
 	*/
 	
-	// 1
+	// 1. Define some variables, depening of what we want to create.
 	var myTypeString, specialLayerName, myType, myItemName, layerMessage;
 	if( atype == 1 ){
 		myTypeString = "CenterMarker";
@@ -74,7 +74,7 @@ function insertSymbol( commandname, atype ){
 		layerMessage = "magnet targets"
 	}
 	
-	// 2
+	// 2. Check whether we need to create the symbol.
 	var theSymbols = [];
 	for( var i=0; i<items.length; i++ ){
 		var item = items[i];
@@ -87,7 +87,7 @@ function insertSymbol( commandname, atype ){
 	var symbolExists = ( theSymbols.length > 0 );
 
 	
-	// 3
+	// 3. Check if there is a "special" layer. If it does not exist - create it.
 	var affectedLayers = myTimeline.layers;
 	var layerExists = false;
 	for( var i=0; i<affectedLayers.length; i++ ){
@@ -106,26 +106,28 @@ function insertSymbol( commandname, atype ){
 		specialLayerNumber = Edapt.utils.indexOf( myTimeline.layers, xlayer );
 	}
 	
-	// 4
+	// 4. Create the necessary symbol.
 	var originalStroke = currentDoc.getCustomStroke( "toolbar" );
 	if( ! symbolExists ){
 		var tempDoc = fl.createDocument( "timeline" );
 		var tempLib = tempDoc.library;
 		var myStroke = createStroke();
 		tempDoc.setCustomStroke( myStroke );
-		// Create needed symbol
 		var success = tempLib.addNewItem( "graphic", myItemName );
 		if( success ){
 			var mySymbol = tempLib.getSelectedItems()[0];
 			mySymbol.addData( "type", "string", myTypeString );
 			mySymbol.addData( "signature", "string", "EDAPT" );
+			myTimeline.currentLayer = specialLayerNumber;
+			var layerMap = Edapt.utils.createObjectStateMap( myTimeline.layers, [ "locked" ] );	// bugfix DRP-J5P-DM8L
+			processLayers( myTimeline, lockLayers, [0] );										// bugfix DRP-J5P-DM8L
 			tempLib.editItem();
 			drawShape( tempDoc, myType );
 			createInfo( tempDoc );
 			tempDoc.exitEditMode();
 			theSymbols.push( mySymbol );
 		}
-
+		
 		// A workaround for stroke "noStroke" Flash bug.
 		if( originalStroke.style == "noStroke" ){
 			currentDoc.swapStrokeAndFill();
@@ -137,9 +139,11 @@ function insertSymbol( commandname, atype ){
 		else{
 			currentDoc.setCustomStroke( originalStroke );
 		}
+		
 	}
+	
 
-	// 5
+	// 5. Copy the symbol, so we can paste it in the centre of the visible part of the stage / regPoint of the symbol /.
 	if( symbolExists ){
 		copySymbols( currentDoc, theSymbols, true );
 	}
@@ -151,10 +155,10 @@ function insertSymbol( commandname, atype ){
 		fl.closeDocument( tempDoc, false ); 
 	}
 
-	// 6
+	// 6. Set the "special" layer as a current.
 	myTimeline.currentLayer = specialLayerNumber;
 
-	// 7
+	// 7. Paste the symbol in the centre of the visible area / regPoint of the symbol /.
 	if( myTimeline.layers[ myTimeline.currentLayer ].locked == false ){
 		currentDoc.clipPaste();
 		if( atype == 1 ){
@@ -174,8 +178,10 @@ function insertSymbol( commandname, atype ){
 	else{
 		Edapt.utils.displayMessage( commandname + " : The '" + specialLayerName + "' layer is locked.", 2 );	
 	}
-
-	// 8
+	if( layerMap ){
+		Edapt.utils.restoreObjectStateFromMap( myTimeline.layers, layerMap );				// bugfix DRP-J5P-DM8L
+	}
+	// 8. Display messages.
 	if( Edapt.settings.createMagnetTarget.showAlert == true ){
 		var message = "A layer called &quot;" + specialLayerName + "&quot; was created for convenience." + "\n" +
 		"It is recommended to place all needed instances of" + "\n" +
@@ -183,6 +189,20 @@ function insertSymbol( commandname, atype ){
 		if( ! layerExists ){
 			Edapt.utils.displayOptionalMessageBox( commandname,  message, "createMagnetTarget" );
 		}
+	}
+}
+function processLayers( timeline, func ){
+	var args = [];
+	for( var i=2; i<arguments.length; i++ ){
+		args.push( arguments[ i ] );
+	}
+	for( var j=0; j<timeline.layers.length; j++ ){
+		func.apply( this, [ timeline.layers[j], j, timeline ].concat( args ) )
+	}
+}
+function lockLayers( alayer, aindex, atimeline, skipped ){
+	if( ! Edapt.utils.include( skipped, aindex )){
+		alayer.locked = true;
 	}
 }
 function getItemByData( library, atype ){
@@ -223,25 +243,20 @@ function createSpecialLayer( doc, atype ){
 	return xLayer;	
 }
 function copySymbols( theDocument, theSymbols, isCurrent ){
+	// There was a bug in this function - HWY-57Z-94U5 from 2013 Oct 04
 	var timeline = theDocument.getTimeline();
 	if( isCurrent ){
-		var layerMap = Edapt.utils.createObjectStateMap( timeline.layers, [ "locked" ] );
 		var n = timeline.addNewLayer();
 		timeline.setSelectedLayers( n, true );
-		theDocument.getTimeline().currentLayer = n; 
+		timeline.currentLayer = n; 
 	}
 	for( var i=0; i<theSymbols.length; i++ ){
 		var so = theSymbols[i];
 		theDocument.library.addItemToDocument({x:0, y:0}, so.name );
 	}
-	if( isCurrent ){
-		timeline.setLayerProperty( "locked", true, "others" );
-	}
-	theDocument.selectAll( true );
 	theDocument.clipCut();
 	if( isCurrent ){
 		timeline.deleteLayer( n );
-		Edapt.utils.restoreObjectStateFromMap( timeline.layers, layerMap );
 	}
 }
 
@@ -310,17 +325,11 @@ function createSquare( theDocument, acenter, radius ){
 	
 	var data = createPolygon( 4, {x:0, y:0}, 6 );
 	var path = polygonToPath( data );
-	
 	path.makeShape();
 	
 	theDocument.addNewLine( { x:lx, y:-radius/4 + ly }, { x:lx, y:radius/4 + ly } );
 	theDocument.addNewLine( { x:-radius/4+lx, y:ly }, { x:radius/4+lx, y:ly } );
 
-	theDocument.selectAll();
-	if( isGroup( theDocument ) ){
-		theDocument.unGroup();
-	}
-	
 	theDocument.selectAll();
 	theDocument.setFillColor( null );
 	theDocument.setStrokeColor( "#00000001" );

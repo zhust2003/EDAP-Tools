@@ -46,10 +46,14 @@ function Utils() {
 			this.serialize( Edapt.settings, fpath );
 		}
 		Edapt.settings.version = this.getProductVersion();
+		if( Edapt.settings.runFirstTime ){
+			Edapt.utils.showWelcomeDialogue();
+		}
 	};
 	this.createSettings				= function( context ){
 		context.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
 		context.bgColor = "0x156FC3"; // web-site accent colour
+		context.runFirstTime = true; // use for welcome/update dialogue
 		
 		// Find and Replace
 		context.FindAndReplace = new Object();
@@ -118,6 +122,8 @@ function Utils() {
 		context.smartMagnetJoint.distanceThreshold = 50;
 		context.smartMagnetJoint.depthLevel = 2;
 
+		context.metadataNames = { SMR:"rigData", MT:"MT", SGC:"SGC" };
+		
 		// SMR panel
 		context.smartMagnetRig = new Object();
 		context.smartMagnetRig.snapThreshold = 4;
@@ -231,7 +237,7 @@ function Utils() {
 	};
 	this.getData					= function( element, atype ){
 		if( this.isElementSymbol( element ) ){
-			var dataname = { SMR:"rigData", MT:"MT", SGC:"SGC" };
+			var dataname = Edapt.settings.metadataNames;
 			if( element.hasPersistentData( dataname[atype] ) ){
 				var data = element.getPersistentData( dataname[atype] );
 				if( data != 0 ){
@@ -246,7 +252,7 @@ function Utils() {
 	};
 	this.setData					= function( element, atype, dataObj ){
 		if( this.isElementSymbol( element ) ){
-			var dataname = { SMR:"rigData", MT:"MT", SGC:"SGC" };
+			var dataname = Edapt.settings.metadataNames;
 			element.removePersistentData( dataname[atype] );
 			element.setPersistentData( dataname[atype], "string", this.JSON.stringify( dataObj ) );
 			return true;
@@ -578,9 +584,9 @@ function Utils() {
 		}
 	};
 	this.getFlashVersion			= function(){
-		astring = fl.version;
-		s1 = astring.split( " " )[ 1 ];
-		return parseInt( s1.split( "," )[0] );
+		ver = fl.version;
+		s1 = ver.split( " " )[ 1 ];
+		return parseFloat( s1.split( "," )[0] );
 	};
 	this.getProductVersion			= function(){
 		var fpath = fl.configURI + "Tools/EDAPTversion.txt";
@@ -731,7 +737,7 @@ function Utils() {
 		};
 	}();
 	
-	// SETTINGS GUI
+	// MANAGE COMMANDS
 	this.loadCommandStates			= function(){
 		var bstates = [];
 		for( var i=0; i< Edapt.settings.commands.settings.length; i++ ){
@@ -915,6 +921,8 @@ function Utils() {
 			fl.xmlui.set( Edapt.settings.commands.settings[cnt].id, astate );
 		}
 	};
+
+	// VIEW SHORTCUTS
 	this.viewShortcutsMap			= function(){
 		var ver = Edapt.settings.version;
 		var xmlPanel = 
@@ -926,6 +934,28 @@ function Utils() {
 				'<spacer></spacer>' +
 			'</vbox>' +
 		'</dialog>';
-		var settings = this.displayPanel( "EDAPTShortcutsMap", xmlPanel );
+		this.displayPanel( "EDAPTShortcutsMap", xmlPanel );
 	};
+	
+	// WELCOME SCREEN
+	this.showWelcomeDialogue = function(){
+		var ver = this.getProductVersion();
+		var msg = 
+		'Welcome to Electric Dog Flash Animation Power Tools!' + "\n" + "\n" +
+		'For instant keyboard access to the Commands activate EDAPT Shortcuts (or assign your own)' + "\n" +
+		'- Windows: Edit > Keyboard Shortcuts... Current Set drop-down menu > EDAPT Shortcuts' + "\n" +
+		'- Mac: Flash > Keyboard Shortcuts... Current Set drop-down menu > EDAPT Shortcuts' + "\n" + "\n" +
+		
+		'All commands are under the Commands menu.' + "\n" +
+		'To start "Smart Magnet Rig" panel, choose Window > Other Panels > Smart Magnet Rig.' + "\n" + "\n" +
+		
+		'For more information visit "http://flash-powertools.com/support/".';
+		
+		fl.trace( msg );
+		Edapt.settings.runFirstTime = false;
+		var fpath = fl.configURI + "Javascript/EDAPT." + ver + "/settings.txt";
+		if ( FLfile.exists( fpath ) ){
+			this.serialize( Edapt.settings, fpath );
+		}
+	}
 }

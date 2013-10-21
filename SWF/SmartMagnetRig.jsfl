@@ -1,6 +1,82 @@
+/*
+Electric Dog Flash Animation Power Tools
+Copyright (C) 2011  Vladin M. Mitov
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see http://www.gnu.org/licenses/.
+*/
+
 fl.showIdleMessage( false );
 var LMU = 0;
 var LKU = 0;
+var needToUpdate = false;
+
+
+var ver = Edapt.utils.getFlashVersion();
+if( ver >= 12 ){ // Flash CS6, Flash CC
+	setSelectionChanged = function(){
+		needToUpdate = true;
+	}
+	checkForUpdates = function( id ){
+		var doc = fl.getDocumentDOM();
+		if( ! doc ){ return ''; }
+		if( needToUpdate ){
+			needToUpdate = false;
+			return getStageInfo( id );
+		}
+		return '';
+	}
+	fl.addEventListener( "selectionChanged",setSelectionChanged );
+	fl.addEventListener( "documentClosed",	setSelectionChanged );
+	fl.addEventListener( "documentChanged",	setSelectionChanged );
+	fl.addEventListener( "layerChanged",	setSelectionChanged );
+	fl.addEventListener( "timelineChanged",	setSelectionChanged );
+	fl.addEventListener( "frameChanged",	setSelectionChanged );
+}
+else{ // Before Flash CC
+	checkForUpdates				= function( id ){
+		var doc = fl.getDocumentDOM();
+		if( ! doc ){ return ''; }
+		var myMouseUp = Edapt.lastMouseUp()[3];
+		var myKeyUp = Edapt.lastKeyUp();
+		if( ! LMU ){
+			LMU = myMouseUp;
+			return getStageInfo( id );
+		}
+		else{
+			if( myMouseUp != LMU ){
+				LMU = myMouseUp;
+				return getStageInfo( id );
+			}
+		}
+		if( ! LKU ){
+			if( myKeyUp[0] == 24 || myKeyUp[0] == 126 ){
+				LKU = myKeyUp[2];
+				return getStageInfo( id );
+			}
+		}
+		else{
+			if( myKeyUp[2] != LKU ){
+				if( myKeyUp[0] == 24 || myKeyUp[0] == 126 ){
+					LKU = myKeyUp[2];
+					return getStageInfo( id );
+				}
+			}
+		}
+		return '';
+	}
+}
+
 
 // PANEL
 newRig						= function(){
@@ -144,37 +220,6 @@ retreiveRigsFromDocument	= function(){
 			return Edapt.utils.JSON.stringify( out );
 		}
 		return '';
-	}
-	return '';
-}
-checkForUpdates				= function( id ){
-	var doc = fl.getDocumentDOM();
-	if( ! doc ){ return ''; }
-	var myMouseUp = Edapt.lastMouseUp()[3];
-	var myKeyUp = Edapt.lastKeyUp();
-	if( ! LMU ){
-		LMU = myMouseUp;
-		return getStageInfo( id );
-	}
-	else{
-		if( myMouseUp != LMU ){
-			LMU = myMouseUp;
-			return getStageInfo( id );
-		}
-	}
-	if( ! LKU ){
-		if( myKeyUp[0] == 24 || myKeyUp[0] == 126 ){
-			LKU = myKeyUp[2];
-			return getStageInfo( id );
-		}
-	}
-	else{
-		if( myKeyUp[2] != LKU ){
-			if( myKeyUp[0] == 24 || myKeyUp[0] == 126 ){
-				LKU = myKeyUp[2];
-				return getStageInfo( id );
-			}
-		}
 	}
 	return '';
 }
@@ -332,7 +377,7 @@ link						= function( doc, element, rigDataObject ){
 			var msg = "No Magnet Target found within the "+ Edapt.settings.smartMagnetRig.snapThreshold +"px radius.\n"+
 			"Parent Symbol must contain a Magnet Target (MT) object.\n"+
 			"MT center must overlap with the Registration Point of currently selected Symbol Instance."
-			var settings = Edapt.utils.displayDialogue( "Set Rig information", msg, "accept", Edapt.utils.getDialogueLink( "smartMagnetRig", "A" ) );
+			var settings = Edapt.utils.displayDialogue( "Set Rig information", msg, "accept" );
 			return;
 		}	
 	}
