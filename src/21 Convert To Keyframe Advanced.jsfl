@@ -60,11 +60,13 @@ function standard( doc, atimeline, recursive, restore ){
 	}
 	else{
 		var scheme = __prepareStandard( atimeline, selFrames, recursive );
-		atimeline.setSelectedFrames( scheme, true );
-		elementsDataMap = ( Edapt.utils.getFlashVersion() >= 13 ) ? buildElementsInfoMap( atimeline, scheme ) : null; // CC bug
-		atimeline.convertToKeyframes();
-		if( elementsDataMap ){ setElementsInfoFromMap( atimeline, scheme, elementsDataMap ); } // CC bug
-		atimeline.setSelectedFrames( scheme, true ); // Force Flash to select the symbols on the Stage
+		if( scheme.length > 0 ){
+			atimeline.setSelectedFrames( scheme, true );
+			elementsDataMap = ( Edapt.utils.getFlashVersion() >= 13 ) ? buildElementsInfoMap( atimeline, scheme ) : null; // CC bug
+			atimeline.convertToKeyframes();
+			if( elementsDataMap ){ setElementsInfoFromMap( atimeline, scheme, elementsDataMap ); } // CC bug
+			atimeline.setSelectedFrames( scheme, true ); // Force Flash to select the symbols on the Stage
+		}
 	}
 	if( restore ){ 
 		atimeline.currentLayer = cl;
