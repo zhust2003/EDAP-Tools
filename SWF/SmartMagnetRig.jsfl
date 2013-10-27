@@ -411,10 +411,9 @@ unLink						= function( doc, element, dataObj ){
 	if( inf.rig == dataObj.rig && inf.id == dataObj.id ){
 		var ok1 = Edapt.utils.removeData( element, "SMR" );
 		var ok2 = removeMagnetTargetInfo();
-		if( ok && ok2 ){
+		if( ok1 && ok2 ){
 			doc.moveSelectionBy( { x:1, y:1 } );	//02 June, 2013 
 			doc.moveSelectionBy( { x:-1, y:-1 } );	//02 June, 2013 
-			fl.trace("moveSelectionBy");
 			var tail = "";
 			if( inf ){
 				tail += "\n\n\Rig: " + inf.rig + "\n";
