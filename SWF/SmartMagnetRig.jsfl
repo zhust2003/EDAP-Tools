@@ -1,6 +1,6 @@
 /*
 Electric Dog Flash Animation Power Tools
-Copyright (C) 2011  Vladin M. Mitov
+Copyright (C) 2011-2013  Vladin M. Mitov
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ var needToUpdate = false;
 
 
 var ver = Edapt.utils.getFlashVersion();
-if( ver >= 12 ){ // Flash CS6, Flash CC
+if( ver >= 12 ){ // Flash CS6 and above
 	setSelectionChanged = function(){
 		needToUpdate = true;
 	}
@@ -43,7 +43,7 @@ if( ver >= 12 ){ // Flash CS6, Flash CC
 	fl.addEventListener( "timelineChanged",	setSelectionChanged );
 	fl.addEventListener( "frameChanged",	setSelectionChanged );
 }
-else{ // Before Flash CC
+else{ // Before Flash CS6
 	checkForUpdates				= function( id ){
 		var doc = fl.getDocumentDOM();
 		if( ! doc ){ return ''; }
@@ -199,6 +199,7 @@ importRig					= function(){
 	if( path ){
 		var string = FLfile.read( path );
 		if( Edapt.utils.JSON.parse( string ) ){
+			forceUpdate();
 			return string;
 		}
 		return 'corrupted';
@@ -217,6 +218,7 @@ retreiveRigsFromDocument	= function(){
 					out.push( inf );
 				}
 			}
+			forceUpdate();
 			return Edapt.utils.JSON.stringify( out );
 		}
 		return '';
@@ -271,6 +273,7 @@ removeSelectedNodes 		= function(){
 				}
 				doc.selection = sel; //02 June, 2013 
 				Edapt.utils.displayDialogue( "Remove Links", cnt + " link(s) were removed.", "accept" );
+				forceUpdate();
 			}
 		}
 		else{
@@ -316,9 +319,13 @@ setRigInfo					= function( infoString ){
 		}
 		link( doc, element, rigDataObj );
 	}
+	forceUpdate();
 }
 
 // HELPER FUNCTIONS
+forceUpdate					= function(){
+	needToUpdate = true;
+}
 link						= function( doc, element, rigDataObject ){
 	var myTimeline = doc.getTimeline();
 	var myInfObj = Edapt.utils.getData( element, "SMR" );

@@ -941,7 +941,7 @@ function Utils() {
 	this.showWelcomeDialogue = function(){
 		var ver = this.getProductVersion();
 		var msg = 
-		'Welcome to Electric Dog Flash Animation Power Tools!' + "\n" + "\n" +
+		'Welcome to Electric Dog Flash Animation Power Tools - ' + ver + "!\n" + "\n" +
 		'For instant keyboard access to the Commands activate EDAPT Shortcuts (or assign your own)' + "\n" +
 		'- Windows: Edit > Keyboard Shortcuts... Current Set drop-down menu > EDAPT Shortcuts' + "\n" +
 		'- Mac: Flash > Keyboard Shortcuts... Current Set drop-down menu > EDAPT Shortcuts' + "\n" + "\n" +
