@@ -15,7 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see http://www.gnu.org/licenses/.
   
- version: 2.0.3
+ version: 3.0.0
  */
 
 try {
@@ -28,8 +28,7 @@ function runScript( commandname ){
     if( selection.length == 0 ){
         Edapt.utils.displayMessage( commandname + ": " + "No selection", 1 );
         return;
-    }
-    else if( selection.length > 1 ){
+    }else if( selection.length > 1 ){
         Edapt.utils.displayMessage( commandname + ": " + "Please, select  single symbol on the stage.", 1 );
         return;
     }
@@ -42,13 +41,14 @@ function runScript( commandname ){
     var transPoint = fl.getDocumentDOM().getTransformationPoint();
     var movements = calculateMovements( transPoint, mtr );
     fl.getDocumentDOM().enterEditMode( "inPlace" );
-    var innerTimeline = fl.getDocumentDOM().getTimeline();                      // Store a reference to the symbol's timeline
+    var innerTimeline = fl.getDocumentDOM().getTimeline();										// Store a reference to the symbol's timeline
     var innerLayers = innerTimeline.layers;
-    var layerMap = Edapt.utils.createObjectStateMap( innerLayers, [ "locked" ] ); // Store a layer "locking" map
-    for( var i = 0; i < innerLayers.length; i ++ ){
-        innerTimeline.setLayerProperty( "locked", false, "all" );				// Unlock all layers
+    var layerMap = Edapt.utils.createObjectStateMap( innerLayers, [ "locked", "visible" ] );	// Store a layer "locking" map
+	innerTimeline.setLayerProperty( "visible", true, "all" );									// Show all layers
+	for( var i = 0; i < innerLayers.length; i ++ ){
+        innerTimeline.setLayerProperty( "locked", false, "all" );								// Unlock all layers
         innerTimeline.setSelectedLayers( i, true );
-        setMultipleLayerProperty( "locked", true, innerTimeline, [i] );			// Lock all other layers( skipping folders )
+        setMultipleLayerProperty( "locked", true, innerTimeline, [i] );							// Lock all other layers( skipping folders )
         var frameArray = innerLayers[i].frames;
         var n = frameArray.length;
         for ( var j = 0; j < n; j ++ ) {
@@ -62,11 +62,11 @@ function runScript( commandname ){
             }
         }
     }
-    Edapt.utils.restoreObjectStateFromMap( innerLayers, layerMap );             // Restore layer states, using the previously created map.
+    Edapt.utils.restoreObjectStateFromMap( innerLayers, layerMap );								// Restore layer states, using the previously created map.
     fl.getDocumentDOM().exitEditMode();
     fl.getDocumentDOM().moveSelectionBy( movements.symbol );
     fl.getDocumentDOM().setTransformationPoint( {x:0, y:0} );
-    fl.getDocumentDOM().selection = selection;                                  // Restore selection.
+    fl.getDocumentDOM().selection = selection;													// Restore selection.
 }
 function setMultipleLayerProperty( prop, state, tml, exclude ){
     var cnt = tml.layers.length;
