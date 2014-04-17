@@ -1,21 +1,80 @@
 /*
-Electric Dog Flash Animation Power Tools
-Copyright (C) 2013  Vladin M. Mitov
+	Electric Dog Flash Animation Power Tools
+	Copyright (C) 2013  Vladin M. Mitov
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see http://www.gnu.org/licenses/.
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see http://www.gnu.org/licenses/.
+
+	version: 2.5.0
 */
-
+ Edapt.drawing = {
+    "ScreenMarker": function( x, y, delay ){
+        if( !x && !y ){ x = y = 0; }
+        this.delay = delay;
+        this.doc = 	fl.getDocumentDOM();
+        this.center = { "x":x, "y":y };
+        this.scale = 1 / this.doc.zoomFactor;
+        this.setLocation = function( x, y ){
+            this.center.x = x;
+            this.center.y = y;
+            this.scale = 1 / this.doc.zoomFactor;
+        };
+        this.draw = function( w, h ){
+            fl.drawingLayer.beginFrame();
+            fl.drawingLayer.setColor( 0xff0000 );
+            var startX = this.center.x - ( this.scale * w );
+            this.__fill__rect( startX, this.center.y - this.scale * h, startX + this.scale * w * 2, this.center.y + this.scale * h );
+            fl.drawingLayer.endFrame();
+            if( this.delay ){
+                this.__sleep( this.delay );
+            }
+            this.end();
+        };
+        this.end = function(){
+            fl.drawingLayer.beginFrame();  // Clear the drawing
+            fl.drawingLayer.endDraw();
+        };
+        this.__sleep = function( milliseconds ) {
+            var start = new Date().getTime();
+            for ( var i = 0; i < 1e7; i++) {
+                if ((new Date().getTime() - start) > milliseconds ){
+                    break;
+                }
+            }
+        };
+        this.__draw__polygon = function(){};
+        this.__fill__rect = function( x1, y1, x2, y2 ){
+            var n, start, end;
+            if( Math.abs( x1 - x2 ) > Math.abs( y1 - y2 ) ){
+                // X is bigger than y, so iterate over y
+                start = Math.min( y1, y2 );
+                end = Math.max( y1, y2 );
+                for(n = start; n < end; n += this.scale){
+                    fl.drawingLayer.moveTo(x1, n);
+                    fl.drawingLayer.lineTo(x2, n);
+                }
+            }else{
+                // Y is bigger than X, so iterate over X
+                start = Math.min(x1, x2);
+                end = Math.max(x1, x2);
+                for( n = start; n < end; n += this.scale ){
+                    fl.drawingLayer.moveTo(n, y1);
+                    fl.drawingLayer.lineTo(n, y2);
+                }
+            }
+        };
+    }
+};
 Edapt.utils = new Utils();
 Edapt.utils.initialize();
 
@@ -51,9 +110,10 @@ function Utils() {
 		}
 	};
 	this.createSettings				= function( context ){
-		context.traceLevel = 1; // 0 = none, 1 = errors only, 2 = all
-		context.bgColor = "0x156FC3"; // web-site accent colour
-		context.runFirstTime = true; // use for welcome/update dialogue
+		context.traceLevel = 1;			// 0 = none, 1 = errors only, 2 = all
+		context.bgColor = "0x156FC3";	// Web-site accent colour
+		context.runFirstTime = true;	// Use for welcome/update dialogue
+		context.preserveEasing = true;	// Preserve easing when create keyframe whithin a tween span.
 		
 		// Find and Replace
 		context.FindAndReplace = new Object();
@@ -116,6 +176,8 @@ function Utils() {
 		context.ConvertToKeyframes = new Object();
 		context.ConvertToKeyframes.recursive = true;
 		context.ConvertToKeyframes.restore = false;
+		context.ConvertToKeyframes.showAlert = true;
+		
 		
 		//Smart Magnet Joint
 		context.smartMagnetJoint = new Object();
@@ -129,10 +191,7 @@ function Utils() {
 		context.smartMagnetRig.snapThreshold = 4;
 		context.smartMagnetRig.folderPath = "";
 		context.smartMagnetRig.help = new Object();
-		context.smartMagnetRig.help.A = {show:true, value:"http://flash-powertools.com/support/#smr"};
-		context.smartMagnetRig.help.B = {show:true, value:"http://flash-powertools.com/support/B"};
-		context.smartMagnetRig.help.C = {show:true, value:"http://flash-powertools.com/support/C"};
-		context.smartMagnetRig.help.D = {show:true, value:"http://flash-powertools.com/support/D"};
+		context.smartMagnetRig.help.A = {show:true, value:"http://flash-powertools.com/smart-magnet-rigs/"};
 		
 		// SGC panel
 		context.smartGraphicControl = new Object();

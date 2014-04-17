@@ -15,7 +15,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see http://www.gnu.org/licenses/.
   
- version: 2.0.3
+ version: 2.5.0
  */
 try {
     runScript( "EDAPT Settings" );
@@ -60,6 +60,7 @@ function runScript( commandname ){
 
         Edapt.settings.ConvertToKeyframes.recursive = Boolean( settings.recursiveFolders === "true");
         Edapt.settings.ConvertToKeyframes.restore = Boolean( settings.restoreSelection === "true");
+		
 
         Edapt.settings.traceLevel = parseInt( settings.traceLevel );
         if( settings.resetDialogs == "true" ){
@@ -71,6 +72,8 @@ function runScript( commandname ){
                 }
             }
         }
+		
+		Edapt.settings.preserveEasing = Boolean( settings.preserveEasing === "true");
         // Save settings
         Edapt.utils.serialize( Edapt.settings, fpath );
     }
@@ -234,12 +237,16 @@ function createSettingsPanel( level1, level2, level3 ){
         '</rows>' +
         '</grid>' +
 
+		
+		
+		
         // ------------------------------------------
         spacer +
         '<separator></separator>' +
         spacer +
         spacer +
-
+		// PRESERVE EASING---------------------------
+		'<checkbox id="preserveEasing" label="Preserve Easing while Splitting Classic Tweens" checked = "' + Edapt.settings.preserveEasing + '" />' +
         // RESET DIALOGUES---------------------------
         '<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
 
