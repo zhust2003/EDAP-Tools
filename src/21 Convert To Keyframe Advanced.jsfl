@@ -18,7 +18,7 @@
  version: 2.5.0
  */
 try {
-    runScript( "Convert To Keyframes" );
+    runScript( "Convert To Keyframes Advanced" );
 }catch( error ){
     fl.trace( error );
 }
@@ -54,17 +54,17 @@ function standard( doc, atimeline, recursive, restore, preserveEasing, commandna
      So, before creating the new keyframe, we create a list with element's persistent data,
      and set the data back to elements in the newly created keyframe.
      */
-    var badSelection = false;
+    
 	var elementsDataMap = null;
     if( ! containsFolder ){
         elementsDataMap = ( Edapt.utils.getFlashVersion() >= 13 ) ? buildElementsInfoMap( atimeline, selFrames ) : null; // CC bug
 		if( ! preserveEasing ){
 			atimeline.convertToKeyframes();
 		}else{
-			badSelection = convertToKeyframes( atimeline );
+			convertToKeyframes( atimeline );
 		}
         if( elementsDataMap ){ setElementsInfoFromMap( atimeline, selFrames, elementsDataMap ); } // CC bug
-        if( ! badSelection ) atimeline.setSelectedFrames( selFrames, true );// Force Flash to select the symbols on the Stage
+        atimeline.setSelectedFrames( selFrames, true );// Force Flash to select the symbols on the Stage
 		
     }else{
         var scheme = __prepareStandard( atimeline, selFrames, recursive );
@@ -74,10 +74,10 @@ function standard( doc, atimeline, recursive, restore, preserveEasing, commandna
 			if( ! preserveEasing ){
 				atimeline.convertToKeyframes();
 			}else{
-				badSelection = convertToKeyframes( atimeline );
+				convertToKeyframes( atimeline );
 			}
             if( elementsDataMap ){ setElementsInfoFromMap( atimeline, scheme, elementsDataMap ); } // CC bug
-            if( ! badSelection ) atimeline.setSelectedFrames( scheme, true );// Force Flash to select the symbols on the Stage
+            atimeline.setSelectedFrames( scheme, true );// Force Flash to select the symbols on the Stage
         }
     }
     if( restore ){
@@ -88,7 +88,6 @@ function extreme( doc, atimeline, recursive, restore, preserveEasing, commandnam
     var cl = atimeline.currentLayer;
     var selFrames = atimeline.getSelectedFrames(); // Get all selected frames in the timeline
     var scheme = __prepareExtreme( atimeline, selFrames, recursive );
-	var badSelection = false;
     /*  There is a bug in Flash CC - loses element's persistent data at new keyframe.
      So, before creating the new keyframe, we create a list with element's persistent data,
      and set the data back to elements in the newly created keyframe.
@@ -99,14 +98,12 @@ function extreme( doc, atimeline, recursive, restore, preserveEasing, commandnam
 	if( ! preserveEasing ){
 		atimeline.convertToKeyframes();
 	}else{
-		badSelection = convertToKeyframes( atimeline );
+		convertToKeyframes( atimeline );
 	}
     if( elementsDataMap ){ setElementsInfoFromMap( atimeline, scheme, elementsDataMap ); } // CC bug
-    if( ! badSelection ){ 
-		if( restore ){
-			atimeline.setSelectedFrames( selFrames, true );
-			atimeline.currentLayer = cl;
-		}
+	if( restore ){
+		atimeline.setSelectedFrames( selFrames, true );
+		atimeline.currentLayer = cl;
 	}
 }
 
@@ -311,15 +308,7 @@ function getElementsInfo( aframe ){
 // EASING
 function convertToKeyframes( atimeline ){
 	var selFrames = atimeline.getSelectedFrames();
-	fl.trace( selFrames );
-	var keymask = createKeyMask( atimeline, selFrames );
-	fl.trace( keymask );
-	if( keymask.length > 0 ){
-		atimeline.setSelectedFrames( keymask, false );
-		return true;
-	}
-	selFrames = atimeline.getSelectedFrames();
-	var bBox = createBoundingBox( atimeline, selFrames );
+	var selModified = modifyFrameSelection( atimeline, selFrames );
 	var keyIndices = {};
 	for( var i=0; i < selFrames.length; i+=3 ){
 		var li = selFrames[i];
@@ -340,7 +329,7 @@ function convertToKeyframes( atimeline ){
 					ease = getEaseFromFrame( myLayer.frames[ pk ] );
 				}else{
 					var tmp = getLayerPrevKey( myLayer, j );
-					if( tmp > keyIndices[ li ][ keyIndices[ li ].length - 1 ].end ){
+					if( tmp >= keyIndices[ li ][ keyIndices[ li ].length - 1 ].end ){
 						pk = tmp;
 						ease = getEaseFromFrame( myLayer.frames[ pk ] );
 					}else{
@@ -359,90 +348,98 @@ function convertToKeyframes( atimeline ){
 							xCurve.prevFrame[ p ] = getNormalized( splitted[0].getCurve() );
 							xCurve.currentFrame[ p ] = getNormalized( splitted[1].getCurve() );
 						}	
-					}	
-					keyIndices[ li ].push( { start:pk, end:j, ratio:ratio, curve:xCurve } );
+					}
+					keyIndices[ li ].push( { start:pk, end:j, ratio:ratio, curve:xCurve, isKey:Boolean( j === myLayer.frames[j].startFrame ) } );
 				}
 			}
 		}
 	}
-	atimeline.setSelectedFrames( bBox.selection, true );
+	var cnt = 0;
+	for( var p in selModified ){
+		var layerInfo = selModified[ p ];
+		atimeline.setSelectedFrames( layerInfo.newsel, Boolean( cnt === 0 ) );			// block select
+		cnt ++;
+	}
 	atimeline.convertToKeyframes();
-	atimeline.setSelectedFrames( selFrames, false );
-	atimeline.setSelectedFrames( bBox.keys, false );
-	atimeline.clearKeyframes();
+
+	var needToClear = false;
+	for( var p in selModified ){
+		var layerInfo = selModified[ p ];
+		if( ! isArraysEqual( layerInfo.sel, layerInfo.newsel ) ){
+			fl.trace( "not Equal" );
+			atimeline.setSelectedFrames( layerInfo.sel, false );		// exclude original selection
+			needToClear = true;
+			for( var j = 0; j < layerInfo.keys.length; j+=3 ){
+				var keyDef = [ layerInfo.keys[j], layerInfo.keys[j+1], layerInfo.keys[j+2] ];
+				var exclude = true;
+					for( jj = 0; jj < layerInfo.sel.length; jj+=3 ){
+						var selDef = [ layerInfo.sel[jj], layerInfo.sel[jj+1], layerInfo.sel[jj+2] ];
+						if( isArraysEqual( keyDef, selDef ) ){
+							exclude = false;
+							break;
+						}
+					}
+ 				if( exclude ){
+					fl.trace( keyDef );
+					atimeline.setSelectedFrames( keyDef, false );		// exclude pre-existing keys, not included in the original selection
+				}
+			}
+		 }
+		
+	}
+	if( needToClear ) atimeline.clearKeyframes();
+	
    	for( var l in keyIndices ){
 		var myLayer = atimeline.layers[ l ];
 		var layerInfo = keyIndices[ l ];
 		for( var j = 0; j < layerInfo.length; j++ ){
 			var myKey = layerInfo[ j ];
- 			var prevFrame = myLayer.frames[ myKey.start ];
-			var thisFrame = myLayer.frames[ myKey.end ];
-			thisFrame.hasCustomEase = true;
-			prevFrame.hasCustomEase = true;
-			thisFrame.useSingleEaseCurve = prevFrame.useSingleEaseCurve;
-			var prevInfo = myKey.curve.prevFrame;
-			var currInfo = myKey.curve.currentFrame;
-			for( var p in prevInfo ){
-				thisFrame.setCustomEase( p, myKey.curve.currentFrame[ p ] );
-				prevFrame.setCustomEase( p, myKey.curve.prevFrame[ p ] );
-			}
-		}
-	}
-}
-function createKeyMask( atimeline, selFrames ){
-	var mask = [];
-	for( var i = 0; i < selFrames.length; i+=3 ){
-		var li = selFrames[ i  ];
-		var st = selFrames[ i+1 ];
-		var en = selFrames[ i+2 ];
-		var myLayer = atimeline.layers[ li ];
-		for( var j = st; j < en; j++ ){
-			var myFrame = myLayer.frames[ j ];
-			if( myFrame ){
-				if( j === myFrame.startFrame ){
-					mask.push( li, j, j+1 );
+			if( ! myKey.isKey ){
+				var prevFrame = myLayer.frames[ myKey.start ];
+				var thisFrame = myLayer.frames[ myKey.end ];
+				thisFrame.hasCustomEase = true;
+				prevFrame.hasCustomEase = true;
+				thisFrame.useSingleEaseCurve = prevFrame.useSingleEaseCurve;
+				var prevInfo = myKey.curve.prevFrame;
+				var currInfo = myKey.curve.currentFrame;
+				for( var p in prevInfo ){
+					thisFrame.setCustomEase( p, myKey.curve.currentFrame[ p ] );
+					prevFrame.setCustomEase( p, myKey.curve.prevFrame[ p ] );
 				}
 			}
 		}
 	}
-	return mask;
 }
-function createBoundingBox( atimeline, selFrames ){
+function modifyFrameSelection( atimeline, selFrames ){
 	var map = {};
+	var retval = {};
 	for( var i=0; i < selFrames.length; i+=3 ){
-		var li = selFrames[i];
-		var st = selFrames[i+1];
-		var en = selFrames[i+2];
-		if( ! map.hasOwnProperty( li ) ){
-			map[ li ] = { left:Number.MAX_VALUE, right:- Number.MAX_VALUE };
+		var li = selFrames[ i ];
+		var st = selFrames[ i+1 ];
+		var en = selFrames[ i+2 ];
+		var myLayer = atimeline.layers[ li ];
+		if( ! retval.hasOwnProperty( li ) ){
+			retval[ li ] = { sel:[], newsel:[li, Number.MAX_VALUE, - Number.MAX_VALUE ], keys:[] };
 		}
-		var myBox = map[ li ];
-		myBox.left = Math.min( myBox.left, st );
-		myBox.right = Math.max( myBox.right, en );	
+		retval[ li ].newsel[1] = Math.min( retval[ li ].newsel[1], st );
+		retval[ li ].newsel[2] = Math.max( retval[ li ].newsel[2], en );
+		retval[ li ].sel.push( li, st, en );
 	}
-	var newSel = [];
-	var keys = [];
-	for( var b in map ){
-		var layer = parseInt( b );
-		var l = parseInt( map[b].left );
-		var r = parseInt( map[b].right);
-		newSel.push( layer, l, r );
-	}
-	for( var i=0; i < newSel.length; i+=3 ){
-		var li = newSel[i];
-		var st = newSel[i+1];
-		var en = newSel[i+2];
+	for( var p in retval ){
+		var li = parseInt( p );
+		var st = retval[ p ].newsel[1];
+		var en = retval[ p ].newsel[2];
 		var myLayer = atimeline.layers[ li ];
 		for( var j = st; j < en; j++ ){
 			var myFrame = myLayer.frames[ j ];
 			if( myFrame ){
 				if( j === myFrame.startFrame ){
-					keys.push( li, j, j+1 );
+					retval[ p ].keys.push( li, j, j+1 );
 				}
 			}
 		}
 	}	
-	return { selection:newSel, keys:keys };
+	return retval;
 }
 function getEaseFromFrame( aframe ){
 	var props = ( aframe.hasCustomEase ) ? ( aframe.useSingleEaseCurve ) ? [ "all" ] : [ "position", "rotation", "scale", "color", "filters" ] : [ "all" ];
@@ -451,7 +448,6 @@ function getEaseFromFrame( aframe ){
 		var xprop = props[ i ];
 		var ease = aframe.getCustomEase( xprop );
 		if( ease.length === 0 ){
-			fl.trace( "set default ease" );
 			ease = [	{"x":0,"y":0}, {"x":0.3333333333333333,"y":0.3333333333333333}, {"x":0.6666666666666666,"y":0.6666666666666666}, {"x":1,"y":1}	];
 		}
 		retval[ xprop ] = ease;
@@ -721,4 +717,13 @@ function getNormalized( arr ){
 	  normalised[ i ].y = map( normalised[ i ].y, my, MY, 0, 1 );
 	}
 	return normalised;
+}
+function isArraysEqual( arr1, arr2 ){
+	if( arr1.length != arr2.length ){ return false; }
+	for( var i=0; i<arr1.length; i++ ){
+		if( arr1[i] != arr2[i] ){
+			return false;
+		}
+	}
+	return true;
 }

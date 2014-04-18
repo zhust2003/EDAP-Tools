@@ -225,7 +225,7 @@ function Utils() {
 		context.commands.settings.push( { id:"comm19", name:["21 Convert To Keyframe Advanced"], state:true } );				//14
 
 		context.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );						//15
-		context.commands.settings.push( { id:"pair2",  name:["14 Record Parent Reg Point", "15 Set Selection Pivot To Parent Reg Point"], state:true } );	//16
+		context.commands.settings.push( { id:"pair2",  name:["14 Smart Transform Point CW", "15 Smart Transform Point CCW"], state:true } );	//16
 		context.commands.settings.push( { id:"pair3",  name:["18 Create Magnet Target", "19 Smart Magnet Joint"], state:true } );							//17	
 	};
 	this.isElementSymbol			= function( element ){
