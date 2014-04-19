@@ -1089,6 +1089,7 @@ Edapt.SmartTransform = {
 	},
 	jumpToNextRegPoint:				function( doc, sel, dest ){
 		var sorted = this.prepareSelectionRegPoint( sel );
+		this.stpf = Math.max( 0, Math.min( sorted.length-1, this.stpf ) );
 		if( dest == "cw" ){
 			if( this.stpf < sorted.length - 1 ){
 				this.stpf ++;
@@ -1182,6 +1183,7 @@ Edapt.SmartTransform = {
 	},
 	jumpToNextMagnetTarget:			function( doc, sel, dest ){
 		var sorted = this.prepareSelectionMagnetTarget( sel );
+		this.stpi = Math.max( 0, Math.min( sorted.length-1, this.stpi ) );
 		if( sorted.length > 0 ){
 			if( dest == "cw" ){
 				if( this.stpi < sorted.length - 1 ){
