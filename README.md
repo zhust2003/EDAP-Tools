@@ -24,8 +24,8 @@ flashConfig\
 		11 Layer Color Light.jsfl
 		12 Set Reg Point To Transform Point.jsfl
 		13 Enter Symbol At Current Frame.jsfl
-		14 Record Parent Reg Point.jsfl
-		15 Set Selection Pivot To Parent Reg Point.jsfl
+		14 Smart Transform Point CW.jsfl
+		15 Smart Transform Point CCW.jsfl
 		16 Swap Multiple Symbols.jsfl
 		17 Sync Symbols to Timeline.jsfl
 		18 Create Magnet Target.jsfl
