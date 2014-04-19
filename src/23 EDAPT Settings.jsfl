@@ -72,8 +72,6 @@ function runScript( commandname ){
                 }
             }
         }
-		
-		Edapt.settings.preserveEasing = Boolean( settings.preserveEasing === "true");
         // Save settings
         Edapt.utils.serialize( Edapt.settings, fpath );
     }
@@ -245,8 +243,6 @@ function createSettingsPanel( level1, level2, level3 ){
         '<separator></separator>' +
         spacer +
         spacer +
-		// PRESERVE EASING---------------------------
-		'<checkbox id="preserveEasing" label="Preserve Easing while Splitting Classic Tweens" checked = "' + Edapt.settings.preserveEasing + '" />' +
         // RESET DIALOGUES---------------------------
         '<checkbox id="resetDialogs" label="Reset &quot;Don&#39;t show this message again&quot; option" checked="false" />' +
 

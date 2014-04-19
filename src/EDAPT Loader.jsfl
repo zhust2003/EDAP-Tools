@@ -17,8 +17,8 @@
 
 	version: 2.5.0
 */
- Edapt.drawing = {
-    "ScreenMarker": function( x, y, delay ){
+Edapt.drawing = {
+    ScreenMarker: function( x, y, delay ){
         if( !x && !y ){ x = y = 0; }
         this.delay = delay;
         this.doc = 	fl.getDocumentDOM();
@@ -77,9 +77,6 @@
 };
 Edapt.utils = new Utils();
 Edapt.utils.initialize();
-
-
-
 function Utils() {
 	this.initialize					= function(){
 		var ver = this.getProductVersion();
@@ -92,8 +89,7 @@ function Utils() {
 				this.serialize( Edapt.settings, fpath );
 			}
 			else{
-				// reset some values
-				Edapt.settings.recordParentRegPoint.currentElement = 0; 
+				// reset some values 
 				Edapt.settings.layerColors.light.index = -1;
 				Edapt.settings.layerColors.dark.index = -1;
 			}
@@ -113,8 +109,7 @@ function Utils() {
 		context.traceLevel = 1;			// 0 = none, 1 = errors only, 2 = all
 		context.bgColor = "0x156FC3";	// Web-site accent colour
 		context.runFirstTime = true;	// Use for welcome/update dialogue
-		context.preserveEasing = true;	// Preserve easing when create keyframe whithin a tween span.
-		
+
 		// Find and Replace
 		context.FindAndReplace = new Object();
 		context.FindAndReplace.find = "";
@@ -154,14 +149,11 @@ function Utils() {
 		context.layerColors.dark.colors = this.defineDarkColors();
 		context.layerColors.dark.index = -1;
 		context.layerColors.forceOutline = true;
-		
-		// Record Parent Reg Point
-		context.recordParentRegPoint = new Object();
-		context.recordParentRegPoint.currentElement = 0;
 
-		// SetSelectionPivotToParentRegPoint
-		context.setSelectionPivotToParentRegPoint = new Object();
-		context.setSelectionPivotToParentRegPoint.showAlert = true;
+		// Smart Transform Point CW /CCW
+		context.SmartTransformPoint = new Object();
+		context.SmartTransformPoint.showAlert = true;
+		context.SmartTransformPoint.modifierUsed = false;
 
 		//CreateSnapObject
 		context.createMagnetTarget = new Object();
@@ -224,9 +216,14 @@ function Utils() {
 		context.commands.settings.push( { id:"comm18", name:["20 Smart Transform"], state:true } );								//13
 		context.commands.settings.push( { id:"comm19", name:["21 Convert To Keyframe Advanced"], state:true } );				//14
 
-		context.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );						//15
+		context.commands.settings.push( { id:"pair1",  name:["06 Next Frame In Symbol", "07 Prev Frame In Symbol" ], state:true } );			//15
 		context.commands.settings.push( { id:"pair2",  name:["14 Smart Transform Point CW", "15 Smart Transform Point CCW"], state:true } );	//16
-		context.commands.settings.push( { id:"pair3",  name:["18 Create Magnet Target", "19 Smart Magnet Joint"], state:true } );							//17	
+		context.commands.settings.push( { id:"pair3",  name:["18 Create Magnet Target", "19 Smart Magnet Joint"], state:true } );				//17	
+	};
+	this.toStage					= function( doc, apoint ){
+		if( ! doc ){ return null; }
+		var mat = doc.viewMatrix;
+		return { x:apoint.x * mat.a + apoint.y * mat.c + mat.tx, y:apoint.x * mat.b + apoint.y * mat.d + mat.ty };
 	};
 	this.isElementSymbol			= function( element ){
 		if( ! element ){ return false; }
@@ -366,6 +363,16 @@ function Utils() {
 			}
 		}
 		return retval;
+	};
+	this.getLayerPrevKey			= function( alayer, sf ){
+		if( ! alayer ) return null;
+		var fi = ( ( sf - 1 ) < 0 ) ? 0 : sf - 1;
+		return alayer.frames[ fi ].startFrame;
+	};
+	this.getLayerNextKey			= function( alayer, sf ){
+		if( ! alayer ) return null;
+		var fr = alayer.frames[ sf ];
+		return fr.startFrame + fr.duration;
 	};
 	this.filterStageElements		= function( aFunction, aTimeline, isFilter, returnFirst, excludedElements ){
 		/*
@@ -550,6 +557,15 @@ function Utils() {
 			}
 		} 
 	};
+	this.isArraysEqual				= function( arr1, arr2 ){
+		if( arr1.length != arr2.length ){ return false; }
+		for( var i=0; i<arr1.length; i++ ){
+			if( arr1[i] != arr2[i] ){
+				return false;
+			}
+		}
+		return true;
+	};
 	this.defineDarkColors			= function(){
 		return [ "#000099", "#990000", "#006600", "#333333", "#9900CC" ];
 	};
@@ -666,7 +682,6 @@ function Utils() {
 		  we clone it and remove the unnecessary data */
 		var obj = this.cloneObject( o );
 		delete obj.version;
-		obj.recordParentRegPoint.currentElement = 0;
 		var str = this.JSON.stringify( obj );
 		if( FLfile.exists( filePath ) ){
 			FLfile.remove( filePath );
@@ -1008,7 +1023,7 @@ function Utils() {
 		'All commands are under the Commands menu.' + "\n" +
 		'To start "Smart Magnet Rig" panel, choose Window > Other Panels > Smart Magnet Rig.' + "\n" + "\n" +
 		
-		'For more information visit "http://flash-powertools.com/support/".';
+		'For more information visit "http://flash-powertools.com/installation-support/".';
 		
 		fl.trace( msg );
 		Edapt.settings.runFirstTime = false;
@@ -1018,3 +1033,587 @@ function Utils() {
 		}
 	}
 }
+
+Edapt.SmartTransform = {
+	//common
+	stpf:-1,
+	stpi:-1,
+	couner:0,
+	translatePositionToParent:		function( parent, child ){
+		var newX = child.matrix.tx * parent.matrix.a + child.matrix.ty *  parent.matrix.c +  parent.matrix.tx;
+		var newY = child.matrix.ty * parent.matrix.d + child.matrix.tx *  parent.matrix.b +  parent.matrix.ty;
+		return { "x":newX, "y":newY };
+	},
+	drawMarker:						function( doc, currentObject, size, translate ){
+		var newPos;
+		if( ! translate ){
+			newPos = { "x":currentObject.element.matrix.tx, "y":currentObject.element.matrix.ty };
+		}else{
+			newPos = this.translatePositionToParent( currentObject.parent, currentObject.element );
+		}
+		doc.getTransformationPoint(); // Force Flash to apply current transformation correctly
+		doc.rotateSelection( 0 );	  // Force Flash to redraw the screen;
+		doc.setTransformationPoint( newPos );
+		var markPoint = Edapt.utils.toStage( doc, newPos );
+		var marker = new Edapt.drawing.ScreenMarker( markPoint.x, markPoint.y, 250 );
+		marker.draw( size, size );
+	},
+	sortByClockwise:				function( a, b ){
+		return b.theta - a.theta;
+	},
+	
+	// reg points
+	prepareSelectionRegPoint:		function( aSelection ){
+		var retval = [];
+		var left   = Infinity;
+		var top    = Infinity;
+		var right  = -Infinity;
+		var bottom = -Infinity;
+		var i;
+		for( i = 0; i < aSelection.length; i++ ){
+			left   = Math.min( aSelection[ i ].matrix.tx, left );
+			right  = Math.max( aSelection[ i ].matrix.tx, right );
+			top    = Math.min( aSelection[ i ].matrix.ty, top );
+			bottom = Math.max( aSelection[ i ].matrix.ty, bottom );
+		}
+		var center = { "x": left + ( right - left ) / 2, "y": top + ( bottom - top ) / 2 };
+		for( i = 0; i < aSelection.length; i++ ){
+			var element = aSelection[ i ];
+			var item = {};
+			item.element = element;
+			item.theta = Math.atan2( element.matrix.tx - center.x, element.matrix.ty - center.y );
+			retval.push( item );
+		}
+		retval.sort( this.sortByClockwise );
+		return retval;
+	},
+	jumpToNextRegPoint:				function( doc, sel, dest ){
+		var sorted = this.prepareSelectionRegPoint( sel );
+		if( dest == "cw" ){
+			if( this.stpf < sorted.length - 1 ){
+				this.stpf ++;
+			}
+			else{
+				this.stpf = 0;
+			}
+		}else if( dest == "ccw" ){
+			if( this.stpf > 0 ){
+				this.stpf --;
+			}
+			else{
+				this.stpf  = sorted.length - 1;
+			}	
+		}
+		var currentObject = sorted[ this.stpf ];
+		this.drawMarker( doc, currentObject, 14, false );
+	},
+	selectNextRegPoint:				function( doc, dest, commandname ){
+		var sel = doc.selection;
+		if( sel.length > 1 ){
+			this.jumpToNextRegPoint( doc, sel, dest );
+			this.couner ++;
+		}
+		else{
+			Edapt.utils.displayMessage( commandname + " : This command works with multiple selection only", 2 );
+		}	
+	},
+
+	// magnet targets
+	isSnapObject:					function( element, aTimeline, currentLayernum, cf, n ){
+		if( Edapt.utils.isMagnetTarget( element ) ){
+			var remove = false;
+			var layer = aTimeline.layers[ currentLayernum ];
+			if( layer.frames[ cf ].startFrame != cf ){
+				aTimeline.currentLayer = currentLayernum;
+				aTimeline.convertToKeyframes( cf );
+				remove = true;
+			}
+			var el = layer.frames[ cf ].elements[n];
+			if( remove ){
+				aTimeline.clearKeyframes( cf );
+			}
+			return el;
+		}
+		else{
+			return null;
+		}
+	},
+	getSnapObjects:					function( element ){
+		if( Edapt.utils.isElementSymbol( element ) ){
+			return Edapt.utils.filterStageElements( this.isSnapObject, element.libraryItem.timeline, false, false, [] );
+		}
+		return [];
+	},
+	prepareSelectionMagnetTarget:	function( aSelection ){
+		var retval = [];
+		var left   = Infinity;
+		var top    = Infinity;
+		var right  = -Infinity;
+		var bottom = -Infinity;
+		var i, j, snaps, element, newPos;
+		for( i = 0; i < aSelection.length; i++ ){
+			element = aSelection[ i ];
+			snaps = this.getSnapObjects( element );
+			for( j=0; j<snaps.length; j++ ){
+				newPos = this.translatePositionToParent( element, snaps[ j ] );
+				left   = Math.min( newPos.x, left );
+				right  = Math.max( newPos.x, right );
+				top    = Math.min( newPos.y, top );
+				bottom = Math.max( newPos.y, bottom );
+			}
+		}
+		var center = { "x": left + ( right - left ) / 2, "y": top + ( bottom - top ) / 2 };
+
+		for( i = 0; i < aSelection.length; i++ ){
+			element = aSelection[ i ];
+			element.libraryItem.timeline.currentFrame = element.firstFrame;
+			snaps = this.getSnapObjects( element );
+			for( j=0; j<snaps.length; j++ ){
+				newPos = this.translatePositionToParent( element, snaps[ j ] );
+				var item = {};
+				item.element = snaps[ j ];
+				item.theta = Math.atan2( newPos.x - center.x, newPos.y - center.y );
+				item.parent = element;
+				retval.push( item );
+			}
+		}
+		retval.sort( this.sortByClockwise );
+		return retval;
+	},
+	jumpToNextMagnetTarget:			function( doc, sel, dest ){
+		var sorted = this.prepareSelectionMagnetTarget( sel );
+		if( sorted.length > 0 ){
+			if( dest == "cw" ){
+				if( this.stpi < sorted.length - 1 ){
+					this.stpi ++;
+				}
+				else{
+					this.stpi = 0;
+				}	
+			}else if( dest == "ccw" ){
+				if( this.stpi > 0 ){
+					this.stpi --;
+				}
+				else{
+					this.stpi  = sorted.length - 1;
+				}	
+			}
+			var currentObject = sorted[ this.stpi ];
+			this.drawMarker( doc, currentObject, 10, true );
+		}
+	},
+	selectNextMagnetTarget:			function( doc, dest, commandname ){
+		var sel = doc.selection;
+		if( sel.length > 1 ){
+			Edapt.settings.SmartTransformPoint.modifierUsed = true;
+			Edapt.utils.serialize( Edapt.settings, fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt" );
+			this.jumpToNextMagnetTarget( doc, sel, dest );
+		}
+		else{
+			Edapt.utils.displayMessage( commandname + " : This command works with multiple selection only", 2 );
+		}
+	}
+};
+
+Edapt.TweenSplitter = {
+	map:							function( value, start1, stop1, start2, stop2) {
+		return start2 + ( stop2 - start2 ) * ( ( value - start1 ) / ( stop1 - start1 ) );
+	},
+	lerp:							function( a, b, x ){
+	  return a + x * ( b - a );
+	},
+	getNormalized:					function( arr ){
+		var normalised = [];
+		var p = arr[ 0 ];
+		var mx = Number.MAX_VALUE;
+		var my = mx;
+		var MX = -Number.MAX_VALUE;
+		var MY = MX;
+		for ( var i = 0; i < arr.length; i++ ) {
+		  p = arr[ i ];
+		  if( p.x < mx ) { mx = p.x; }
+		  if( p.y < my ) { my = p.y; }
+		  if( p.x > MX ) { MX = p.x; }
+		  if( p.y > MY ) { MY = p.y; }
+		  normalised[ i ] = p;
+		}
+		for ( var i = 0; i < arr.length; i++) {
+		  normalised[ i ].x = this.map( normalised[ i ].x, mx, MX, 0, 1 );
+		  normalised[ i ].y = this.map( normalised[ i ].y, my, MY, 0, 1 );
+		}
+		return normalised;
+	},
+	modifyFrameSelection:			function( atimeline, selFrames ){
+		var map = {};
+		var retval = {};
+		for( var i=0; i < selFrames.length; i+=3 ){
+			var li = selFrames[ i ];
+			var st = selFrames[ i+1 ];
+			var en = selFrames[ i+2 ];
+			var myLayer = atimeline.layers[ li ];
+			if( ! retval.hasOwnProperty( li ) ){
+				retval[ li ] = { sel:[], newsel:[li, Number.MAX_VALUE, - Number.MAX_VALUE ], keys:[] };
+			}
+			retval[ li ].newsel[1] = Math.min( retval[ li ].newsel[1], st );
+			retval[ li ].newsel[2] = Math.max( retval[ li ].newsel[2], en );
+			retval[ li ].sel.push( li, st, en );
+		}
+		for( var p in retval ){
+			var li = parseInt( p );
+			var st = retval[ p ].newsel[1];
+			var en = retval[ p ].newsel[2];
+			var myLayer = atimeline.layers[ li ];
+			for( var j = st; j < en; j++ ){
+				var myFrame = myLayer.frames[ j ];
+				if( myFrame ){
+					if( j === myFrame.startFrame ){
+						retval[ p ].keys.push( li, j, j+1 );
+					}
+				}
+			}
+		}	
+		return retval;
+	},
+	getEaseFromFrame:				function ( aframe ){
+		var props = ( aframe.hasCustomEase ) ? ( aframe.useSingleEaseCurve ) ? [ "all" ] : [ "position", "rotation", "scale", "color", "filters" ] : [ "all" ];
+		var retval = {};
+		for( var i = 0; i < props.length; i++ ){
+			var xprop = props[ i ];
+			var ease = aframe.getCustomEase( xprop );
+			if( ease.length === 0 ){
+				ease = [	{"x":0,"y":0}, {"x":0.3333333333333333,"y":0.3333333333333333}, {"x":0.6666666666666666,"y":0.6666666666666666}, {"x":1,"y":1}	];
+			}
+			retval[ xprop ] = ease;
+		}
+		return retval;
+	},
+	Bezier:							function( apoints ){
+		this.id = -1;
+		this.x0 = apoints[0].x; // X coordinate of the first point.
+		this.y0 = apoints[0].y; // Y coordinate of the first point.
+		this.x1 = apoints[1].x; // X coordinate of the first control point.
+		this.y1 = apoints[1].y; // Y coordinate of the first control point.
+		this.x2 = apoints[2].x; // X coordinate of the second control point.
+		this.y2 = apoints[2].y; // Y coordinate of the second control point.
+		this.x3 = apoints[3].x; // X coordinate of the end point.
+		this.y3 = apoints[3].y; // Y coordinate of the end point.
+		this.points = apoints;
+
+		this.clone						= function(){
+			return new Edapt.TweenSplitter.Bezier( [ {   x:this.x0, y:this.y0 },
+								   { x:this.x1, y:this.y1 },
+								   { x:this.x2, y:this.y2 },
+								   { x:this.x3, y:this.y3 } ] );
+		};
+		this.flip						= function(){
+			var temp = this.x0;
+			this.x0 = this.x3;
+			this.x3 = temp;
+			temp = this.y0;
+			this.y0 = this.y3;
+			this.y3 = temp;
+
+			temp = this.x1;
+			this.x1 = this.x2;
+			this.x2 = temp;
+			temp = this.y1;
+			this.y1 = this.y2;
+			this.y2 = temp;
+			this.points = [ {x:this.x0, y:this.y0}, {x:this.x1, y:this.y1}, {x:this.x2, y:this.y2},{x:this.x3, y:this.y3} ];
+		};
+		this.getPoint					= function( t ) {
+		  // Special case start and end
+		  if ( t == 0 ) {
+			return { x:this.x0, y:this.y0 };
+		  } else if ( t == 1 ) {
+			return { x:this.x3, y:this.y3 };
+		  }
+
+		  // Step one - from 4 points to 3
+		  var ix0 = Edapt.TweenSplitter.lerp( this.x0, this.x1, t );
+		  var iy0 = Edapt.TweenSplitter.lerp( this.y0, this.y1, t );
+
+		  var ix1 = Edapt.TweenSplitter.lerp( this.x1, this.x2, t );
+		  var iy1 = Edapt.TweenSplitter.lerp( this.y1, this.y2, t );
+
+		  var ix2 = Edapt.TweenSplitter.lerp( this.x2, this.x3, t );
+		  var iy2 = Edapt.TweenSplitter.lerp( this.y2, this.y3, t );
+
+		  // Step two - from 3 points to 2
+		  ix0 = Edapt.TweenSplitter.lerp( ix0, ix1, t );
+		  iy0 = Edapt.TweenSplitter.lerp( iy0, iy1, t );
+
+		  ix1 = Edapt.TweenSplitter.lerp( ix1, ix2, t );
+		  iy1 = Edapt.TweenSplitter.lerp( iy1, iy2, t );
+
+		  // Final step - last point
+		  return { x:Edapt.TweenSplitter.lerp( ix0, ix1, t ), y:Edapt.TweenSplitter.lerp( iy0, iy1, t ) };
+		};
+		this.getCurve					= function(){
+			return [{ x:this.x0, y:this.y0 },
+					{ x:this.x1, y:this.y1 },
+					{ x:this.x2, y:this.y2 },
+					{ x:this.x3, y:this.y3 } ];
+		};
+		this.split						= function( t ){
+			var a = this.clone();
+			var b = this.clone();
+			a.subdivideLeft( t );
+			b.subdivideRight( t );
+			return [ a, b ];
+		};
+		this.subdivideLeft				= function( t ){
+		  if ( t == 1 ){
+			return;
+		  }
+		  // Step one - from 4 points to 3
+		  var ix0 = Edapt.TweenSplitter.lerp( this.x0, this.x1, t );
+		  var iy0 = Edapt.TweenSplitter.lerp( this.y0, this.y1, t );
+
+		  var ix1 = Edapt.TweenSplitter.lerp( this.x1, this.x2, t );
+		  var iy1 = Edapt.TweenSplitter.lerp( this.y1, this.y2, t );
+
+		  var ix2 = Edapt.TweenSplitter.lerp( this.x2, this.x3, t );
+		  var iy2 = Edapt.TweenSplitter.lerp( this.y2, this.y3, t );
+
+		  // Collect our new x1 and y1
+		  this.x1 = ix0;
+		  this.y1 = iy0;
+
+		  // Step two - from 3 points to 2
+		  ix0 = Edapt.TweenSplitter.lerp( ix0, ix1, t );
+		  iy0 = Edapt.TweenSplitter.lerp( iy0, iy1, t );
+
+		  ix1 = Edapt.TweenSplitter.lerp(ix1, ix2, t);
+		  iy1 = Edapt.TweenSplitter.lerp(iy1, iy2, t);
+
+		  // Collect our new x2 and y2
+		  this.x2 = ix0;
+		  this.y2 = iy0;
+
+		  // Final step - last point
+		  this.x3 = Edapt.TweenSplitter.lerp( ix0, ix1, t );
+		  this.y3 = Edapt.TweenSplitter.lerp( iy0, iy1, t );
+		  this.points = [ {x:this.x0, y:this.y0}, {x:this.x1, y:this.y1}, {x:this.x2, y:this.y2},{x:this.x3, y:this.y3} ];
+		};
+		this.subdivideRight				= function( t ){
+		  this.flip();
+		  this.subdivideLeft( 1 - t );
+		  this.flip();
+		};
+		this.solvePositionFromXValue	= function( xVal ){
+			// Desired precision on the computation.
+			var epsilon = 1e-6;
+
+			// Initial estimate of t using linear interpolation.
+			var t = ( xVal - this.x0 ) / ( this.x3 - this.x0 );
+			if ( t <= 0 ){
+				return null; //0;
+			} else if ( t >= 1 ){
+				return null; //1;
+			}
+
+			// Try gradient descent to solve for t. If it works, it is very fast.
+			var tMin = 0;
+			var tMax = 1;
+			for ( var i = 0; i < 8; i++ ){
+				var value = this.getPoint( t ).x;
+				var derivative = ( this.getPoint( t + epsilon ).x - value ) / epsilon;
+				if ( Math.abs(value - xVal) < epsilon ){
+					return t;
+				} else if ( Math.abs(derivative) < epsilon){
+					break;
+				} else{
+					if ( value < xVal ){
+						tMin = t;
+					} else{
+						tMax = t;
+					}
+					t -= ( value - xVal ) / derivative;
+				}
+			}
+
+			// If the gradient descent got stuck in a local minimum, e.g. because
+			// the derivative was close to 0, use a Dichotomy refinement instead.
+			// We limit the number of interations to 8.
+			for ( var i = 0; Math.abs(value - xVal) > epsilon && i < 8; i++ ){
+				if ( value < xVal ){
+					tMin = t;
+					t = (t + tMax) / 2;
+				}else{
+					tMax = t;
+					t = (t + tMin) / 2;
+				}
+				value = this.getPoint( t ).x;
+			}
+			return t;
+		};
+		this.solveYValueFromXValue		= function( xVal ){
+		  return this.getPoint(this.solvePositionFromXValue(xVal)).y;
+		};
+	},
+	BezierSpline:					function( apoints ){
+		this.segments = [];
+		this.init						= function( apoints ){
+			var cnt = ( apoints ) ? apoints.length - 1 : -1;
+			if( apoints ){
+				for( var i = 0; i < cnt; i += 3 ){
+					var seg = new Edapt.TweenSplitter.Bezier( [ apoints[i], apoints[i+1], apoints[i+2], apoints[i+3] ] );
+					this.segments.push( seg );
+					seg.id = this.segments.length;
+				}
+			}
+
+		};
+		this.getSegment					= function( t ){
+			var segment = Math.max( 1, Math.ceil( this.segments.length * t ) );
+			return this.segments[ segment ];
+		};
+		this.solvePositionFromXValue	= function( xVal ){
+			for( var i = 0; i < this.segments.length; i ++ ){
+				var xCurve = this.segments[ i ];
+				var xValue = xCurve.solvePositionFromXValue( xVal );
+				if( xValue ){
+					return { segment:i, position:xValue };
+				}
+			}
+			return { segment:-1, position:-1 };
+		};
+		this.split						= function( t ){
+			var spoint = this.solvePositionFromXValue( t );
+			if( spoint.segment > -1 && spoint.position > -1 ){
+				var splitted = this.segments[ spoint.segment ].split( spoint.position );
+				var seg = spoint.segment;
+				var pos = spoint.position;
+				var a = new Edapt.TweenSplitter.BezierSpline();
+				var b = new Edapt.TweenSplitter.BezierSpline();
+				for( i = 0; i < seg; i++ ){
+					a.segments.push( this.segments[ i ] );
+				}
+				a.segments.push( splitted[0] );
+				b.segments.push( splitted[1] );
+				seg ++;
+				for( i = seg; i < this.segments.length; i++ ){
+					b.segments.push( this.segments[ i ] );
+				}
+				return [ a, b ];
+			}
+			return null
+		};
+		this.getCurve					= function(){
+			var retval = [];
+			for( var i = 0; i < this.segments.length; i++ ){
+				var segment = this.segments[ i ];
+				var xpoints = segment.getCurve();
+				var start = ( i === 0 ) ? 0 : 1;
+				for( var j = start; j < xpoints.length; j ++ ){
+					retval.push( xpoints[ j ] );
+				}
+			}
+			return retval;
+		};
+		this.init( apoints );
+	},
+	convertToKeyframes:				function( atimeline ){
+		var selFrames = atimeline.getSelectedFrames();
+		var selModified = this.modifyFrameSelection( atimeline, selFrames );
+		var keyIndices = {};
+		for( var i=0; i < selFrames.length; i+=3 ){
+			var li = selFrames[i];
+			var st = selFrames[i+1];
+			var en = selFrames[i+2];
+			var myLayer = atimeline.layers[ li ];
+
+			if( ! keyIndices.hasOwnProperty( li ) ){
+				keyIndices[ li ] = [];
+			}
+			for( var j = st; j < en; j++ ){
+				if( j < myLayer.frames.length ){
+					var pk, prevKey, ease;
+					var xCurve = { prevFrame:{}, currentFrame:{} };
+					var nk = Edapt.utils.getLayerNextKey( myLayer, j );
+					if ( keyIndices[ li ].length < 1 ){
+						pk = Edapt.utils.getLayerPrevKey( myLayer, j );
+						ease = this.getEaseFromFrame( myLayer.frames[ pk ] );
+					}else{
+						var tmp = Edapt.utils.getLayerPrevKey( myLayer, j );
+						if( tmp >= keyIndices[ li ][ keyIndices[ li ].length - 1 ].end ){
+							pk = tmp;
+							ease = this.getEaseFromFrame( myLayer.frames[ pk ] );
+						}else{
+							pk = keyIndices[ li ][ keyIndices[ li ].length - 1 ].end;
+							ease = keyIndices[ li ][ keyIndices[ li ].length - 1 ].curve.currentFrame;
+						}
+					}
+					prevKey = myLayer.frames[ pk ];
+					if( prevKey ){
+						var totalDuration = nk - pk;
+						var ratio = ( j - pk ) / totalDuration;
+						for( var p in ease ){
+							var originalSpline = new this.BezierSpline( ease[ p ] );
+							var splitted = originalSpline.split( ratio );
+							if( splitted ){
+								xCurve.prevFrame[ p ] = this.getNormalized( splitted[0].getCurve() );
+								xCurve.currentFrame[ p ] = this.getNormalized( splitted[1].getCurve() );
+							}	
+						}
+						keyIndices[ li ].push( { start:pk, end:j, ratio:ratio, curve:xCurve, isKey:Boolean( j === myLayer.frames[j].startFrame ) } );
+					}
+				}
+			}
+		}
+		var cnt = 0;
+		for( var p in selModified ){
+			var layerInfo = selModified[ p ];
+			atimeline.setSelectedFrames( layerInfo.newsel, Boolean( cnt === 0 ) );	// block select
+			cnt ++;
+		}
+		atimeline.convertToKeyframes();
+
+		var needToClear = false;
+		for( var p in selModified ){
+			var layerInfo = selModified[ p ];
+			if( ! Edapt.utils.isArraysEqual( layerInfo.sel, layerInfo.newsel ) ){
+				atimeline.setSelectedFrames( layerInfo.sel, false );	// exclude original selection
+				needToClear = true;
+				for( var j = 0; j < layerInfo.keys.length; j+=3 ){
+					var keyDef = [ layerInfo.keys[j], layerInfo.keys[j+1], layerInfo.keys[j+2] ];
+					var exclude = true;
+						for( jj = 0; jj < layerInfo.sel.length; jj+=3 ){
+							var selDef = [ layerInfo.sel[jj], layerInfo.sel[jj+1], layerInfo.sel[jj+2] ];
+							if( Edapt.utils.isArraysEqual( keyDef, selDef ) ){
+								exclude = false;
+								break;
+							}
+						}
+					if( exclude ){
+						atimeline.setSelectedFrames( keyDef, false );	// exclude pre-existing keys, not included in the original selection
+					}
+				}
+			 }
+			
+		}
+		if( needToClear ) atimeline.clearKeyframes();
+		
+		for( var l in keyIndices ){
+			var myLayer = atimeline.layers[ l ];
+			var layerInfo = keyIndices[ l ];
+			for( var j = 0; j < layerInfo.length; j++ ){
+				var myKey = layerInfo[ j ];
+				if( ! myKey.isKey ){
+					var prevFrame = myLayer.frames[ myKey.start ];
+					var thisFrame = myLayer.frames[ myKey.end ];
+					thisFrame.hasCustomEase = true;
+					prevFrame.hasCustomEase = true;
+					thisFrame.useSingleEaseCurve = prevFrame.useSingleEaseCurve;
+					var prevInfo = myKey.curve.prevFrame;
+					var currInfo = myKey.curve.currentFrame;
+					for( var p in prevInfo ){
+						thisFrame.setCustomEase( p, myKey.curve.currentFrame[ p ] );
+						prevFrame.setCustomEase( p, myKey.curve.prevFrame[ p ] );
+					}
+				}
+			}
+		}
+	}
+};
