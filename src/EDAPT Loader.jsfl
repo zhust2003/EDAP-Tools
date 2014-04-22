@@ -1516,6 +1516,15 @@ Edapt.TweenSplitter = {
 		};
 		this.init( apoints );
 	},
+	isATweenStop:					function ( keyDef, arr ){
+		for( var i = 0 ; i < arr.length; i++ ){
+			var obj = arr[ i ];
+			if( keyDef[1] === obj.end && obj.isKey ){
+				return true;
+			}
+		}
+		return false;
+	},
 	convertToKeyframes:				function( atimeline ){
 		var selFrames = atimeline.getSelectedFrames();
 		var selModified = this.modifyFrameSelection( atimeline, selFrames );
@@ -1583,7 +1592,7 @@ Edapt.TweenSplitter = {
 					var exclude = true;
 						for( jj = 0; jj < layerInfo.sel.length; jj+=3 ){
 							var selDef = [ layerInfo.sel[jj], layerInfo.sel[jj+1], layerInfo.sel[jj+2] ];
-							if( Edapt.utils.isArraysEqual( keyDef, selDef ) ){
+							if( Edapt.utils.isArraysEqual( keyDef, selDef ) || this.isATweenStop( keyDef, keyIndices[ p ] ) ){
 								exclude = false;
 								break;
 							}
