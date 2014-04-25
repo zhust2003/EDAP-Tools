@@ -35,9 +35,9 @@ function runScript( commandname ){
 		Edapt.SmartTransform.selectNextRegPoint( doc, "ccw", commandname );
 		if( Edapt.settings.SmartTransformPoint.showAlert == true && ! Edapt.settings.SmartTransformPoint.modifierUsed ){
 			if( Edapt.SmartTransform.couner >= 5 ){
-				var message = "For your information:\n"+
-				"Use the command with Alt modifier to cycle through Magnet Targets";
-				Edapt.utils.displayOptionalMessageBox( commandname,  message, "SmartTransformPoint" );
+				var message = "Please note that 14 Smart Transform Point CW and 15 Smart Transform Point CCW can also work in Inverse mode.\n"+
+				"This is activated with Alt+ the corresponding shortcut. Read more about these two commands online:";
+				Edapt.utils.displayDialogue( commandname, message, null, "http://flash-powertools.com/smart-transform-point-cw-ccw/", "SmartTransformPoint" );
 			}
 		} 
 	}

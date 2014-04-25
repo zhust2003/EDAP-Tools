@@ -201,7 +201,7 @@ function insertSymbol( commandname, atype ){
             "It is recommended to place all needed instances of" + "\n" +
             "the "+ layerMessage +" onto this layer.";
         if( ! layerExists ){
-            Edapt.utils.displayOptionalMessageBox( commandname,  message, "createMagnetTarget" );
+			Edapt.utils.displayDialogue( commandname, message, "accept", null, "createMagnetTarget" );
         }
     }
 }

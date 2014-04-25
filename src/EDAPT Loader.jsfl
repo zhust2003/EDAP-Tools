@@ -438,7 +438,7 @@ function Utils() {
 			return doc.selection;
 		}
 	};
-	this.displayDialogue			= function( atitle, amessage, abuttons, url ){
+	this.displayDialogue			= function( atitle, amessage, abuttons, url, apropToChange ){
 		var messageLines = "";
 		var match = new RegExp( "___", "gi" );
 		var myFlash = "<flash width='430' height='24' src='../XULControls/Edapt url.swf'/>";
@@ -455,7 +455,10 @@ function Utils() {
 				'<spacer></spacer>' + 
 				'<spacer></spacer>' + (( url ) ? myFlash : "") +
 				'<spacer></spacer>' + 
-				'<spacer></spacer>' +
+				'<spacer></spacer>' + 
+				'<spacer></spacer>' + 
+				'<spacer></spacer>' + 
+				(( apropToChange ) ? '<checkbox 	id="DontShowAgain" label="Don&#39;t show this message again" checked = "false"/>' : "" ) +
 				'<separator></separator>' +
 				'<spacer></spacer>' + 
 			'</vbox>' + 
@@ -478,48 +481,18 @@ function Utils() {
 
 		FLfile.write( xmlFile, xmlContent );
 		var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
+		if( settings.dismiss == "accept" ){
+			var fpath = fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt";
+			if( settings.DontShowAgain == "true" ){
+				Edapt.settings[ apropToChange ].showAlert = false;
+				this.serialize( Edapt.settings, fpath );	
+			}	
+		}
 		FLfile.remove( xmlFile );
 		if( needToRemove ){
 			FLfile.remove( varFile );
 		}
-		return settings;
-	};
-	this.displayOptionalMessageBox	= function( atitle, amessage, apropToChange ){
-		var xmlContent = this.createOptionalMessageBox( atitle, amessage );
-		var xmlFile = fl.configURI + "Commands/OptionalMessageBoxGUI.xml";
-		if ( FLfile.exists( xmlFile ) ) {
-			FLfile.remove( xmlFile );	
-		}
-		FLfile.write( xmlFile, xmlContent );
-		var settings = fl.getDocumentDOM().xmlPanel( xmlFile );
-		if( settings.dismiss == "accept" ){
-			var fpath = fl.configURI + "Javascript/EDAPT." + Edapt.settings.version + "/settings.txt";
-			if( settings.DontShowAgain == "true" ){
-				Edapt.settings[apropToChange].showAlert = false;
-				this.serialize( Edapt.settings, fpath );	
-			}	
-		}
-		FLfile.remove( xmlFile );	
-	};
-	this.createOptionalMessageBox	= function( atitle, amessage ){
-		var messageLines = "";
-		var myLines = amessage.split( "\n" );
-		for( var i=0; i<myLines.length; i++ ){
-		  messageLines += ( '<label value="'+myLines[i]+'"/>');
-		}
-		return '<?xml version="1.0"?>' + 
-		'<dialog buttons="accept" title="' + atitle + '    ' + Edapt.settings.version + '">' +
-			'<vbox>' + 
-				messageLines + 
-				'<spacer></spacer>' + 
-				'<spacer></spacer>' + 
-				'<spacer></spacer>' + 
-				'<checkbox 	id="DontShowAgain" label="Don&#39;t show this message again" checked = "false"/>' +
-				'<spacer></spacer>' + 
-				'<separator></separator>' + 
-				'<spacer></spacer>' + 
-			'</vbox>' + 
-		'</dialog>';
+		return settings;	
 	};
 	this.displayMessage				= function( msg, level ){
 		switch( Edapt.settings.traceLevel ){
