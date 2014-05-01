@@ -249,14 +249,14 @@ function buildLayerElementsInfoMap( tl, alayer, cf ){
     }
     var checkprev = true;
     while( checkprev ){
-        cf = getLayerPrevKey( alayer, cf );
+        cf = Edapt.utils.getLayerPrevKey( alayer, cf );
         checkprev = Boolean( ( alayer.frames[ cf ].elements.length == 0) && ( cf > 0 ) );
     }
     if( alayer.frames[ cf ].elements.length == 0 && reverseCheck ){
         cf = original;
         var checknext = true;
         while( checknext ){
-            cf = getLayerNextKey( alayer, cf );
+            cf = Edapt.utils.getLayerNextKey( alayer, cf );
 			xFrame = alayer.frames[ cf ];
 			if( xFrame ){
 				checknext = Boolean( ( xFrame.elements.length == 0) && ( cf < alayer.frames.length-1 ) );

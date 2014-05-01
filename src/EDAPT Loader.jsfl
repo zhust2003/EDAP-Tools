@@ -957,7 +957,9 @@ function Utils() {
 				this.moveCommandFiles();
 				this.serialize( Edapt.settings, fpath );	
 				if( Edapt.settings.commands.showAlert == true ){
-					this.displayOptionalMessageBox( "Restart", "Hiding or showing commands requires Flash to be restarted." + "\n" + "All command shortcuts will be functional after the next restart.", "commands" );
+					var msg = "Hiding or showing commands requires Flash to be restarted.\n" +
+					"All command shortcuts will be functional after the next restart.";
+					this.displayDialogue( "Restart", msg, "accept", null, "commands" );
 				}
 			}
 		}
