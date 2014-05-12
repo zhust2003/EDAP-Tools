@@ -204,76 +204,62 @@ function __getLayerSelection( selFrames, layernum ){
 
 // Flash CC bug fix
 function buildElementsInfoMap( myTimeline, selFrames ){
-    var retval = {};
-    for( var l=0; l < selFrames.length; l += 3 ){ // For each layer in the selection...
-        var ln = selFrames[ l ];
-        var layer = myTimeline.layers[ ln ];
-        if( layer.layerType != "folder" ){
-            var cf = selFrames[ l+1 ];
-            retval[ln] = buildLayerElementsInfoMap( myTimeline, layer, cf );
-        }
-    }
-    return retval;
+	var retval = {};
+	for( var l=0; l < selFrames.length; l += 3 ){ // For each layer in the selection...
+		var ln = selFrames[ l ];
+		var layer = myTimeline.layers[ ln ];
+		if( layer.layerType != "folder" ){
+			var cf = selFrames[ l+1 ];
+			retval[ln] = buildLayerElementsInfoMap( myTimeline, layer, cf );
+		}
+	}
+	return retval;
 }
 function setElementsInfoFromMap( myTimeline, selFrames, amap ){
-    for( var l=0; l < selFrames.length; l += 3 ){
-        var ln = selFrames[ l ];
-        var layer = myTimeline.layers[ ln ];
-        if( layer.layerType != "folder" ){
-            var startFrame = selFrames[ l+1 ];
-            var endFrame = selFrames[ l+2 ];
-            for( var j = startFrame; j<endFrame; j++ ){
-                var theFrame = layer.frames[ j ];
-                for( var i = 0; i < theFrame.elements.length; i++ ){
-                    var objectData = amap[ln][i];
-                    for( var prop in objectData ){
-                        if( objectData.hasOwnProperty(prop) ){
-                            theFrame.elements[ i ].setPersistentData( prop, "string", objectData[ prop ] );
-                        }
-                    }
-                }
-            }
-        }
-    }
+	for( var l=0; l < selFrames.length; l += 3 ){
+		var ln = selFrames[ l ];
+		var layer = myTimeline.layers[ ln ];
+		if( layer.layerType != "folder" ){
+			var startFrame = selFrames[ l+1 ];
+			var endFrame = selFrames[ l+2 ];
+			for( var j = startFrame; j<endFrame; j++ ){
+				var theFrame = layer.frames[ j ];
+				for( var i = 0; i < theFrame.elements.length; i++ ){
+					theFrame.elements[ i ].setPersistentData( "rigData", "string", amap[ln][i].rigData );
+					theFrame.elements[ i ].setPersistentData( "SGC", "string", amap[ln][i].SGC );
+				}
+			}
+		}
+	}
 }
 function buildLayerElementsInfoMap( tl, alayer, cf ){
-    var original = cf;
-    var reverseCheck = true;
-	var xFrame;
-    if( cf > alayer.frames.length-1 ){
-        cf = alayer.frames.length-1;
-        if( cf == alayer.frames[ cf ].startFrame ){
-            return getElementsInfo( alayer.frames[ cf ] ) ;
-        }
-        reverseCheck = false;
-    }
-    var checkprev = true;
-    while( checkprev ){
-        cf = Edapt.utils.getLayerPrevKey( alayer, cf );
-        checkprev = Boolean( ( alayer.frames[ cf ].elements.length == 0) && ( cf > 0 ) );
-    }
-    if( alayer.frames[ cf ].elements.length == 0 && reverseCheck ){
-        cf = original;
-        var checknext = true;
-        while( checknext ){
-            cf = Edapt.utils.getLayerNextKey( alayer, cf );
-			xFrame = alayer.frames[ cf ];
-			if( xFrame ){
-				checknext = Boolean( ( xFrame.elements.length == 0) && ( cf < alayer.frames.length-1 ) );
-			}else{
-				checknext = Boolean( ( cf < alayer.frames.length-1 ) );
-			}
-        }
-    }
-	if( xFrame ){
-		if( xFrame.elements.length > 0 ){
-			return getElementsInfo( xFrame ) ;
-		}else{
-			return [];
+	var original = cf;
+	var reverseCheck = true;
+	if( cf > alayer.frames.length-1 ){ 
+		cf = alayer.frames.length-1;
+		if( cf == alayer.frames[ cf ].startFrame ){
+			return getElementsInfo( alayer.frames[ cf ] ) ;
 		}
+		reverseCheck = false;
+	}
+	var checkprev = true;
+	while( checkprev ){
+		cf = Edapt.utils.getLayerPrevKey( alayer, cf );
+		checkprev = Boolean( ( alayer.frames[ cf ].elements.length == 0) && ( cf > 0 ) );
+	}
+	if( alayer.frames[ cf ].elements.length == 0 && reverseCheck ){
+		cf = original;
+		var checknext = true;
+		while( checknext ){
+			cf = Edapt.utils.getLayerNextKey( alayer, cf );
+			checknext = Boolean( ( alayer.frames[ cf ].elements.length == 0) && ( cf < alayer.frames.length-1 ) );
+		}
+	}
+	if( alayer.frames[ cf ].elements.length > 0 ){
+		return getElementsInfo( alayer.frames[ cf ] ) ;
 	}else{
 		return [];
-	}
+	}	
 }
 function getElementsInfo( aframe ){
     var retval = [];
