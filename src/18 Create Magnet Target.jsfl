@@ -24,6 +24,10 @@ try {
     fl.trace( error );
 }
 function runScript( command ){
+    if( fl.getDocumentDOM() == null ){
+        fl.trace( "No document open." );
+        return;
+    }
     var a = fl.tools.altIsDown;
     var s = fl.tools.shiftIsDown;
 
@@ -37,7 +41,6 @@ function runScript( command ){
     }
     if( a ){
         insertSymbol( command, 1 );  //CenterMarker
-        return;
     }
 }
 function insertSymbol( commandname, atype ){
@@ -48,17 +51,17 @@ function insertSymbol( commandname, atype ){
     var specialLayerNumber = -1;
 
     /*
-     1. Define some variables, depening of what we want to create.
+     1. Define some variables, depending of what we want to create.
      2. Check whether we need to create the symbol.
      3. Check if there is a "special" layer. If it does not exist - create it.
      4. Create the necessary symbol.
-     5. Copy the symbol, so we can paste it in the center of the visible part of the stage / regpoint of the symbol /.
+     5. Copy the symbol, so we can paste it in the centre of the visible part of the stage / reg-point of the symbol /.
      6. Set the "special" layer as a current.
-     7. Paste the symbol in the centre of the visible area / regpoint of the symbol /.
+     7. Paste the symbol in the centre of the visible area / reg-point of the symbol /.
      8. Display messages.
      */
 
-    // 1. Define some variables, depening of what we want to create.
+    // 1. Define some variables, depending of what we want to create.
     var myTypeString, specialLayerName, myType, myItemName, layerMessage;
     if( atype == 1 ){
         myTypeString = "CenterMarker";
@@ -66,8 +69,7 @@ function insertSymbol( commandname, atype ){
         myType = "marker";
         myItemName = "Center Marker";
         layerMessage = "center markers";
-    }
-    else if( atype == 2 ){
+    }else if( atype == 2 ){
         myTypeString = "MagnetTarget";
         specialLayerName = Edapt.settings.createMagnetTarget.targetLayerName;
         myType = "target";
@@ -137,8 +139,7 @@ function insertSymbol( commandname, atype ){
             tempFill.style = "noFill";
             currentDoc.setCustomFill( tempFill );
             currentDoc.swapStrokeAndFill();
-        }
-        else{
+        }else{
             currentDoc.setCustomStroke( originalStroke );
         }
 
@@ -148,8 +149,7 @@ function insertSymbol( commandname, atype ){
     // 5. Copy the symbol, so we can paste it in the centre of the visible part of the stage / regPoint of the symbol /.
     if( symbolExists ){
         copySymbols( currentDoc, theSymbols, true );
-    }
-    else{
+    }else{
         copySymbols( tempDoc, theSymbols, false );
     }
     if( tempDoc ){
@@ -176,8 +176,7 @@ function insertSymbol( commandname, atype ){
                 currentLib.moveToFolder( Edapt.settings.createMagnetTarget.folderName, theItem.name, true );
             }
         }
-    }
-    else{
+    }else{
         Edapt.utils.displayMessage( commandname + " : The '" + specialLayerName + "' layer is locked.", 2 );
     }
     if( layerMap ){
@@ -187,11 +186,13 @@ function insertSymbol( commandname, atype ){
     // Feature request - MG3-ZGA-667Q ( 04 November, 2013 )
     // Select the newly created magnet target object.
     if( atype == 2 ){
-        fl.getDocumentDOM().selectAll();
-        var lastAddedElement = fl.getDocumentDOM().selection[ 0 ];
+        currentDoc.selectAll();
+        var lastAddedElement = currentDoc.selection[ 0 ];
         if( lastAddedElement ){
-            fl.getDocumentDOM().selectNone();
-            fl.getDocumentDOM().selection = [ lastAddedElement ];
+            currentDoc.selectNone();
+            currentDoc.selection = [ lastAddedElement ];
+			lastAddedElement.firstFrame = 0;
+			lastAddedElement.loop = "single frame";
         }
     }
 
@@ -243,8 +244,7 @@ function createSpecialLayer( doc, atype ){
         myName = Edapt.settings.createMagnetTarget.targetLayerName;
         myColor = "#FF0000";
         myType = ( Edapt.settings.createMagnetTarget.visibleTargets ) ? "normal" : "guide";
-    }
-    else if ( atype == "marker" ){
+    }else if ( atype == "marker" ){
         myName = Edapt.settings.createMagnetTarget.markerLayerName;
         myColor = "#0000FF";
         myType = ( Edapt.settings.createMagnetTarget.visibleMarkers ) ? "normal" : "guide";
@@ -278,8 +278,7 @@ function copySymbols( theDocument, theSymbols, isCurrent ){
 function drawShape( theDocument, atype ){
     if( atype == "target" ){
         createCircle( theDocument, {x:0, y:0}, 6 );
-    }
-    else if( atype == "marker" ){
+    }else if( atype == "marker" ){
         createSquare( theDocument, {x:0, y:0}, 6 );
     }
     // Select, ungroup and make fill and stroke invisible.
@@ -329,14 +328,17 @@ function isGroup( doc ){
 function createSquare( theDocument, acenter, radius ){
     var lx = acenter.x;
     var ly = acenter.y;
-
     var data = createPolygon( 4, {x:0, y:0}, 6 );
     var path = polygonToPath( data );
     path.makeShape();
-
     theDocument.addNewLine( { x:lx, y:-radius/4 + ly }, { x:lx, y:radius/4 + ly } );
     theDocument.addNewLine( { x:-radius/4+lx, y:ly }, { x:radius/4+lx, y:ly } );
-
+	
+	theDocument.selectAll();     // Fix: Drawing object problem upon CM creation - June 7, 2014
+	if( isGroup( theDocument ) ){
+		theDocument.unGroup();
+	}
+	
     theDocument.selectAll();
     theDocument.setFillColor( null );
     theDocument.setStrokeColor( "#00000001" );
